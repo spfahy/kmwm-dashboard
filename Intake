@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMWM Research Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f0f0ee; --bg2: #fafaf8; --bg3: #e8e8e6;
+  --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.14);
+  --text: #1a1a1c; --muted: #606068; --dim: #a0a0a8;
+  --green: #1d7a3a; --green-dim: rgba(29,122,58,0.08);
+  --amber: #92570a; --amber-dim: rgba(146,87,10,0.08);
+  --red: #b91c1c; --red-dim: rgba(185,28,28,0.08);
+  --blue: #1d4ed8; --blue-dim: rgba(29,78,216,0.07);
+  --mono: 'DM Mono', monospace; --serif: 'Instrument Serif', serif; --sans: 'DM Sans', sans-serif;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; }
+
+.shell { display: flex; height: 100vh; }
+
+.left-panel {
+  width: 420px; flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+.left-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.left-title { font-family: var(--serif); font-size: 18px; color: var(--text); }
+.left-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.input-area { padding: 16px 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+
+.field-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 5px; }
+
+textarea {
+  width: 100%; border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--bg3); color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 10px 12px; resize: vertical; outline: none; line-height: 1.5;
+}
+textarea:focus { border-color: var(--green); background: var(--bg2); }
+
+input[type="text"] {
+  width: 100%; border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--bg3); color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 9px 12px; outline: none;
+}
+input[type="text"]:focus { border-color: var(--green); background: var(--bg2); }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+select {
+  width: 100%; border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--bg3); color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 9px 12px; outline: none; cursor: pointer;
+}
+select:focus { border-color: var(--green); }
+
+.btn-analyze {
+  width: 100%; padding: 12px; background: var(--green); color: white;
+  border: none; border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: opacity 0.15s; font-family: var(--sans);
+}
+.btn-analyze:hover { opacity: 0.88; }
+.btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.status-bar {
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 11px;
+  color: var(--muted); flex-shrink: 0;
+  min-height: 38px;
+}
+.status-bar.active { color: var(--green); }
+.status-bar.error { color: var(--red); }
+
+/* Right panel - analysis output */
+.right-panel {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden; background: var(--bg);
+}
+
+.right-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.right-title { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+.signal-badge {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  padding: 4px 12px; border-radius: 20px; display: none;
+}
+.signal-act { background: var(--red-dim); color: var(--red); border: 1px solid rgba(185,28,28,0.2); }
+.signal-read { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(146,87,10,0.2); }
+.signal-file { background: var(--green-dim); color: var(--green); border: 1px solid rgba(29,122,58,0.2); }
+
+.analysis-output {
+  flex: 1; overflow-y: auto; padding: 24px;
+  font-size: 14px; line-height: 1.7; color: var(--text);
+}
+.analysis-output h3 { font-family: var(--serif); font-size: 16px; margin: 20px 0 8px; color: var(--text); }
+.analysis-output h3:first-child { margin-top: 0; }
+.analysis-output p { margin-bottom: 10px; }
+.analysis-output strong { color: var(--text); font-weight: 500; }
+.analysis-output .placeholder { color: var(--dim); font-style: italic; }
+
+.save-bar {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--bg2); flex-shrink: 0;
+  display: none; align-items: center; gap: 10px;
+}
+.btn-save {
+  padding: 9px 20px; background: var(--green); color: white;
+  border: none; border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: var(--sans);
+}
+.btn-save:hover { opacity: 0.88; }
+.btn-kill {
+  padding: 9px 20px; background: none; color: var(--red);
+  border: 1px solid rgba(185,28,28,0.3); border-radius: 8px; font-size: 13px;
+  cursor: pointer; font-family: var(--sans);
+}
+.btn-kill:hover { background: var(--red-dim); }
+.save-note { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Left: Input Panel -->
+  <div class="left-panel">
+    <div class="left-header">
+      <div class="left-title">Research Intake</div>
+      <div class="left-sub">Paste article text or a URL — Claude will analyze and save to the database</div>
+    </div>
+
+    <div class="input-area">
+      <div>
+        <div class="field-label">Article Text or URL</div>
+        <textarea id="article-input" rows="10" placeholder="Paste the full article text here, or enter a URL..."></textarea>
+      </div>
+
+      <div>
+        <div class="field-label">Source Name</div>
+        <input type="text" id="source-input" placeholder="e.g. WSJ, Bloomberg, Reuters, KMWM Internal">
+      </div>
+
+      <div class="row2">
+        <div>
+          <div class="field-label">Author</div>
+          <select id="author-select">
+            <option value="Steve">Steve</option>
+            <option value="Michael">Michael</option>
+          </select>
+        </div>
+        <div>
+          <div class="field-label">Phase Tag</div>
+          <select id="phase-select">
+            <option value="Phase 1">Phase 1</option>
+            <option value="Phase 2">Phase 2</option>
+            <option value="Phase 3">Phase 3</option>
+            <option value="Phase 4">Phase 4</option>
+            <option value="macro">Macro</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-analyze" id="analyze-btn" onclick="runAnalysis()">Analyze with Claude →</button>
+    </div>
+
+    <div class="status-bar" id="status-bar">Ready — paste article text and click Analyze</div>
+  </div>
+
+  <!-- Right: Analysis Output -->
+  <div class="right-panel">
+    <div class="right-header">
+      <div class="right-title">Analysis Output</div>
+      <div class="signal-badge" id="signal-badge"></div>
+    </div>
+
+    <div class="analysis-output" id="analysis-output">
+      <p class="placeholder">Analysis will appear here after you submit an article.</p>
+    </div>
+
+    <div class="save-bar" id="save-bar">
+      <button class="btn-save" onclick="saveToDatabase()">Save to Database</button>
+      <button class="btn-kill" onclick="killArticle()">Kill</button>
+      <span class="save-note" id="save-note">Review analysis before saving</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
+
+let currentAnalysis = '';
+let currentArticle = '';
+
+function setStatus(msg, type = '') {
+  const bar = document.getElementById('status-bar');
+  bar.textContent = msg;
+  bar.className = 'status-bar' + (type ? ' ' + type : '');
+}
+
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 60);
+}
+
+async function runAnalysis() {
+  const article = document.getElementById('article-input').value.trim();
+  const source = document.getElementById('source-input').value.trim();
+  const author = document.getElementById('author-select').value;
+  const phase = document.getElementById('phase-select').value;
+
+  if (!article) { setStatus('Please paste article text first.', 'error'); return; }
+
+  currentArticle = article;
+  document.getElementById('analyze-btn').disabled = true;
+  document.getElementById('signal-badge').style.display = 'none';
+  document.getElementById('save-bar').style.display = 'none';
+  document.getElementById('analysis-output').innerHTML = '<p class="placeholder">Analyzing...</p>';
+  setStatus('Sending to Claude for analysis...', 'active');
+
+  try {
+    const systemPrompt = `You are Claude, the senior analyst for Kelley & Mullis Wealth Management (KMWM). 
+You are analyzing research documents using the KMWM Research System framework.
+
+ANALYSIS FORMAT — always use this exact structure:
+
+## SIGNAL RATING
+**SIGNAL TIER:** [ACT / READ / FILE]
+**ONE-LINE VERDICT:** [Single most important thing for KMWM — max 20 words]
+**THESIS IMPACT:** [Which phases and holdings are touched]
+
+## 1. Article Summary
+[Brief factual summary of what the document says]
+
+## 2. Executive Overview
+[High-level synthesis of key information]
+
+## 3. Strong Points
+[Claims that are valid and why — in bold for KMWM analytical conclusions]
+
+## 4. Weak Points
+[Claims that are not valid or unsupported and why]
+
+## 5. Additional Thoughts
+[Important points, second-order implications, or gaps]
+
+## 6. KMWM Portfolio Verdict
+[Phase classification, portfolio action if any, watch item candidates]
+
+CRITICAL RULES:
+- KMWM analytical conclusions in BOLD. Source material in plain text.
+- Spell out every abbreviation on first use.
+- Source: ${source || 'Unknown'} | Author: ${author} | Phase: ${phase}`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: `Please analyze this research document:\n\n${article}` }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.map(b => b.text || '').join('') || '';
+    currentAnalysis = text;
+
+    // Render markdown-ish output
+    const html = text
+      .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+
+    document.getElementById('analysis-output').innerHTML = '<p>' + html + '</p>';
+
+    // Extract signal tier
+    const tierMatch = text.match(/SIGNAL TIER:\s*\*?\*?(\w+)\*?\*?/i);
+    if (tierMatch) {
+      const tier = tierMatch[1].toUpperCase();
+      const badge = document.getElementById('signal-badge');
+      badge.textContent = tier;
+      badge.className = 'signal-badge signal-' + tier.toLowerCase();
+      badge.style.display = 'inline-block';
+    }
+
+    document.getElementById('save-bar').style.display = 'flex';
+    setStatus('Analysis complete — review and save or kill', 'active');
+
+  } catch(e) {
+    document.getElementById('analysis-output').innerHTML = '<p class="placeholder">Error: ' + e.message + '</p>';
+    setStatus('Error: ' + e.message, 'error');
+  }
+
+  document.getElementById('analyze-btn').disabled = false;
+}
+
+async function saveToDatabase() {
+  const source = document.getElementById('source-input').value.trim() || 'Unknown';
+  const author = document.getElementById('author-select').value;
+  const phase = document.getElementById('phase-select').value;
+  const dateStr = new Date().toISOString().split('T')[0];
+  const sourceFileId = slugify(source + '-' + dateStr);
+  const sourceFileName = source + ' — ' + new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+
+  document.getElementById('save-note').textContent = 'Saving...';
+
+  try {
+    // Record 1 — research (source document)
+    const rec1 = {
+      source_file_id: sourceFileId,
+      source_file_name: sourceFileName,
+      source_folder: 'Research Intake',
+      chunk_index: 0,
+      content: currentArticle,
+      content_summary: currentArticle.substring(0, 200) + '...',
+      company_tags: [],
+      topic_tags: ['author: ' + author, 'source: ' + source, phase],
+      portfolio_impact_tags: [phase],
+      portfolio_status: ['research'],
+      research_type: 'research',
+      research_stage: 'analyzed',
+      is_analyzed: true,
+      read_by_steve: author === 'Steve',
+      read_by_michael: author === 'Michael'
+    };
+
+    // Record 2 — analysis
+    const rec2 = {
+      ...rec1,
+      chunk_index: 1,
+      content: currentAnalysis,
+      content_summary: currentAnalysis.substring(0, 200) + '...',
+      research_type: 'kmwm_analysis'
+    };
+
+    for (const rec of [rec1, rec2]) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/research_chunks`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(rec)
+      });
+      if (!res.ok) throw new Error('Save failed: ' + res.status);
+    }
+
+    document.getElementById('save-bar').style.display = 'none';
+    document.getElementById('analysis-output').innerHTML += '<div style="margin-top:20px;padding:12px 16px;background:var(--green-dim);border-radius:8px;color:var(--green);font-family:var(--mono);font-size:12px;">✓ Records committed to database</div>';
+    setStatus('Saved — records committed to Supabase', 'active');
+
+    // Clear inputs
+    document.getElementById('article-input').value = '';
+    document.getElementById('source-input').value = '';
+
+  } catch(e) {
+    document.getElementById('save-note').textContent = 'Error: ' + e.message;
+    setStatus('Save failed: ' + e.message, 'error');
+  }
+}
+
+function killArticle() {
+  document.getElementById('save-bar').style.display = 'none';
+  document.getElementById('analysis-output').innerHTML = '<p class="placeholder">Killed — article not saved. Ready for next submission.</p>';
+  document.getElementById('signal-badge').style.display = 'none';
+  document.getElementById('analysis-output').value = '';
+  currentAnalysis = '';
+  currentArticle = '';
+  setStatus('Killed — not saved');
+}
+</script>
+</body>
+</html>
