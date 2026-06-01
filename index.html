@@ -403,16 +403,21 @@
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">Phase 1 Holdings</div>
-            <div class="panel-count">8 positions</div>
+            <div class="panel-count" id="h-panel-count">8 positions</div>
           </div>
-          <div class="holding-row"><span class="status-dot dot-green"></span><span class="h-ticker">LNG</span><span class="h-name">Cheniere Energy</span><div class="h-bar-wrap"><div class="h-bar" style="width:80%"></div></div><span class="h-alloc">4.0%</span></div>
-          <div class="holding-row"><span class="status-dot dot-amber"></span><span class="h-ticker">NEXT</span><span class="h-name">NextDecade</span><div class="h-bar-wrap"><div class="h-bar" style="width:28%;background:var(--amber)"></div></div><span class="h-alloc">~1.5%</span></div>
-          <div class="holding-row"><span class="status-dot dot-green"></span><span class="h-ticker">EOG</span><span class="h-name">EOG Resources</span><div class="h-bar-wrap"><div class="h-bar" style="width:50%"></div></div><span class="h-alloc">~2.5%</span></div>
-          <div class="holding-row"><span class="status-dot dot-green"></span><span class="h-ticker">WMB</span><span class="h-name">Williams Companies</span><div class="h-bar-wrap"><div class="h-bar" style="width:40%"></div></div><span class="h-alloc">~2.0%</span></div>
-          <div class="holding-row"><span class="status-dot dot-green"></span><span class="h-ticker">EPD</span><span class="h-name">Enterprise Products</span><div class="h-bar-wrap"><div class="h-bar" style="width:40%"></div></div><span class="h-alloc">~2.0%</span></div>
-          <div class="holding-row"><span class="status-dot dot-green"></span><span class="h-ticker">DVN</span><span class="h-name">Devon Energy</span><div class="h-bar-wrap"><div class="h-bar" style="width:36%"></div></div><span class="h-alloc">~1.8%</span></div>
-          <div class="holding-row"><span class="status-dot dot-green"></span><span class="h-ticker">CF</span><span class="h-name">CF Industries</span><div class="h-bar-wrap"><div class="h-bar" style="width:30%"></div></div><span class="h-alloc">~1.5%</span></div>
-          <div class="holding-row"><span class="status-dot dot-green"></span><span class="h-ticker">INSW</span><span class="h-name">Intl Seaways</span><div class="h-bar-wrap"><div class="h-bar" style="width:30%"></div></div><span class="h-alloc">1.5%</span></div>
+          <div id="holdings-list"><div class="loading">Fetching from portfolio...</div></div>
+        </div>
+
+        <!-- Side Panel -->
+        <div id="side-panel" style="display:none; position:fixed; top:0; right:0; width:360px; height:100vh; background:var(--bg2); border-left:1px solid var(--border); z-index:100; overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,0.10);">
+          <div style="padding:20px; display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--border);">
+            <div>
+              <div id="sp-ticker" style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--text);"></div>
+              <div id="sp-name" style="font-size:12px;color:var(--muted);margin-top:3px;"></div>
+            </div>
+            <button onclick="document.getElementById('side-panel').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:var(--muted);">Close ✕</button>
+          </div>
+          <div id="sp-content" style="padding:20px;"></div>
         </div>
 
         <!-- Watch Items - live from Supabase -->
@@ -582,6 +587,144 @@ async function loadCashSleeve() {
 loadRecordCount();
 loadWatchItems();
 loadCashSleeve();
+loadHoldings();
+
+// Phase 1 tickers with names
+const PHASE1 = [
+  {ticker:'LNG', name:'Cheniere Energy'},
+  {ticker:'NEXT', name:'NextDecade'},
+  {ticker:'EOG', name:'EOG Resources'},
+  {ticker:'WMB', name:'Williams Companies'},
+  {ticker:'EPD', name:'Enterprise Products'},
+  {ticker:'DVN', name:'Devon Energy'},
+  {ticker:'CF', name:'CF Industries'},
+  {ticker:'INSW', name:'Intl Seaways'}
+];
+
+// Fetch holdings data from Google Sheet via Supabase Edge Function proxy
+// We'll use the portfolio data already in the sheet document context
+let holdingsData = {};
+
+async function loadHoldings() {
+  try {
+    const SHEET_ID = '1ZdeNY_9m_GF-5lu7VBSixbYXGXOuqonxjpG3V5VUOco';
+    const SHEET_NAME = 'KMWM Portfolio';
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+    
+    const res = await fetch(url);
+    const text = await res.text();
+    // Strip Google's JSONP wrapper
+    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    
+    const rows = json.table.rows;
+    const cols = json.table.cols.map(c => c.label);
+    
+    // Map column letters to indices
+    // A=Symbol, C=Ave Share Price (entry), G=Profit/Loss%, N=Pur Dt, Q=Cost, T=Value, U=% of Total
+    const symIdx = cols.indexOf('Symbol');
+    const entryIdx = 2;   // C
+    const plIdx = 6;      // G
+    const purIdx = 13;    // N
+    const costIdx = 16;   // Q
+    const valueIdx = 19;  // T
+    const allocIdx = 20;  // U
+
+    for (const row of rows) {
+      if (!row.c || !row.c[symIdx] || !row.c[symIdx].v) continue;
+      const sym = String(row.c[symIdx].v).trim().toUpperCase();
+      if (PHASE1.find(h => h.ticker === sym)) {
+        holdingsData[sym] = {
+          entryPrice: row.c[entryIdx] ? row.c[entryIdx].v : null,
+          pl: row.c[plIdx] ? row.c[plIdx].v : null,
+          purDate: row.c[purIdx] ? (row.c[purIdx].f || row.c[purIdx].v) : null,
+          cost: row.c[costIdx] ? row.c[costIdx].v : null,
+          value: row.c[valueIdx] ? row.c[valueIdx].v : null,
+          alloc: row.c[allocIdx] ? row.c[allocIdx].v : null
+        };
+      }
+    }
+    renderHoldings();
+  } catch(e) {
+    document.getElementById('holdings-list').innerHTML = '<div class="error">Could not load holdings: ' + e.message + '</div>';
+  }
+}
+
+function renderHoldings() {
+  const list = document.getElementById('holdings-list');
+  if (!list) return;
+  
+  const html = PHASE1.map(h => {
+    const d = holdingsData[h.ticker] || {};
+    const alloc = d.alloc ? (d.alloc * 100).toFixed(2) + '%' : '—';
+    const pl = d.pl != null ? (d.pl * 100).toFixed(2) : null;
+    const plColor = pl == null ? 'var(--muted)' : parseFloat(pl) >= 0 ? 'var(--green)' : 'var(--red)';
+    const plText = pl != null ? (parseFloat(pl) >= 0 ? '+' : '') + pl + '%' : '—';
+    const barWidth = d.alloc ? Math.min(100, d.alloc * 100 / 0.05) : 20;
+    const dotClass = h.ticker === 'NEXT' ? 'dot-amber' : 'dot-green';
+    
+    return `<div class="holding-row" style="cursor:pointer;" onclick="showPanel('${h.ticker}')">
+      <span class="status-dot ${dotClass}"></span>
+      <span class="h-ticker">${h.ticker}</span>
+      <span class="h-name">${h.name}</span>
+      <span style="font-family:var(--mono);font-size:11px;color:${plColor};margin-left:auto;margin-right:12px;">${plText}</span>
+      <span class="h-alloc">${alloc}</span>
+    </div>`;
+  }).join('');
+  
+  list.innerHTML = html;
+}
+
+function showPanel(ticker) {
+  const d = holdingsData[ticker] || {};
+  const h = PHASE1.find(x => x.ticker === ticker) || {};
+  
+  document.getElementById('sp-ticker').textContent = ticker;
+  document.getElementById('sp-name').textContent = h.name || '';
+  
+  // Calculate days held
+  let daysHeld = '—';
+  if (d.purDate) {
+    const parts = String(d.purDate).split('/');
+    if (parts.length >= 2) {
+      const purchaseDate = new Date(2026, parseInt(parts[0])-1, parseInt(parts[1]));
+      const today = new Date();
+      const diff = Math.floor((today - purchaseDate) / 86400000);
+      if (!isNaN(diff) && diff >= 0) daysHeld = diff + ' days';
+    }
+  }
+
+  const fmt = (v) => v != null ? '$' + parseFloat(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
+  const fmtPct = (v) => v != null ? (parseFloat(v)*100).toFixed(2) + '%' : '—';
+  const pl = d.pl != null ? parseFloat(d.pl)*100 : null;
+  const plColor = pl == null ? 'var(--muted)' : pl >= 0 ? 'var(--green)' : 'var(--red)';
+  const unrealized = (d.value != null && d.cost != null) ? (d.value - d.cost) : null;
+
+  const rows = [
+    ['Entry Price', fmt(d.entryPrice)],
+    ['Cost Basis', fmt(d.cost)],
+    ['Current Value', fmt(d.value)],
+    ['Profit / Loss', `<span style="color:${plColor}">${pl != null ? (pl>=0?'+':'') + pl.toFixed(2) + '%' : '—'}</span>`],
+    ['Unrealized Gain/Loss', unrealized != null ? `<span style="color:${unrealized>=0?'var(--green)':'var(--red)'}">${unrealized>=0?'+':''}${fmt(unrealized)}</span>` : '—'],
+    ['Portfolio Weight', fmtPct(d.alloc)],
+    ['Days Held', daysHeld],
+    ['Purchase Date', d.purDate || '—']
+  ];
+
+  document.getElementById('sp-content').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:1px;">
+      ${rows.map(([label, val]) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:11px;color:var(--muted);">${label}</span>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--text);">${val}</span>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:20px;padding:12px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--muted);">
+      Data from KMWM Portfolio · Google Sheets
+    </div>`;
+
+  document.getElementById('side-panel').style.display = 'block';
+}
+
 </script>
 </body>
 </html>
