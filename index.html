@@ -911,28 +911,15 @@ async function runIntake() {
   document.getElementById('intake-status').textContent = 'Sending to Claude...';
 
   try {
+    const sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management (KMWM). Analyze research documents using the KMWM framework. FORMAT: SIGNAL RATING (SIGNAL TIER: ACT/READ/FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT). Then: 1. Article Summary, 2. Executive Overview, 3. Strong Points, 4. Weak Points, 5. Additional Thoughts, 6. KMWM Portfolio Verdict. RULES: KMWM conclusions in BOLD. Source material plain text. Spell out all abbreviations first use. Source: ' + (source||'Unknown') + ' | Author: ' + author + ' | Phase: ' + phase;
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
-        system: `You are Claude, the senior analyst for Kelley & Mullis Wealth Management (KMWM). Analyze research documents using the KMWM framework.
-
-FORMAT:
-## SIGNAL RATING
-**SIGNAL TIER:** [ACT / READ / FILE]
-**ONE-LINE VERDICT:** [Max 20 words]
-**THESIS IMPACT:** [Phases and holdings touched]
-
-## 1. Article Summary
-## 2. Executive Overview  
-## 3. Strong Points
-## 4. Weak Points
-## 5. Additional Thoughts
-## 6. KMWM Portfolio Verdict
-
-RULES: KMWM conclusions in BOLD. Source material plain text. Spell out all abbreviations first use. Source: ${source||'Unknown'} | Author: ${author} | Phase: ${phase}`,
+        system: sysPrompt,
         messages: [{ role: 'user', content: 'Analyze this research document:
 
 ' + article }]
