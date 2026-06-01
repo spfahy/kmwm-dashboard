@@ -355,10 +355,19 @@
           <div class="metric-val" id="record-count">—</div>
           <div class="metric-sub" id="record-sub">Loading...</div>
         </div>
-        <div class="metric-card amber">
-          <div class="metric-label">Cash Sleeve</div>
+        <div class="metric-card amber" style="cursor:pointer;" onclick="showCashDetail()" title="Click for breakdown">
+          <div class="metric-label">Cash Sleeve <span style="font-size:9px;opacity:0.6;">▼</span></div>
           <div class="metric-val" id="cash-sleeve-val">—</div>
           <div class="metric-sub warn" id="cash-sleeve-sub">Loading...</div>
+        </div>
+
+        <!-- Cash Sleeve Detail Popup -->
+        <div id="cash-detail" style="display:none;position:absolute;z-index:200;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;width:320px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;">Cash Sleeve Breakdown</span>
+            <button onclick="document.getElementById('cash-detail').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);">✕</button>
+          </div>
+          <div id="cash-detail-content"></div>
         </div>
         <div class="metric-card red">
           <div class="metric-label">30-Yr Treasury</div>
@@ -577,6 +586,7 @@ async function loadCashSleeve() {
       const m = data[0];
       const pct = (m.cash_sleeve_pct * 100).toFixed(2);
       document.getElementById('cash-sleeve-val').textContent = pct + '%';
+      cashMetrics = m;
       const synced = new Date(m.last_synced_at).toLocaleDateString('en-US', {month:'short', day:'numeric'});
       document.getElementById('cash-sleeve-sub').textContent = 'SGOV · FDUXX · GLD dry powder · as of ' + synced;
       // Update sidebar sync time
@@ -593,7 +603,7 @@ async function loadCashSleeve() {
 }
 
 // Init
-// Set deploy time (when this page was built/deployed)
+// Set deploy time
 const deployTime = document.lastModified 
   ? new Date(document.lastModified).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
   : 'Unknown';
@@ -602,21 +612,40 @@ document.getElementById('deploy-time').textContent = deployTime;
 loadRecordCount();
 loadWatchItems();
 loadCashSleeve();
-loadHoldings();
+// Load tickers first, then holdings
+loadPhaseTickers().then(() => loadHoldings());
 
-// Phase 1 tickers with names
-const PHASE1 = [
-  {ticker:'LNG', name:'Cheniere Energy'},
-  {ticker:'NEXT', name:'NextDecade'},
-  {ticker:'EOG', name:'EOG Resources'},
-  {ticker:'WMB', name:'Williams Companies'},
-  {ticker:'EPD', name:'Enterprise Products'},
-  {ticker:'CF', name:'CF Industries'},
-  {ticker:'INSW', name:'Intl Seaways'}
-];
-
+// Phase 1 tickers — loaded from Supabase
+let PHASE1 = [];
 let holdingsData = {};
 let activeTicker = null;
+let cashMetrics = {};
+
+async function loadPhaseTickers() {
+  try {
+    const data = await query('phase_tickers', {
+      select: 'ticker,name,sort_order',
+      phase: 'eq.Phase 1',
+      status: 'eq.active',
+      order: 'sort_order.asc'
+    });
+    if (data && data.length > 0) {
+      PHASE1 = data.map(d => ({ticker: d.ticker, name: d.name}));
+    }
+  } catch(e) {
+    console.error('Could not load phase tickers:', e);
+    // Fallback
+    PHASE1 = [
+      {ticker:'LNG', name:'Cheniere Energy'},
+      {ticker:'NEXT', name:'NextDecade'},
+      {ticker:'EOG', name:'EOG Resources'},
+      {ticker:'WMB', name:'Williams Companies'},
+      {ticker:'EPD', name:'Enterprise Products'},
+      {ticker:'CF', name:'CF Industries'},
+      {ticker:'INSW', name:'Intl Seaways'}
+    ];
+  }
+}
 
 async function loadHoldings() {
   try {
@@ -718,5 +747,66 @@ function showPanel(ticker) {
   document.getElementById('sp-content').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${rows.map(([label,val])=>`<div style="background:var(--bg2);border-radius:6px;padding:8px 10px;"><div style="font-size:9px;color:var(--dim);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px;">${label}</div><div style="font-family:var(--mono);font-size:12px;color:var(--text);">${val}</div></div>`).join('')}</div>`;
   document.getElementById('side-panel').style.display = 'block';
 }
+function showCashDetail() {
+  const card = document.querySelector('.metric-card.amber');
+  const detail = document.getElementById('cash-detail');
+  if (detail.style.display === 'block') {
+    detail.style.display = 'none';
+    return;
+  }
+  
+  const m = cashMetrics;
+  const fmt$ = (v) => v != null ? '$' + parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
+  const fmtPct = (v) => v != null ? (parseFloat(v)*100).toFixed(2)+'%' : '—';
+  
+  const rows = [
+    ['SGOV', 'iShares 0-3M Treasury', m.sgov_pct, m.sgov_value],
+    ['FDUXX', 'Fidelity Money Market', m.fduxx_pct, m.fduxx_value],
+    ['FTSM', 'First Trust Short Maturity', m.ftsm_pct, m.ftsm_value],
+    ['PTSHX', 'PIMCO Short-Term', m.ptshx_pct, m.ptshx_value],
+    ['GLD', 'SPDR Gold (above 9% core)', m.gld_excess_pct, m.gld_excess_value]
+  ];
+  
+  const total_pct = (m.cash_sleeve_pct != null) ? (parseFloat(m.cash_sleeve_pct)*100).toFixed(2)+'%' : '—';
+  
+  document.getElementById('cash-detail-content').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${rows.map(([ticker, name, pct, val]) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--bg3);border-radius:6px;">
+          <div>
+            <div style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text);">${ticker}</div>
+            <div style="font-size:10px;color:var(--muted);">${name}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:var(--mono);font-size:12px;color:var(--text);">${fmt$(val)}</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);">${fmtPct(pct)}</div>
+          </div>
+        </div>`).join('')}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--amber-dim);border-radius:6px;margin-top:4px;border:1px solid rgba(146,87,10,0.15);">
+        <span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber);">Total Cash Sleeve</span>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:500;color:var(--amber);">${total_pct}</span>
+      </div>
+    </div>`;
+  
+  // Position below the card
+  if (card) {
+    const rect = card.getBoundingClientRect();
+    detail.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+    detail.style.left = rect.left + 'px';
+  }
+  detail.style.display = 'block';
+}
+
+// Close cash detail on outside click
+document.addEventListener('click', function(e) {
+  const detail = document.getElementById('cash-detail');
+  const card = document.querySelector('.metric-card.amber');
+  if (detail && detail.style.display === 'block') {
+    if (!detail.contains(e.target) && (!card || !card.contains(e.target))) {
+      detail.style.display = 'none';
+    }
+  }
+});
+
 </script>
 </body>
