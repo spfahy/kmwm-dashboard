@@ -523,17 +523,19 @@ const SUPABASE_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
 
 async function query(table, params) {
-  const base = `${SUPABASE_URL}/rest/v1/${table}`;
-  const qs = Object.entries(params).map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
-  const url = base + '?' + qs;
+  const parts = [];
+  for (const k in params) {
+    parts.push(k + '=' + params[k]);
+  }
+  const url = SUPABASE_URL + '/rest/v1/' + table + '?' + parts.join('&');
   const res = await fetch(url, {
     headers: {
       'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
       'Content-Type': 'application/json'
     }
   });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
   return res.json();
 }
 
