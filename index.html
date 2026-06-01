@@ -46,7 +46,9 @@
     display: flex; flex-direction: column;
     padding: 0;
     overflow-y: auto;
+    height: 100vh;
   }
+  .sidebar .nav-section { flex-shrink: 0; }
   .sidebar-header {
     padding: 24px 20px 20px;
     border-bottom: 1px solid var(--border);
@@ -307,12 +309,6 @@
     <div class="sidebar-header">
       <div class="sidebar-logo">Kelley & Mullis<span>Wealth Management</span></div>
       <div class="sidebar-version">Research System v10.2</div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.05em;margin-bottom:4px;">DEPLOYED</div>
-        <div id="deploy-time" style="font-family:var(--mono);font-size:10px;color:var(--muted);">—</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.05em;margin-top:8px;margin-bottom:4px;">LAST SYNCED</div>
-        <div id="sync-time" style="font-family:var(--mono);font-size:10px;color:var(--muted);">—</div>
-      </div>
     </div>
 
     <div class="nav-section">
@@ -333,6 +329,13 @@
       <div class="nav-label">System</div>
       <div class="nav-item"><span class="nav-dot"></span> Database</div>
       <div class="nav-item"><span class="nav-dot"></span> Settings</div>
+      <div style="margin-top:auto;padding:16px;border-top:1px solid var(--border);">
+        <a href="intake.html" target="_blank" style="display:block;text-align:center;padding:9px 12px;background:var(--green-dim);border:1px solid rgba(29,122,58,0.2);border-radius:8px;font-size:12px;font-weight:500;color:var(--green);text-decoration:none;margin-bottom:14px;">+ Research Intake</a>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.05em;margin-bottom:3px;">DEPLOYED</div>
+        <div id="deploy-time" style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px;">—</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.05em;margin-bottom:3px;">LAST SYNCED</div>
+        <div id="sync-time" style="font-family:var(--mono);font-size:10px;color:var(--muted);">—</div>
+      </div>
     </div>
   </div>
 
