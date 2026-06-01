@@ -414,16 +414,16 @@
           <div id="holdings-list"><div class="loading">Fetching from portfolio...</div></div>
         </div>
 
-        <!-- Side Panel -->
-        <div id="side-panel" style="display:none; position:fixed; top:0; right:0; width:360px; height:100vh; background:var(--bg2); border-left:1px solid var(--border); z-index:100; overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,0.10);">
-          <div style="padding:20px; display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--border);">
-            <div>
-              <div id="sp-ticker" style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--text);"></div>
-              <div id="sp-name" style="font-size:12px;color:var(--muted);margin-top:3px;"></div>
+        <!-- Inline Detail Panel (appears below clicked row) -->
+        <div id="side-panel" style="display:none; background:var(--bg3); border:1px solid var(--border2); border-radius:8px; margin:4px 12px 8px; padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="sp-ticker" style="font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);"></span>
+              <span id="sp-name" style="font-size:11px;color:var(--muted);"></span>
             </div>
-            <button onclick="document.getElementById('side-panel').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:var(--muted);">Close ✕</button>
+            <button onclick="closePanel()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;color:var(--muted);">✕</button>
           </div>
-          <div id="sp-content" style="padding:20px;"></div>
+          <div id="sp-content"></div>
         </div>
 
         <!-- Watch Items - live from Supabase -->
@@ -616,130 +616,108 @@ const PHASE1 = [
   {ticker:'INSW', name:'Intl Seaways'}
 ];
 
-// Fetch holdings data from Google Sheet via Supabase Edge Function proxy
-// We'll use the portfolio data already in the sheet document context
 let holdingsData = {};
+let activeTicker = null;
 
 async function loadHoldings() {
   try {
-    const SHEET_ID = '1ZdeNY_9m_GF-5lu7VBSixbYXGXOuqonxjpG3V5VUOco';
-    const SHEET_NAME = 'KMWM Portfolio';
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-    
-    const res = await fetch(url);
-    const text = await res.text();
-    // Strip Google's JSONP wrapper
-    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
-    
-    const rows = json.table.rows;
-    const cols = json.table.cols.map(c => c.label);
-    
-    // Map column letters to indices
-    // A=Symbol, C=Ave Share Price (entry), G=Profit/Loss%, N=Pur Dt, Q=Cost, T=Value, U=% of Total
-    const symIdx = cols.indexOf('Symbol');
-    const entryIdx = 2;   // C
-    const plIdx = 6;      // G
-    const purIdx = 13;    // N
-    const costIdx = 16;   // Q
-    const valueIdx = 19;  // T
-    const allocIdx = 20;  // U
-
-    for (const row of rows) {
-      if (!row.c || !row.c[symIdx] || !row.c[symIdx].v) continue;
-      const sym = String(row.c[symIdx].v).trim().toUpperCase();
-      if (PHASE1.find(h => h.ticker === sym)) {
-        holdingsData[sym] = {
-          entryPrice: row.c[entryIdx] ? row.c[entryIdx].v : null,
-          pl: row.c[plIdx] ? row.c[plIdx].v : null,
-          purDate: row.c[purIdx] ? (row.c[purIdx].f || row.c[purIdx].v) : null,
-          cost: row.c[costIdx] ? row.c[costIdx].v : null,
-          value: row.c[valueIdx] ? row.c[valueIdx].v : null,
-          alloc: row.c[allocIdx] ? row.c[allocIdx].v : null
-        };
+    const today = new Date().toISOString().split('T')[0];
+    const data = await query('holdings_detail', {
+      select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date,last_synced_at',
+      metric_date: 'eq.' + today,
+      order: 'ticker.asc'
+    });
+    if (data && data.length > 0) {
+      for (const row of data) holdingsData[row.ticker] = row;
+      const syncEl = document.getElementById('sync-time');
+      if (syncEl && data[0].last_synced_at) {
+        const d = new Date(data[0].last_synced_at);
+        syncEl.textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+        syncEl.style.color = 'var(--green)';
       }
     }
     renderHoldings();
   } catch(e) {
-    document.getElementById('holdings-list').innerHTML = '<div class="error">Could not load holdings: ' + e.message + '</div>';
+    document.getElementById('holdings-list').innerHTML = '<div class="error">Could not load: ' + e.message + '</div>';
   }
 }
 
 function renderHoldings() {
   const list = document.getElementById('holdings-list');
   if (!list) return;
-  
-  const html = PHASE1.map(h => {
+  let html = '';
+  for (const h of PHASE1) {
     const d = holdingsData[h.ticker] || {};
-    const alloc = d.alloc ? (d.alloc * 100).toFixed(2) + '%' : '—';
-    const pl = d.pl != null ? (d.pl * 100).toFixed(2) : null;
-    const plColor = pl == null ? 'var(--muted)' : parseFloat(pl) >= 0 ? 'var(--green)' : 'var(--red)';
-    const plText = pl != null ? (parseFloat(pl) >= 0 ? '+' : '') + pl + '%' : '—';
-    const barWidth = d.alloc ? Math.min(100, d.alloc * 100 / 0.05) : 20;
-    const dotClass = h.ticker === 'NEXT' ? 'dot-amber' : 'dot-green';
-    
-    return `<div class="holding-row" style="cursor:pointer;" onclick="showPanel('${h.ticker}')">
+    const alloc = d.alloc_pct ? (d.alloc_pct*100).toFixed(2)+'%' : '—';
+    const pl = d.pl_pct != null ? parseFloat(d.pl_pct)*100 : null;
+    const plColor = pl==null?'var(--muted)':pl>=0?'var(--green)':'var(--red)';
+    const plText = pl!=null?(pl>=0?'+':'')+pl.toFixed(2)+'%':'—';
+    const dotClass = h.ticker==='NEXT'?'dot-amber':'dot-green';
+    const barW = d.alloc_pct ? Math.min(100,d.alloc_pct*100/0.05) : 20;
+    html += `<div id="row-${h.ticker}" class="holding-row" style="cursor:pointer;flex-wrap:wrap;" onclick="showPanel('${h.ticker}')">
       <span class="status-dot ${dotClass}"></span>
       <span class="h-ticker">${h.ticker}</span>
       <span class="h-name">${h.name}</span>
-      <span style="font-family:var(--mono);font-size:11px;color:${plColor};margin-left:auto;margin-right:12px;">${plText}</span>
+      <div class="h-bar-wrap"><div class="h-bar" style="width:${barW}%;background:${dotClass==='dot-amber'?'var(--amber)':'var(--green)'};"></div></div>
+      <span style="font-family:var(--mono);font-size:11px;color:${plColor};min-width:52px;text-align:right;">${plText}</span>
       <span class="h-alloc">${alloc}</span>
     </div>`;
-  }).join('');
-  
+  }
   list.innerHTML = html;
+  document.getElementById('h-panel-count').textContent = PHASE1.length + ' positions';
+}
+
+function closePanel() {
+  document.getElementById('side-panel').style.display = 'none';
+  if (activeTicker) {
+    const row = document.getElementById('row-'+activeTicker);
+    if (row) row.style.background = '';
+    activeTicker = null;
+  }
 }
 
 function showPanel(ticker) {
+  if (activeTicker===ticker) { closePanel(); return; }
+  if (activeTicker) {
+    const prev = document.getElementById('row-'+activeTicker);
+    if (prev) prev.style.background = '';
+  }
+  activeTicker = ticker;
+  const row = document.getElementById('row-'+ticker);
+  if (row) {
+    row.style.background = 'var(--green-dim)';
+    const panel = document.getElementById('side-panel');
+    row.parentNode.insertBefore(panel, row.nextSibling);
+  }
   const d = holdingsData[ticker] || {};
-  const h = PHASE1.find(x => x.ticker === ticker) || {};
-  
+  const h = PHASE1.find(x=>x.ticker===ticker) || {};
   document.getElementById('sp-ticker').textContent = ticker;
   document.getElementById('sp-name').textContent = h.name || '';
-  
-  // Calculate days held
   let daysHeld = '—';
-  if (d.purDate) {
-    const parts = String(d.purDate).split('/');
-    if (parts.length >= 2) {
-      const purchaseDate = new Date(2026, parseInt(parts[0])-1, parseInt(parts[1]));
-      const today = new Date();
-      const diff = Math.floor((today - purchaseDate) / 86400000);
-      if (!isNaN(diff) && diff >= 0) daysHeld = diff + ' days';
+  if (d.purchase_date) {
+    const parts = String(d.purchase_date).replace(/[^0-9/]/g,'').split('/');
+    if (parts.length>=2) {
+      const pd = new Date(2026,parseInt(parts[0])-1,parseInt(parts[1]));
+      const diff = Math.floor((new Date()-pd)/86400000);
+      if (!isNaN(diff)&&diff>=0&&diff<3000) daysHeld = diff+' days';
     }
   }
-
-  const fmt = (v) => v != null ? '$' + parseFloat(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
-  const fmtPct = (v) => v != null ? (parseFloat(v)*100).toFixed(2) + '%' : '—';
-  const pl = d.pl != null ? parseFloat(d.pl)*100 : null;
-  const plColor = pl == null ? 'var(--muted)' : pl >= 0 ? 'var(--green)' : 'var(--red)';
-  const unrealized = (d.value != null && d.cost != null) ? (d.value - d.cost) : null;
-
+  const fmt = (v) => v!=null?'$'+parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+  const pl = d.pl_pct!=null?parseFloat(d.pl_pct)*100:null;
+  const plColor = pl==null?'var(--muted)':pl>=0?'var(--green)':'var(--red)';
+  const unrealized = (d.current_value!=null&&d.cost_basis!=null)?(d.current_value-d.cost_basis):null;
   const rows = [
-    ['Entry Price', fmt(d.entryPrice)],
-    ['Cost Basis', fmt(d.cost)],
-    ['Current Value', fmt(d.value)],
-    ['Profit / Loss', `<span style="color:${plColor}">${pl != null ? (pl>=0?'+':'') + pl.toFixed(2) + '%' : '—'}</span>`],
-    ['Unrealized Gain/Loss', unrealized != null ? `<span style="color:${unrealized>=0?'var(--green)':'var(--red)'}">${unrealized>=0?'+':''}${fmt(unrealized)}</span>` : '—'],
-    ['Portfolio Weight', fmtPct(d.alloc)],
-    ['Days Held', daysHeld],
-    ['Purchase Date', d.purDate || '—']
+    ['Entry Price',fmt(d.entry_price)],
+    ['Cost Basis',fmt(d.cost_basis)],
+    ['Current Value',fmt(d.current_value)],
+    ['P/L',pl!=null?`<span style="color:${plColor}">${pl>=0?'+':''}${pl.toFixed(2)}%</span>`:'—'],
+    ['Unrealized',unrealized!=null?`<span style="color:${unrealized>=0?'var(--green)':'var(--red)'}">${unrealized>=0?'+':''}${fmt(unrealized)}</span>`:'—'],
+    ['Weight',d.alloc_pct?(d.alloc_pct*100).toFixed(2)+'%':'—'],
+    ['Days Held',daysHeld],
+    ['Purchased',d.purchase_date||'—']
   ];
-
-  document.getElementById('sp-content').innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:1px;">
-      ${rows.map(([label, val]) => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
-          <span style="font-size:11px;color:var(--muted);">${label}</span>
-          <span style="font-family:var(--mono);font-size:12px;color:var(--text);">${val}</span>
-        </div>`).join('')}
-    </div>
-    <div style="margin-top:20px;padding:12px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--muted);">
-      Data from KMWM Portfolio · Google Sheets
-    </div>`;
-
+  document.getElementById('sp-content').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${rows.map(([label,val])=>`<div style="background:var(--bg2);border-radius:6px;padding:8px 10px;"><div style="font-size:9px;color:var(--dim);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px;">${label}</div><div style="font-family:var(--mono);font-size:12px;color:var(--text);">${val}</div></div>`).join('')}</div>`;
   document.getElementById('side-panel').style.display = 'block';
 }
-
 </script>
 </body>
-</html>
