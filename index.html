@@ -307,6 +307,12 @@
     <div class="sidebar-header">
       <div class="sidebar-logo">Kelley & Mullis<span>Wealth Management</span></div>
       <div class="sidebar-version">Research System v10.2</div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.05em;margin-bottom:4px;">DEPLOYED</div>
+        <div id="deploy-time" style="font-family:var(--mono);font-size:10px;color:var(--muted);">—</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.05em;margin-top:8px;margin-bottom:4px;">LAST SYNCED</div>
+        <div id="sync-time" style="font-family:var(--mono);font-size:10px;color:var(--muted);">—</div>
+      </div>
     </div>
 
     <div class="nav-section">
@@ -573,6 +579,9 @@ async function loadCashSleeve() {
       document.getElementById('cash-sleeve-val').textContent = pct + '%';
       const synced = new Date(m.last_synced_at).toLocaleDateString('en-US', {month:'short', day:'numeric'});
       document.getElementById('cash-sleeve-sub').textContent = 'SGOV · FDUXX · GLD dry powder · as of ' + synced;
+      // Update sidebar sync time
+      const syncEl = document.getElementById('sync-time');
+      if (syncEl) syncEl.textContent = 'Jun ' + new Date(m.last_synced_at).getDate() + ', ' + new Date(m.last_synced_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     } else {
       document.getElementById('cash-sleeve-val').textContent = '—';
       document.getElementById('cash-sleeve-sub').textContent = 'No data yet';
@@ -584,6 +593,12 @@ async function loadCashSleeve() {
 }
 
 // Init
+// Set deploy time (when this page was built/deployed)
+const deployTime = document.lastModified 
+  ? new Date(document.lastModified).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+  : 'Unknown';
+document.getElementById('deploy-time').textContent = deployTime;
+
 loadRecordCount();
 loadWatchItems();
 loadCashSleeve();
