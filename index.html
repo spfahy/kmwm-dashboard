@@ -351,8 +351,8 @@
         </div>
         <div class="metric-card amber">
           <div class="metric-label">Cash Sleeve</div>
-          <div class="metric-val">22.85%</div>
-          <div class="metric-sub warn">SGOV · dry powder</div>
+          <div class="metric-val" id="cash-sleeve-val">—</div>
+          <div class="metric-sub warn" id="cash-sleeve-sub">Loading...</div>
         </div>
         <div class="metric-card red">
           <div class="metric-label">30-Yr Treasury</div>
@@ -554,9 +554,34 @@ async function loadWatchItems() {
   }
 }
 
+// Load cash sleeve from Supabase
+async function loadCashSleeve() {
+  try {
+    const data = await query('portfolio_metrics', {
+      select: 'cash_sleeve_pct,sgov_pct,fduxx_pct,ftsm_pct,ptshx_pct,gld_excess_pct,last_synced_at',
+      order: 'metric_date.desc',
+      limit: 1
+    });
+    if (data && data.length > 0) {
+      const m = data[0];
+      const pct = (m.cash_sleeve_pct * 100).toFixed(2);
+      document.getElementById('cash-sleeve-val').textContent = pct + '%';
+      const synced = new Date(m.last_synced_at).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      document.getElementById('cash-sleeve-sub').textContent = 'SGOV · FDUXX · GLD dry powder · as of ' + synced;
+    } else {
+      document.getElementById('cash-sleeve-val').textContent = '—';
+      document.getElementById('cash-sleeve-sub').textContent = 'No data yet';
+    }
+  } catch(e) {
+    document.getElementById('cash-sleeve-val').textContent = '—';
+    document.getElementById('cash-sleeve-sub').textContent = 'Could not load';
+  }
+}
+
 // Init
 loadRecordCount();
 loadWatchItems();
+loadCashSleeve();
 </script>
 </body>
 </html>
