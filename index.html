@@ -920,9 +920,7 @@ async function runIntake() {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
         system: sysPrompt,
-        messages: [{ role: 'user', content: 'Analyze this research document:
-
-' + article }]
+        messages: [{ role: 'user', content: 'Analyze this research document:\n\n' + article }]
       })
     });
 
