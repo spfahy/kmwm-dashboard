@@ -605,11 +605,11 @@ fomcCountdown();
 
 // Format helpers
 function fmtDollar(v) {
-  if (v == null || v === '') return '—';
-  var n = parseFloat(v);
+  if (v == null || v === '' || v === '—') return '—';
+  var n = parseFloat(String(v).replace(/,/g, ''));
   if (isNaN(n)) return '—';
   if (n >= 1000000000) return '$' + (n/1000000000).toFixed(1) + 'B';
-  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
   if (n >= 1000) return '$' + (n/1000).toFixed(0) + 'K';
   return '$' + n.toFixed(2);
 }
