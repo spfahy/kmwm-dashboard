@@ -168,10 +168,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .modal-left{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px;gap:10px;overflow-y:auto}
 .modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .modal-output{flex:1;overflow-y:auto;padding:18px;font-size:13px;line-height:1.7;color:var(--text)}
+.modal-output.large-text{font-size:15px;line-height:1.8}
+.modal-output.large-text h3{font-size:16px}
 .modal-output p{margin-bottom:8px}
 .modal-output h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px;color:var(--text)}
 .modal-output strong{font-weight:500;color:var(--text)}
 .modal-output .placeholder{color:var(--dim);font-style:italic}
+.btn-font-toggle{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:0.03em}
+.btn-font-toggle:hover{background:var(--bg3);color:var(--text)}
+.btn-font-toggle.active{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
 .modal-footer{display:none;padding:10px 18px;border-top:1px solid var(--border);background:var(--bg2);align-items:center;gap:8px;flex-shrink:0}
 .modal-footer.visible{display:flex}
 .field-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px}
@@ -352,6 +357,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <span class="signal-badge" id="signal-badge"></span>
+        <button class="btn-font-toggle" id="font-toggle-btn">A+</button>
         <button class="modal-close" id="intake-close-btn">Close ✕</button>
       </div>
     </div>
@@ -794,6 +800,15 @@ document.getElementById('intake-save-btn').addEventListener('click', function() 
   saveNext(0);
 });
 
+// Font size toggle
+document.getElementById('font-toggle-btn').addEventListener('click', function() {
+  var output = document.getElementById('intake-output');
+  var isLarge = output.classList.contains('large-text');
+  output.classList.toggle('large-text', !isLarge);
+  this.textContent = isLarge ? 'A+' : 'A−';
+  this.classList.toggle('active', !isLarge);
+});
+
 // Chat toggle
 document.getElementById('intake-chat-toggle').addEventListener('click', function() {
   var area = document.getElementById('intake-chat-area');
@@ -819,9 +834,8 @@ function sendChatMessage() {
   appendChatMsg('user', msg);
   document.getElementById('intake-chat-send').disabled = true;
 
-  // Build message history for API
+  // Build message history — first message injects full article + analysis as context
   if (intakeChatHistory.length === 0) {
-    // First message: include full article + analysis as context
     intakeChatHistory.push({
       role: 'user',
       content: 'Here is the article I submitted:\n\n' + intakeArticle + '\n\n---\n\nHere is the KMWM analysis you produced:\n\n' + intakeAnalysis + '\n\n---\n\nNow I have a follow-up question: ' + msg
@@ -830,17 +844,14 @@ function sendChatMessage() {
     intakeChatHistory.push({ role: 'user', content: msg });
   }
 
-  fetch('https://api.anthropic.com/v1/messages', {
+  // Route through Edge Function to avoid CORS
+  fetch(SUPA_URL + '/functions/v1/analyze-article', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: 'You are the senior analyst for Kelley & Mullis Wealth Management. The user has questions about a specific research article and KMWM analysis. Be direct, terse, and analytical. Spell out all abbreviations on first use. KMWM conclusions in bold, source claims in plain text.',
-      messages: intakeChatHistory
-    })
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
+    body: JSON.stringify({ mode: 'chat', conversation: intakeChatHistory })
   }).then(function(r) { return r.json(); }).then(function(data) {
-    var reply = data.content && data.content[0] && data.content[0].text ? data.content[0].text : 'No response received.';
+    if (data.error) throw new Error(data.error);
+    var reply = data.analysis || data.reply || 'No response received.';
     intakeChatHistory.push({ role: 'assistant', content: reply });
     appendChatMsg('assistant', reply);
   }).catch(function(e) {
