@@ -205,7 +205,10 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .signal-file{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
 .save-note{font-size:11px;color:var(--muted);margin-left:auto}
 .success-banner{margin-top:14px;padding:9px 12px;background:var(--green-dim);border-radius:7px;color:var(--green);font-family:var(--mono);font-size:11px;border:1px solid var(--green-mid)}
-.top5-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
+.top-toggle{padding:3px 10px;background:none;border:1px solid var(--border2);border-radius:5px;font-size:10px;font-family:var(--mono);color:var(--muted);cursor:pointer;transition:all 0.12s}
+.top-toggle:hover{background:var(--bg3);color:var(--text)}
+.top-toggle.active{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
+.top5-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
 .top5-row:last-child{border-bottom:none}
 .top5-row:hover{background:var(--bg3)}
 .top5-rank{font-family:var(--mono);font-size:11px;color:var(--dim);width:18px;flex-shrink:0}
@@ -355,7 +358,10 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">Top Research Items</div>
-            <div class="panel-count" id="top5-count">by mention frequency</div>
+            <div style="display:flex;gap:5px;">
+              <button class="top-toggle active" id="toggle-tickers" onclick="switchTopView('tickers')">Tickers</button>
+              <button class="top-toggle" id="toggle-themes" onclick="switchTopView('themes')">Themes</button>
+            </div>
           </div>
           <div id="top5-list"><div class="loading">Loading...</div></div>
         </div>
@@ -706,39 +712,60 @@ supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase
   document.getElementById('wi-list').innerHTML = '<div class="error-msg">Could not load: ' + e.message + '</div>';
 });
 
-// Load Top 5 Research Items
-fetch(SUPA_URL + '/rest/v1/rpc/top_research_tags', {
-  method: 'POST',
-  headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
-  body: JSON.stringify({ tag_limit: 5 })
-}).then(function(r) { return r.json(); }).then(function(data) {
-  renderTop5(data);
-}).catch(function() {
-  // Fallback: direct query via supaFetch not possible for unnest — use hardcoded from last known data
-  renderTop5([
-    { tag: 'LNG', frequency: 186 },
-    { tag: 'WMB', frequency: 156 },
-    { tag: 'EOG', frequency: 156 },
-    { tag: 'CEG', frequency: 145 },
-    { tag: 'EPD', frequency: 145 }
-  ]);
-});
+// Load Top Research Items — tickers default
+var currentTopView = 'tickers';
 
-function renderTop5(data) {
+function switchTopView(view) {
+  currentTopView = view;
+  document.getElementById('toggle-tickers').classList.toggle('active', view === 'tickers');
+  document.getElementById('toggle-themes').classList.toggle('active', view === 'themes');
+  document.getElementById('top5-list').innerHTML = '<div class="loading">Loading...</div>';
+  loadTopItems(view);
+}
+
+function loadTopItems(view) {
+  var endpoint = view === 'tickers' ? 'top_research_tags' : 'top_theme_tags';
+  fetch(SUPA_URL + '/rest/v1/rpc/' + endpoint, {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tag_limit: 10 })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    renderTopItems(data, view);
+  }).catch(function() {
+    if (view === 'tickers') {
+      renderTopItems([
+        {tag:'LNG',frequency:186},{tag:'WMB',frequency:156},{tag:'EOG',frequency:156},
+        {tag:'CEG',frequency:145},{tag:'EPD',frequency:145},{tag:'VST',frequency:142},
+        {tag:'NEXT',frequency:134},{tag:'GLD',frequency:111},{tag:'INSW',frequency:89},{tag:'CF',frequency:82}
+      ], view);
+    } else {
+      renderTopItems([
+        {tag:'Hormuz',frequency:76},{tag:'macro',frequency:64},{tag:'stagflation',frequency:50},
+        {tag:'LNG export',frequency:44},{tag:'Phase 2',frequency:43}
+      ], view);
+    }
+  });
+}
+
+function renderTopItems(data, view) {
   if (!data || !data.length) { document.getElementById('top5-list').innerHTML = '<div class="loading">No data</div>'; return; }
-  var top5 = data.slice(0, 5);
-  var max = top5[0].frequency;
-  var html = top5.map(function(item, i) {
+  var top = data.slice(0, 10);
+  var max = top[0].frequency;
+  var html = top.map(function(item, i) {
     var pct = Math.round((item.frequency / max) * 100);
-    return '<div class="top5-row" onclick="openSummary(\'' + item.tag + '\')">' +
+    var label = item.tag.length > 22 ? item.tag.substring(0,22) + '…' : item.tag;
+    return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'' + view + '\')">' +
       '<div class="top5-rank">' + (i+1) + '</div>' +
-      '<div class="top5-ticker">' + item.tag + '</div>' +
+      '<div class="top5-ticker" style="width:' + (view === 'themes' ? '130px' : '46px') + ';font-size:' + (view === 'themes' ? '11px' : '13px') + '">' + label + '</div>' +
       '<div class="top5-bar-wrap"><div class="top5-bar" style="width:' + pct + '%"></div></div>' +
-      '<div class="top5-count">' + item.frequency + ' refs</div>' +
+      '<div class="top5-count">' + item.frequency + '</div>' +
       '</div>';
   }).join('');
   document.getElementById('top5-list').innerHTML = html;
 }
+
+// Initial load
+loadTopItems('tickers');
 
 // Summary modal
 document.getElementById('summary-close-btn').addEventListener('click', function() {
@@ -748,21 +775,26 @@ document.getElementById('summary-modal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
 
-function openSummary(ticker) {
-  document.getElementById('summary-title').textContent = ticker + ' — Research Summary';
+function openSummary(tag, view) {
+  var isTheme = view === 'themes';
+  document.getElementById('summary-title').textContent = tag + ' — Research Summary';
   document.getElementById('summary-sub').textContent = 'Synthesizing from database...';
   document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading analysis records...</p>';
   document.getElementById('summary-modal').classList.add('open');
 
-  // Pull recent analysis records for this ticker
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&company_tags=cs.{"' + ticker + '"}&select=content,created_at&order=created_at.desc&limit=8', {
+  // Build query — tickers use company_tags, themes use topic_tags
+  var filterParam = isTheme
+    ? 'topic_tags=cs.{"' + tag + '"}'
+    : 'company_tags=cs.{"' + tag + '"}';
+
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&' + filterParam + '&select=content,created_at&order=created_at.desc&limit=8', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r) { return r.json(); }).then(function(records) {
     if (!records || !records.length) {
-      document.getElementById('summary-body').innerHTML = '<p>No analysis records found for ' + ticker + '.</p>';
+      document.getElementById('summary-body').innerHTML = '<p>No analysis records found for ' + tag + '.</p>';
       return;
     }
-    document.getElementById('summary-sub').textContent = records.length + ' analysis records found · Generating summary...';
+    document.getElementById('summary-sub').textContent = records.length + ' records found · Generating summary...';
     var context = records.map(function(r, i) { return (i+1) + '. ' + (r.content || '').substring(0, 800); }).join('\n\n');
     fetch(SUPA_URL + '/functions/v1/analyze-article', {
       method: 'POST',
@@ -771,18 +803,17 @@ function openSummary(ticker) {
         mode: 'chat',
         conversation: [{
           role: 'user',
-          content: 'Here are the most recent KMWM analysis summaries mentioning ' + ticker + ':\n\n' + context + '\n\nSynthesize these into a concise research summary for ' + ticker + '. Cover: (1) what the collective research says about this company/theme, (2) key thesis points that recur, (3) any tensions or risks flagged, (4) current portfolio relevance. Be direct and terse. Use bold for KMWM conclusions.'
+          content: 'Here are the most recent KMWM analysis records mentioning "' + tag + '":\n\n' + context + '\n\nSynthesize these into a concise research summary for "' + tag + '". Cover: (1) what the collective research says about this ' + (isTheme ? 'theme' : 'company') + ', (2) key thesis points that recur, (3) any tensions or risks flagged, (4) current portfolio relevance. Be direct and terse. Use bold for KMWM conclusions.'
         }]
       })
     }).then(function(r) { return r.json(); }).then(function(data) {
       var reply = data.analysis || data.reply || 'No summary generated.';
       document.getElementById('summary-sub').textContent = records.length + ' records synthesized';
-      document.getElementById('summary-body').innerHTML = reply
+      document.getElementById('summary-body').innerHTML = '<p>' + reply
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
         .replace(/\n\n/g,'</p><p>')
-        .replace(/\n/g,'<br>');
-      document.getElementById('summary-body').innerHTML = '<p>' + document.getElementById('summary-body').innerHTML + '</p>';
+        .replace(/\n/g,'<br>') + '</p>';
     });
   }).catch(function(e) {
     document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
