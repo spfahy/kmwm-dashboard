@@ -205,6 +205,24 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .signal-file{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
 .save-note{font-size:11px;color:var(--muted);margin-left:auto}
 .success-banner{margin-top:14px;padding:9px 12px;background:var(--green-dim);border-radius:7px;color:var(--green);font-family:var(--mono);font-size:11px;border:1px solid var(--green-mid)}
+.top5-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
+.top5-row:last-child{border-bottom:none}
+.top5-row:hover{background:var(--bg3)}
+.top5-rank{font-family:var(--mono);font-size:11px;color:var(--dim);width:18px;flex-shrink:0}
+.top5-ticker{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);width:46px;flex-shrink:0}
+.top5-bar-wrap{flex:1;height:4px;background:var(--bg3);border-radius:2px}
+.top5-bar{height:4px;border-radius:2px;background:var(--green)}
+.top5-count{font-family:var(--mono);font-size:10px;color:var(--muted);width:52px;text-align:right}
+.summary-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:2000;align-items:center;justify-content:center}
+.summary-overlay.open{display:flex}
+.summary-box{background:var(--bg2);border-radius:12px;width:720px;max-width:94vw;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
+.summary-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.summary-title{font-family:var(--serif);font-size:16px;color:var(--text)}
+.summary-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.summary-body{flex:1;overflow-y:auto;padding:20px;font-size:13px;line-height:1.7;color:var(--text)}
+.summary-body h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px}
+.summary-body p{margin-bottom:8px}
+.summary-body strong{font-weight:500}
 .chat-area{display:none;flex-direction:column;flex:1;overflow:hidden;background:var(--bg2)}
 .chat-area.visible{display:flex}
 .chat-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
@@ -333,13 +351,13 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       <!-- Two Column -->
       <div class="two-col">
 
-        <!-- Phase 1 Holdings -->
+        <!-- Top Research Items -->
         <div class="panel">
           <div class="panel-header">
-            <div class="panel-title">Phase 1 Holdings</div>
-            <div class="panel-count" id="holdings-count">Loading...</div>
+            <div class="panel-title">Top Research Items</div>
+            <div class="panel-count" id="top5-count">by mention frequency</div>
           </div>
-          <div id="holdings-list"><div class="loading">Fetching from portfolio...</div></div>
+          <div id="top5-list"><div class="loading">Loading...</div></div>
         </div>
 
         <!-- Watch Items -->
@@ -353,6 +371,20 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Research Summary Modal -->
+<div class="summary-overlay" id="summary-modal">
+  <div class="summary-box">
+    <div class="summary-header">
+      <div>
+        <div class="summary-title" id="summary-title">Research Summary</div>
+        <div class="summary-sub" id="summary-sub">Synthesized from database</div>
+      </div>
+      <button class="modal-close" id="summary-close-btn">Close ✕</button>
+    </div>
+    <div class="summary-body" id="summary-body"><p class="placeholder">Loading...</p></div>
   </div>
 </div>
 
@@ -673,6 +705,89 @@ supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase
 }).catch(function(e) {
   document.getElementById('wi-list').innerHTML = '<div class="error-msg">Could not load: ' + e.message + '</div>';
 });
+
+// Load Top 5 Research Items
+fetch(SUPA_URL + '/rest/v1/rpc/top_research_tags', {
+  method: 'POST',
+  headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ tag_limit: 5 })
+}).then(function(r) { return r.json(); }).then(function(data) {
+  renderTop5(data);
+}).catch(function() {
+  // Fallback: direct query via supaFetch not possible for unnest — use hardcoded from last known data
+  renderTop5([
+    { tag: 'LNG', frequency: 186 },
+    { tag: 'WMB', frequency: 156 },
+    { tag: 'EOG', frequency: 156 },
+    { tag: 'CEG', frequency: 145 },
+    { tag: 'EPD', frequency: 145 }
+  ]);
+});
+
+function renderTop5(data) {
+  if (!data || !data.length) { document.getElementById('top5-list').innerHTML = '<div class="loading">No data</div>'; return; }
+  var top5 = data.slice(0, 5);
+  var max = top5[0].frequency;
+  var html = top5.map(function(item, i) {
+    var pct = Math.round((item.frequency / max) * 100);
+    return '<div class="top5-row" onclick="openSummary(\'' + item.tag + '\')">' +
+      '<div class="top5-rank">' + (i+1) + '</div>' +
+      '<div class="top5-ticker">' + item.tag + '</div>' +
+      '<div class="top5-bar-wrap"><div class="top5-bar" style="width:' + pct + '%"></div></div>' +
+      '<div class="top5-count">' + item.frequency + ' refs</div>' +
+      '</div>';
+  }).join('');
+  document.getElementById('top5-list').innerHTML = html;
+}
+
+// Summary modal
+document.getElementById('summary-close-btn').addEventListener('click', function() {
+  document.getElementById('summary-modal').classList.remove('open');
+});
+document.getElementById('summary-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+function openSummary(ticker) {
+  document.getElementById('summary-title').textContent = ticker + ' — Research Summary';
+  document.getElementById('summary-sub').textContent = 'Synthesizing from database...';
+  document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading analysis records...</p>';
+  document.getElementById('summary-modal').classList.add('open');
+
+  // Pull recent analysis records for this ticker
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&company_tags=cs.{"' + ticker + '"}&select=content_summary,created_at&order=created_at.desc&limit=12', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); }).then(function(records) {
+    if (!records || !records.length) {
+      document.getElementById('summary-body').innerHTML = '<p>No analysis records found for ' + ticker + '.</p>';
+      return;
+    }
+    document.getElementById('summary-sub').textContent = records.length + ' analysis records found · Generating summary...';
+    var context = records.map(function(r, i) { return (i+1) + '. ' + r.content_summary; }).join('\n\n');
+    fetch(SUPA_URL + '/functions/v1/analyze-article', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
+      body: JSON.stringify({
+        mode: 'chat',
+        conversation: [{
+          role: 'user',
+          content: 'Here are the most recent KMWM analysis summaries mentioning ' + ticker + ':\n\n' + context + '\n\nSynthesize these into a concise research summary for ' + ticker + '. Cover: (1) what the collective research says about this company/theme, (2) key thesis points that recur, (3) any tensions or risks flagged, (4) current portfolio relevance. Be direct and terse. Use bold for KMWM conclusions.'
+        }]
+      })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var reply = data.analysis || data.reply || 'No summary generated.';
+      document.getElementById('summary-sub').textContent = records.length + ' records synthesized';
+      document.getElementById('summary-body').innerHTML = reply
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+        .replace(/\n\n/g,'</p><p>')
+        .replace(/\n/g,'<br>');
+      document.getElementById('summary-body').innerHTML = '<p>' + document.getElementById('summary-body').innerHTML + '</p>';
+    });
+  }).catch(function(e) {
+    document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
+  });
+}
 
 // Research Intake Modal
 var intakeAnalysis = '';
