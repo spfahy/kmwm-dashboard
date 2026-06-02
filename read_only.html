@@ -342,7 +342,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
   <div class="main">
     <div class="topbar">
       <div class="topbar-title">Dashboard</div>
-      <span class="phase-tag" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.2)">Read Only</span>
+      <span class="phase-tag" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.2)">Read Only · View Only</span>
       <span class="phase-tag tag-green">Phase 1 · Active</span>
       <span class="phase-tag tag-blue">Phase 2 · Deploying</span>
       <span class="phase-tag tag-dim">Phase 3 · Watching</span>
@@ -504,10 +504,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       <button class="modal-close" id="wi-detail-close">Close ✕</button>
     </div>
     <div class="wi-detail-body" id="wi-detail-body"></div>
-    <div class="wi-detail-footer">
-      <button class="btn-wi-complete" id="wi-complete-btn">Mark Complete</button>
-      <button class="btn-wi-kill" id="wi-kill-btn">Kill</button>
-    </div>
+    <div class="wi-detail-footer" style="display:none;"></div>
   </div>
 </div>
 
