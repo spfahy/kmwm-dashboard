@@ -365,8 +365,8 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         </div>
         <div class="metric-card red">
           <div class="m-label">30-Yr Treasury</div>
-          <div class="m-val">4.975%</div>
-          <div class="m-sub warn">WI-28 trigger: 5.00%</div>
+          <div class="m-val" id="treasury-val">—</div>
+          <div class="m-sub warn" id="treasury-sub">Loading...</div>
         </div>
         <div class="metric-card blue">
           <div class="m-label">Active Watch Items</div>
@@ -629,6 +629,35 @@ function plColor(v) {
   if (v == null) return 'var(--muted)';
   return parseFloat(v) >= 0 ? 'var(--green)' : 'var(--red)';
 }
+
+// Load 30-year Treasury yield from Watch Item 28
+supaFetch('watch_items', { select: 'current_value,last_checked_at', id: 'eq.28', limit: 1 }).then(function(data) {
+  if (!data || !data.length || !data[0].current_value) return;
+  var val = parseFloat(data[0].current_value);
+  if (isNaN(val)) return;
+  var pct = val.toFixed(3) + '%';
+  var card = document.getElementById('treasury-val').closest('.metric-card');
+  document.getElementById('treasury-val').textContent = pct;
+  var trigger = 5.00;
+  var sub = document.getElementById('treasury-sub');
+  if (val >= 5.25) {
+    sub.textContent = 'ABOVE WI-75 threshold 5.25%';
+    sub.className = 'm-sub bad';
+    card.className = card.className.replace(/\b(green|amber|red|blue)\b/, 'red');
+  } else if (val >= 5.00) {
+    sub.textContent = 'Above 5.00% — WI-28 active';
+    sub.className = 'm-sub bad';
+    card.className = card.className.replace(/\b(green|amber|red|blue)\b/, 'red');
+  } else {
+    var bps = Math.round((trigger - val) * 100);
+    sub.textContent = bps + 'bps below 5.00% trigger';
+    sub.className = 'm-sub warn';
+  }
+  if (data[0].last_checked_at) {
+    var checked = new Date(data[0].last_checked_at);
+    sub.textContent += ' · ' + checked.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }
+}).catch(function() {});
 
 // Load record count
 supaFetch('research_chunks', { select: 'id', limit: 1 });
