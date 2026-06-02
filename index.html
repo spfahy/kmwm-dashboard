@@ -77,17 +77,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .m-sub.bad{color:var(--red)}
 
 /* Cash detail popup */
-.cash-popup{display:none;position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;width:310px;box-shadow:0 8px 32px rgba(0,0,0,0.14)}
-.cash-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.cash-popup-title{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
-.cash-popup-close{background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);padding:0}
-.cash-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--bg3);border-radius:6px;margin-bottom:5px}
-.cash-row-ticker{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
-.cash-row-name{font-size:10px;color:var(--muted);margin-top:1px}
+.cash-popup{display:none;position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:20px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,0.14)}
+.cash-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.cash-popup-title{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
+.cash-popup-close{background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:0}
+.cash-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg3);border-radius:6px;margin-bottom:6px}
+.cash-row-ticker{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text)}
+.cash-row-name{font-size:12px;color:var(--muted);margin-top:2px}
 .cash-row-right{text-align:right}
-.cash-row-val{font-family:var(--mono);font-size:12px;color:var(--text)}
-.cash-row-pct{font-family:var(--mono);font-size:10px;color:var(--muted)}
-.cash-total{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--amber-dim);border-radius:6px;margin-top:8px;border:1px solid rgba(122,74,8,0.12)}
+.cash-row-val{font-family:var(--mono);font-size:14px;color:var(--text)}
+.cash-row-pct{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.cash-total{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--amber-dim);border-radius:6px;margin-top:10px;border:1px solid rgba(122,74,8,0.12)}
 
 /* FOMC gate */
 .fomc-gate{background:var(--bg2);border:1px solid rgba(26,61,143,0.2);border-radius:10px;padding:18px 22px;margin-bottom:18px;position:relative}
@@ -242,6 +242,37 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .btn-wi-complete{padding:7px 16px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans)}
 .btn-wi-kill{padding:7px 16px;background:none;color:var(--red);border:1px solid rgba(160,24,24,0.25);border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--sans)}
 .btn-wi-kill:hover{background:var(--red-dim)}
+.phase-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center}
+.phase-overlay.open{display:flex}
+.phase-box{background:var(--bg2);border-radius:14px;width:92vw;max-width:1100px;height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.22)}
+.phase-box-header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);flex-shrink:0}
+.phase-box-title{font-family:var(--serif);font-size:20px;color:var(--text)}
+.phase-box-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.phase-box-body{flex:1;display:flex;overflow:hidden}
+.phase-thesis{width:340px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:22px 24px;font-size:13px;line-height:1.75;color:var(--text)}
+.phase-thesis h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px;color:var(--text)}
+.phase-thesis p{margin-bottom:10px}
+.phase-thesis strong{font-weight:500}
+.phase-thesis-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px}
+.phase-securities{flex:1;overflow-y:auto}
+.phase-sec-header{display:grid;grid-template-columns:32px 72px 1fr 110px 110px 110px 90px;padding:9px 24px;border-bottom:1px solid var(--border2);background:var(--bg3)}
+.phase-sec-col{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase}
+.phase-sec-row{display:grid;grid-template-columns:32px 72px 1fr 110px 110px 110px 90px;padding:14px 24px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;align-items:center}
+.phase-sec-row:hover{background:var(--bg3)}
+.phase-sec-row.expanded{background:var(--green-dim)}
+.phase-sec-dot{width:7px;height:7px;border-radius:50%}
+.phase-sec-ticker{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text)}
+.phase-sec-name{font-size:13px;color:var(--muted)}
+.phase-sec-val{font-family:var(--mono);font-size:13px;color:var(--text);text-align:right;padding-right:8px}
+.phase-sec-pl{font-family:var(--mono);font-size:13px;text-align:right;padding-right:8px}
+.phase-sec-pl.pos{color:var(--green)}
+.phase-sec-pl.neg{color:var(--red)}
+.phase-sec-detail{display:none;padding:18px 24px;background:var(--bg3);border-bottom:1px solid var(--border2)}
+.phase-sec-detail.open{display:block}
+.phase-detail-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.phase-detail-cell{background:var(--bg2);border-radius:8px;padding:14px 16px}
+.phase-detail-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.phase-detail-val{font-family:var(--mono);font-size:15px;color:var(--text)}
 .chat-area{display:none;flex-direction:column;flex:1;overflow:hidden;background:var(--bg2)}
 .chat-area.visible{display:flex}
 .chat-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
@@ -283,10 +314,10 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
     </div>
     <div class="nav-group">
       <div class="nav-label">Phases</div>
-      <div class="nav-item"><span class="nav-dot" style="background:var(--green)"></span> Phase 1 · Energy <span class="nav-badge" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)">Active</span></div>
-      <div class="nav-item"><span class="nav-dot" style="background:var(--blue)"></span> Phase 2 · Power <span class="nav-badge" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.2)">Deploy</span></div>
-      <div class="nav-item"><span class="nav-dot" style="background:var(--muted)"></span> Phase 3 · Metals</div>
-      <div class="nav-item"><span class="nav-dot" style="background:var(--amber)"></span> Phase 4 · Gold</div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 1')" style="cursor:pointer"><span class="nav-dot" style="background:var(--green)"></span> Phase 1 · Energy <span class="nav-badge" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)">Active</span></div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 2')" style="cursor:pointer"><span class="nav-dot" style="background:var(--blue)"></span> Phase 2 · Power <span class="nav-badge" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.2)">Deploy</span></div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 3')" style="cursor:pointer"><span class="nav-dot" style="background:var(--muted)"></span> Phase 3 · Metals</div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 4')" style="cursor:pointer"><span class="nav-dot" style="background:var(--amber)"></span> Phase 4 · Gold</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Research</div>
@@ -411,6 +442,37 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
           <div id="wi-list"><div class="loading">Fetching from database...</div></div>
         </div>
 
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase Overlay -->
+<div class="phase-overlay" id="phase-overlay">
+  <div class="phase-box">
+    <div class="phase-box-header">
+      <div>
+        <div class="phase-box-title" id="phase-overlay-title">Phase 1 — Energy / LNG</div>
+        <div class="phase-box-sub" id="phase-overlay-sub">Loading...</div>
+      </div>
+      <button class="modal-close" id="phase-overlay-close">Close ✕</button>
+    </div>
+    <div class="phase-box-body">
+      <div class="phase-thesis" id="phase-thesis-panel">
+        <div class="phase-thesis-label">Phase Thesis</div>
+        <div id="phase-thesis-content"><p style="color:var(--dim);font-style:italic">Loading thesis...</p></div>
+      </div>
+      <div class="phase-securities">
+        <div class="phase-sec-header">
+          <div class="phase-sec-col"></div>
+          <div class="phase-sec-col">Ticker</div>
+          <div class="phase-sec-col">Name</div>
+          <div class="phase-sec-col" style="text-align:right;padding-right:8px">Entry</div>
+          <div class="phase-sec-col" style="text-align:right;padding-right:8px">Value</div>
+          <div class="phase-sec-col" style="text-align:right;padding-right:8px">P&amp;L</div>
+          <div class="phase-sec-col" style="text-align:right;padding-right:8px">Weight</div>
+        </div>
+        <div id="phase-securities-list"><div class="loading" style="padding:20px">Loading securities...</div></div>
       </div>
     </div>
   </div>
@@ -869,6 +931,160 @@ function clearTickerSearch() {
 
 // Initial load
 loadTopItems('tickers');
+
+// Phase definitions
+var PHASE_CONFIG = {
+  'Phase 1': {
+    title: 'Phase 1 — Energy / LNG',
+    color: 'var(--green)',
+    tickers: ['LNG','NEXT','EOG','WMB','EPD','CF','INSW'],
+    thesisTag: 'Phase 1',
+    summary: 'Hormuz closure thesis: U.S. energy producers, midstream infrastructure, LNG exporters, and nitrogen fertilizer producers positioned to outperform through mine clearance timeline (6+ months) and Ras Laffan repair window (3–5 years).'
+  },
+  'Phase 2': {
+    title: 'Phase 2 — Power / Grid',
+    color: 'var(--blue)',
+    tickers: ['CEG','VST','ETN','VRT','ABBNY'],
+    thesisTag: 'Phase 2',
+    summary: 'AI compute demand driving structural power deficit. Positioned at the power infrastructure input layer — electricity generators and electrical equipment manufacturers. June 17 Warsh FOMC is the next deployment gate.'
+  },
+  'Phase 3': {
+    title: 'Phase 3 — Critical Metals',
+    color: 'var(--muted)',
+    tickers: ['FCX','SCCO','CCJ'],
+    thesisTag: 'Phase 3',
+    summary: 'Critical minerals thesis. Copper (FCX, SCCO) and uranium (CCJ). Crowding risk active. No adds pending Phase 3 confirmation triggers.'
+  },
+  'Phase 4': {
+    title: 'Phase 4 — Monetary / Gold',
+    color: 'var(--amber)',
+    tickers: ['GLD','PSLV'],
+    thesisTag: 'Phase 4',
+    summary: 'Monetary reset hedge. GLD ~10.01% total (9% core + ~1.01% dry powder). Mental accounting: 9% = core position, above 9% = dry powder deployed into better asset class than cash.'
+  }
+};
+
+document.getElementById('phase-overlay-close').addEventListener('click', function() {
+  document.getElementById('phase-overlay').classList.remove('open');
+});
+document.getElementById('phase-overlay').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+function openPhaseOverlay(phase) {
+  var cfg = PHASE_CONFIG[phase];
+  if (!cfg) return;
+  document.getElementById('phase-overlay-title').textContent = cfg.title;
+  document.getElementById('phase-overlay-sub').textContent = cfg.tickers.join(' · ');
+  document.getElementById('phase-thesis-content').innerHTML = '<p>' + cfg.summary + '</p><p style="color:var(--dim);font-style:italic;font-size:11px">Loading database synthesis...</p>';
+  document.getElementById('phase-securities-list').innerHTML = '<div class="loading" style="padding:20px">Loading securities...</div>';
+  document.getElementById('phase-overlay').classList.add('open');
+
+  // Load holdings data for this phase
+  var today = new Date().toISOString().split('T')[0];
+  var tickerFilter = 'in.(' + cfg.tickers.join(',') + ')';
+  supaFetch('holdings_detail', {
+    select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date',
+    metric_date: 'eq.' + today,
+    ticker: tickerFilter,
+    order: 'ticker.asc'
+  }).then(function(data) {
+    var dataMap = {};
+    if (data && data.length) data.forEach(function(r) { dataMap[r.ticker] = r; });
+    renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
+  }).catch(function() {
+    renderPhaseSecurities(cfg.tickers, {}, cfg.color);
+  });
+
+  // Pull thesis synthesis from database
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"' + cfg.thesisTag + '"}&select=content&order=created_at.desc&limit=5', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); }).then(function(records) {
+    if (!records || !records.length) return;
+    var context = records.map(function(r,i) { return (i+1)+'. '+(r.content||'').substring(0,600); }).join('\n\n');
+    fetch(SUPA_URL + '/functions/v1/analyze-article', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
+      body: JSON.stringify({ mode: 'chat', conversation: [{
+        role: 'user',
+        content: 'Synthesize these recent KMWM analysis records for ' + phase + ':\n\n' + context + '\n\nProvide a concise 3-4 paragraph thesis summary covering: current thesis status, key drivers, active risks, and next catalyst. Bold KMWM conclusions. Be direct and terse.'
+      }]})
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var reply = data.analysis || cfg.summary;
+      document.getElementById('phase-thesis-content').innerHTML = '<p>' + reply
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+        .replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>';
+    });
+  });
+}
+
+var activePhaseSecTicker = null;
+
+function renderPhaseSecurities(tickers, dataMap, color) {
+  var html = tickers.map(function(ticker) {
+    var d = dataMap[ticker] || {};
+    var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
+    var plTxt = pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—';
+    var plCls = pl != null ? (pl >= 0 ? 'pos' : 'neg') : '';
+    var alloc = d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—';
+    var val = fmtDollar(d.current_value);
+    var entry = fmtDollar(d.entry_price);
+    return '<div class="phase-sec-row" id="psrow-' + ticker + '" onclick="togglePhaseSec(\'' + ticker + '\')">' +
+      '<div><div class="phase-sec-dot" style="background:' + color + '"></div></div>' +
+      '<div class="phase-sec-ticker">' + ticker + '</div>' +
+      '<div class="phase-sec-name">' + (d.name || ticker) + '</div>' +
+      '<div class="phase-sec-val">' + entry + '</div>' +
+      '<div class="phase-sec-val">' + val + '</div>' +
+      '<div class="phase-sec-pl ' + plCls + '">' + plTxt + '</div>' +
+      '<div class="phase-sec-val">' + alloc + '</div>' +
+      '</div>' +
+      '<div class="phase-sec-detail" id="psdetail-' + ticker + '">' +
+        renderPhaseSecDetail(ticker, d) +
+      '</div>';
+  }).join('');
+  document.getElementById('phase-securities-list').innerHTML = html;
+}
+
+function renderPhaseSecDetail(ticker, d) {
+  var daysHeld = '—';
+  if (d.purchase_date) {
+    var parts = String(d.purchase_date).split('/');
+    if (parts.length >= 2) {
+      var pd = new Date(parseInt(parts[2]||2026), parseInt(parts[0])-1, parseInt(parts[1]));
+      var diff = Math.floor((new Date() - pd) / 86400000);
+      if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
+    }
+  }
+  var unrealized = (d.current_value && d.cost_basis) ? parseFloat(d.current_value) - parseFloat(d.cost_basis) : null;
+  var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
+  var cells = [
+    ['Entry Price', fmtDollar(d.entry_price)],
+    ['Cost Basis', fmtDollar(d.cost_basis)],
+    ['Current Value', fmtDollar(d.current_value)],
+    ['Unrealized G/L', unrealized != null ? (unrealized >= 0 ? '+' : '') + fmtDollar(unrealized) : '—'],
+    ['P / L %', pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—'],
+    ['Weight', d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—'],
+    ['Purchase Date', d.purchase_date || '—'],
+    ['Holding Period', daysHeld]
+  ];
+  return '<div class="phase-detail-grid">' + cells.map(function(c) {
+    return '<div class="phase-detail-cell"><div class="phase-detail-label">' + c[0] + '</div><div class="phase-detail-val">' + c[1] + '</div></div>';
+  }).join('') + '</div>';
+}
+
+function togglePhaseSec(ticker) {
+  if (activePhaseSecTicker && activePhaseSecTicker !== ticker) {
+    document.getElementById('psdetail-' + activePhaseSecTicker).classList.remove('open');
+    document.getElementById('psrow-' + activePhaseSecTicker).classList.remove('expanded');
+  }
+  var detail = document.getElementById('psdetail-' + ticker);
+  var row = document.getElementById('psrow-' + ticker);
+  var isOpen = detail.classList.contains('open');
+  detail.classList.toggle('open', !isOpen);
+  row.classList.toggle('expanded', !isOpen);
+  activePhaseSecTicker = isOpen ? null : ticker;
+}
 
 // Summary modal controls
 document.getElementById('summary-close-btn').addEventListener('click', function() {
