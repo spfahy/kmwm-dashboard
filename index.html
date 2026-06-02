@@ -205,20 +205,24 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .signal-file{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
 .save-note{font-size:11px;color:var(--muted);margin-left:auto}
 .success-banner{margin-top:14px;padding:9px 12px;background:var(--green-dim);border-radius:7px;color:var(--green);font-family:var(--mono);font-size:11px;border:1px solid var(--green-mid)}
-.chat-area{border-top:1px solid var(--border);background:var(--bg3);display:none;flex-direction:column;max-height:280px}
+.chat-area{display:none;flex-direction:column;flex:1;overflow:hidden;background:var(--bg2)}
 .chat-area.visible{display:flex}
-.chat-messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
-.chat-msg{font-size:12px;line-height:1.6;padding:8px 11px;border-radius:7px;max-width:92%}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.chat-msg{font-size:13px;line-height:1.7;padding:10px 14px;border-radius:8px;max-width:92%}
 .chat-msg.user{background:var(--green-dim);color:var(--text);border:1px solid var(--green-mid);align-self:flex-end}
-.chat-msg.assistant{background:var(--bg2);color:var(--text);border:1px solid var(--border2);align-self:flex-start}
+.chat-msg.assistant{background:var(--bg3);color:var(--text);border:1px solid var(--border2);align-self:flex-start;width:100%}
 .chat-msg.assistant strong{font-weight:500}
-.chat-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.chat-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
 .chat-input-row textarea{flex:1;resize:none;height:36px;padding:8px 10px;font-size:12px;line-height:1.4;border-radius:6px}
 .btn-chat-send{padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0}
 .btn-chat-send:hover{opacity:0.88}
 .btn-chat-send:disabled{opacity:0.45;cursor:not-allowed}
 .chat-toggle{padding:6px 14px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans)}
 .chat-toggle:hover{background:var(--bg3);color:var(--text)}
+.chat-progress{height:3px;background:var(--border);overflow:hidden;flex-shrink:0;display:none}
+.chat-progress.visible{display:block}
+.chat-progress-bar{height:100%;width:40%;background:var(--green);animation:progress-slide 1.4s ease-in-out infinite}
+.modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
@@ -389,6 +393,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         </div>
         <div class="chat-area" id="intake-chat-area">
           <div class="chat-messages" id="intake-chat-messages"></div>
+          <div class="chat-progress" id="chat-progress"><div class="chat-progress-bar"></div></div>
           <div class="chat-input-row">
             <textarea id="intake-chat-input" placeholder="Ask a follow-up question about this analysis..." rows="1"></textarea>
             <button class="btn-chat-send" id="intake-chat-send">Send</button>
@@ -778,7 +783,7 @@ document.getElementById('intake-save-btn').addEventListener('click', function() 
   var phaseTag = 'phase-1';
   if (/phase 2/i.test(intakeAnalysis)) phaseTag = 'phase-2';
   else if (/phase 3/i.test(intakeAnalysis)) phaseTag = 'phase-3';
-  var slug = (sourceRaw + '-' + dateStr).substring(0, 60);
+  var ts = Date.now().toString().slice(-6); var slug = (sourceRaw + '-' + dateStr + '-' + ts).substring(0, 60);
   var fileName = sourceRaw + ' \u2014 ' + new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
   document.getElementById('intake-save-note').textContent = 'Saving...';
   var base = {
@@ -800,6 +805,17 @@ document.getElementById('intake-save-btn').addEventListener('click', function() 
       setIntakeStatus('Saved to database', 'active');
       document.getElementById('intake-text').value = '';
       intakeArticle = ''; intakeAnalysis = '';
+      // Auto-close modal after 2 seconds
+      setTimeout(function() {
+        document.getElementById('intake-modal').classList.remove('open');
+        document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analysis will appear here after you submit an article.</p>';
+        document.getElementById('signal-badge').style.display = 'none';
+        document.getElementById('intake-chat-messages').innerHTML = '';
+        document.getElementById('intake-chat-area').classList.remove('visible');
+        document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
+        setIntakeStatus('Ready \u2014 paste article and analyze');
+        intakeChatHistory = [];
+      }, 2000);
       return;
     }
     fetch(SUPA_URL + '/rest/v1/research_chunks', {
@@ -847,6 +863,7 @@ function sendChatMessage() {
   input.value = '';
   appendChatMsg('user', msg);
   document.getElementById('intake-chat-send').disabled = true;
+  document.getElementById('chat-progress').classList.add('visible');
 
   // Build message history — first message injects full article + analysis as context
   if (intakeChatHistory.length === 0) {
@@ -872,6 +889,7 @@ function sendChatMessage() {
     appendChatMsg('assistant', 'Error: ' + e.message);
   }).finally(function() {
     document.getElementById('intake-chat-send').disabled = false;
+    document.getElementById('chat-progress').classList.remove('visible');
   });
 }
 
@@ -882,7 +900,11 @@ function appendChatMsg(role, text) {
   // Simple markdown: bold
   div.innerHTML = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
   container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+  if (role === 'assistant') {
+    div.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    container.scrollTop = container.scrollHeight;
+  }
   // Auto-open chat area if not already open
   document.getElementById('intake-chat-area').classList.add('visible');
   document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2193';
