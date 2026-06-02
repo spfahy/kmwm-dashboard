@@ -1176,7 +1176,7 @@ document.getElementById('wi-detail-close').addEventListener('click', function() 
 document.getElementById('wi-detail-modal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
-document.getElementById('wi-complete-btn').addEventListener('click', function() {
+document.getElementById('wi-complete-btn') && document.getElementById('wi-complete-btn').addEventListener('click', function() {
   if (!activeWiId) return;
   fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
     method: 'PATCH',
@@ -1187,7 +1187,7 @@ document.getElementById('wi-complete-btn').addEventListener('click', function() 
     document.getElementById('wi-row-' + activeWiId) && document.getElementById('wi-row-' + activeWiId).remove();
   });
 });
-document.getElementById('wi-kill-btn').addEventListener('click', function() {
+document.getElementById('wi-kill-btn') && document.getElementById('wi-kill-btn').addEventListener('click', function() {
   if (!activeWiId) return;
   if (!confirm('Kill watch item WI-' + activeWiId + '? This cannot be undone.')) return;
   fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
@@ -1200,7 +1200,8 @@ document.getElementById('wi-kill-btn').addEventListener('click', function() {
   });
 });
 
-function openWiDetail(wi) {
+function openWiDetail(wi) { return; // read-only mode
+  // original code below (disabled)
   activeWiId = wi.id;
   var fields = [
     ['ID', 'WI-' + wi.id],
