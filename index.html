@@ -661,20 +661,13 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
   document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analyzing with Claude...</p>';
   setIntakeStatus('Sending to Claude...', 'active');
   var sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management. Analyze research documents using the KMWM framework. Determine the source and phase yourself from the content. Format your response with these sections: SIGNAL RATING (include SIGNAL TIER: ACT or READ or FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT with phase and tickers), then Section 1 Article Summary, Section 2 Executive Overview, Section 3 Strong Points (KMWM conclusions in bold), Section 4 Weak Points, Section 5 Additional Thoughts, Section 6 KMWM Portfolio Verdict. Author: ' + author + '. Spell out all abbreviations on first use.';
-  fetch('https://api.anthropic.com/v1/messages', {
+  fetch(SUPA_URL + '/functions/v1/analyze-article', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: sysPrompt,
-      messages: [{ role: 'user', content: 'Analyze this research document: ' + article }]
-    })
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
+    body: JSON.stringify({ article: article, author: author })
   }).then(function(r) { return r.json(); }).then(function(data) {
-    var text = '';
-    if (data.content && data.content.length) {
-      data.content.forEach(function(b) { if (b.text) text += b.text; });
-    }
+    if (data.error) throw new Error(data.error);
+    var text = data.analysis || '';
     if (!text) throw new Error('No response from Claude');
     intakeAnalysis = text;
     var html = renderMarkdown(text);
