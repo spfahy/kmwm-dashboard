@@ -386,7 +386,20 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
               <button class="top-toggle" id="toggle-themes" onclick="switchTopView('themes')">Themes</button>
             </div>
           </div>
+          <div id="top-search-row" style="display:none;padding:8px 12px;border-bottom:1px solid var(--border);">
+            <div style="display:flex;gap:6px;">
+              <input type="text" id="ticker-search-input" placeholder="Enter ticker (e.g. CEG)" style="flex:1;height:30px;font-size:12px;padding:4px 8px;" onkeydown="if(event.key==='Enter')searchTicker()">
+              <button onclick="searchTicker()" style="padding:4px 12px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--sans);">Search</button>
+              <button onclick="clearTickerSearch()" style="padding:4px 10px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Clear</button>
+            </div>
+          </div>
           <div id="top5-list"><div class="loading">Loading...</div></div>
+          <div id="more-themes-row" style="display:none;border-top:1px solid var(--border);">
+            <div id="more-themes-toggle" onclick="toggleMoreThemes()" style="padding:9px 16px;font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <span id="more-themes-arrow">▼</span> More themes
+            </div>
+            <div id="more-themes-list" style="display:none;"></div>
+          </div>
         </div>
 
         <!-- Watch Items -->
@@ -761,16 +774,21 @@ function switchTopView(view) {
   currentTopView = view;
   document.getElementById('toggle-tickers').classList.toggle('active', view === 'tickers');
   document.getElementById('toggle-themes').classList.toggle('active', view === 'themes');
+  document.getElementById('top-search-row').style.display = view === 'tickers' ? 'block' : 'none';
+  document.getElementById('more-themes-row').style.display = 'none';
+  document.getElementById('more-themes-list').style.display = 'none';
+  document.getElementById('ticker-search-input') && (document.getElementById('ticker-search-input').value = '');
   document.getElementById('top5-list').innerHTML = '<div class="loading">Loading...</div>';
   loadTopItems(view);
 }
 
 function loadTopItems(view) {
   var endpoint = view === 'tickers' ? 'top_research_tags' : 'top_theme_tags';
+  var limit = view === 'themes' ? 30 : 10;
   fetch(SUPA_URL + '/rest/v1/rpc/' + endpoint, {
     method: 'POST',
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tag_limit: 10 })
+    body: JSON.stringify({ tag_limit: limit })
   }).then(function(r) { return r.json(); }).then(function(data) {
     renderTopItems(data, view);
   }).catch(function() {
@@ -796,9 +814,7 @@ function renderTopItems(data, view) {
   var html = top.map(function(item, i) {
     var pct = Math.round((item.frequency / max) * 100);
     var rawLabel = item.tag.replace(/_/g, ' ');
-    var displayLabel = view === 'themes'
-      ? rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1)
-      : rawLabel;
+    var displayLabel = view === 'themes' ? rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1) : rawLabel;
     var label = displayLabel.length > 22 ? displayLabel.substring(0,22) + '…' : displayLabel;
     return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'' + view + '\')">' +
       '<div class="top5-rank">' + (i+1) + '</div>' +
@@ -808,6 +824,47 @@ function renderTopItems(data, view) {
       '</div>';
   }).join('');
   document.getElementById('top5-list').innerHTML = html;
+
+  // Show more themes button if there are extras
+  if (view === 'themes' && data.length > 10) {
+    var extras = data.slice(10);
+    document.getElementById('more-themes-row').style.display = 'block';
+    var extraHtml = extras.map(function(item, i) {
+      var rawLabel = item.tag.replace(/_/g, ' ');
+      var displayLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
+      var label = displayLabel.length > 22 ? displayLabel.substring(0,22) + '…' : displayLabel;
+      return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'themes\')">' +
+        '<div class="top5-rank">' + (i+11) + '</div>' +
+        '<div class="top5-ticker" style="width:130px;font-size:11px">' + label + '</div>' +
+        '<div class="top5-bar-wrap"><div class="top5-bar" style="width:' + Math.round((item.frequency / max) * 100) + '%"></div></div>' +
+        '<div class="top5-count">' + item.frequency + '</div>' +
+        '</div>';
+    }).join('');
+    document.getElementById('more-themes-list').innerHTML = extraHtml;
+  } else {
+    document.getElementById('more-themes-row').style.display = 'none';
+  }
+}
+
+function toggleMoreThemes() {
+  var list = document.getElementById('more-themes-list');
+  var arrow = document.getElementById('more-themes-arrow');
+  var isOpen = list.style.display !== 'none';
+  list.style.display = isOpen ? 'none' : 'block';
+  arrow.textContent = isOpen ? '▼' : '▲';
+  document.getElementById('more-themes-toggle').querySelector('span:last-child') &&
+    (document.getElementById('more-themes-toggle').lastChild.textContent = isOpen ? ' More themes' : ' Less themes');
+}
+
+function searchTicker() {
+  var input = document.getElementById('ticker-search-input').value.trim().toUpperCase();
+  if (!input) return;
+  openSummary(input, 'tickers');
+}
+
+function clearTickerSearch() {
+  document.getElementById('ticker-search-input').value = '';
+  loadTopItems('tickers');
 }
 
 // Initial load
