@@ -755,7 +755,7 @@ function openSummary(ticker) {
   document.getElementById('summary-modal').classList.add('open');
 
   // Pull recent analysis records for this ticker
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&company_tags=cs.{"' + ticker + '"}&select=content_summary,created_at&order=created_at.desc&limit=12', {
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&company_tags=cs.{"' + ticker + '"}&select=content,created_at&order=created_at.desc&limit=8', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r) { return r.json(); }).then(function(records) {
     if (!records || !records.length) {
@@ -763,7 +763,7 @@ function openSummary(ticker) {
       return;
     }
     document.getElementById('summary-sub').textContent = records.length + ' analysis records found · Generating summary...';
-    var context = records.map(function(r, i) { return (i+1) + '. ' + r.content_summary; }).join('\n\n');
+    var context = records.map(function(r, i) { return (i+1) + '. ' + (r.content || '').substring(0, 800); }).join('\n\n');
     fetch(SUPA_URL + '/functions/v1/analyze-article', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
