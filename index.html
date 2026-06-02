@@ -194,6 +194,11 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .intake-status{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center}
 .intake-status.active{color:var(--green)}
 .intake-status.error{color:var(--red)}
+.intake-progress{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px;display:none}
+.intake-progress.visible{display:block}
+.intake-progress-bar{height:100%;width:40%;background:var(--green);border-radius:2px}
+.intake-progress-bar.indeterminate{animation:progress-slide 1.4s ease-in-out infinite}
+@keyframes progress-slide{0%{margin-left:-40%}100%{margin-left:100%}}
 .signal-badge{font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;display:none}
 .signal-act{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.2)}
 .signal-read{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.2)}
@@ -376,6 +381,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         </div>
         <button class="btn-primary" id="intake-analyze-btn">Analyze with Claude →</button>
         <div class="intake-status" id="intake-status">Ready — paste article and analyze</div>
+        <div class="intake-progress" id="intake-progress"><div class="intake-progress-bar" id="intake-progress-bar"></div></div>
       </div>
       <div class="modal-right">
         <div class="modal-output" id="intake-output">
@@ -692,6 +698,10 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
   document.getElementById('signal-badge').style.display = 'none';
   document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analyzing with Claude...</p>';
   setIntakeStatus('Sending to Claude...', 'active');
+  var prog = document.getElementById('intake-progress');
+  var progBar = document.getElementById('intake-progress-bar');
+  prog.classList.add('visible');
+  progBar.classList.add('indeterminate');
   var sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management. Analyze research documents using the KMWM framework. Determine the source and phase yourself from the content. Format your response with these sections: SIGNAL RATING (include SIGNAL TIER: ACT or READ or FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT with phase and tickers), then Section 1 Article Summary, Section 2 Executive Overview, Section 3 Strong Points (KMWM conclusions in bold), Section 4 Weak Points, Section 5 Additional Thoughts, Section 6 KMWM Portfolio Verdict. Author: ' + author + '. Spell out all abbreviations on first use.';
   fetch(SUPA_URL + '/functions/v1/analyze-article', {
     method: 'POST',
@@ -722,6 +732,10 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
     setIntakeStatus('Error: ' + e.message, 'error');
   }).finally(function() {
     document.getElementById('intake-analyze-btn').disabled = false;
+    var prog = document.getElementById('intake-progress');
+    var progBar = document.getElementById('intake-progress-bar');
+    progBar.classList.remove('indeterminate');
+    prog.classList.remove('visible');
   });
 });
 
