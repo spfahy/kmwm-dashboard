@@ -776,13 +776,19 @@ function toggleHolding(ticker) {
   panel.style.display = 'block';
   var d = holdingsData[ticker] || {};
   var daysHeld = '—';
-  if (d.purchase_date) {
-    var parts = String(d.purchase_date).split('/');
-    if (parts.length >= 2) {
-      var pd = new Date(parseInt(parts[2] || 2026), parseInt(parts[0])-1, parseInt(parts[1]));
-      var diff = Math.floor((new Date() - pd) / 86400000);
-      if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
+  if (d.purchase_date && d.purchase_date !== '—') {
+    var pd = new Date(d.purchase_date);
+    if (isNaN(pd.getTime())) {
+      // Try M/D format without year — assume most recent past occurrence
+      var parts = String(d.purchase_date).split('/');
+      if (parts.length >= 2) {
+        var yr = parts.length >= 3 ? parseInt(parts[2]) : new Date().getFullYear();
+        pd = new Date(yr, parseInt(parts[0])-1, parseInt(parts[1]));
+        if (pd > new Date()) pd.setFullYear(pd.getFullYear() - 1);
+      }
     }
+    var diff = Math.floor((new Date() - pd) / 86400000);
+    if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
   }
   var unrealized = (d.current_value && d.cost_basis) ? parseFloat(d.current_value) - parseFloat(d.cost_basis) : null;
   var cells = [
@@ -1029,19 +1035,19 @@ function openPhaseOverlay(phase) {
 
 // Known holdings data sourced from Google Sheets (updated from live spreadsheet)
 var KNOWN_HOLDINGS = {
-  'CEG': { name:'Constellation Energy', entry_price:'278.86', cost_basis:'2,800,856', current_value:'2,666,456', pl_pct:'-0.0480', alloc_pct:'0.0275', purchase_date:'2/12' },
-  'VST': { name:'Vistra Corp', entry_price:'160.90', cost_basis:'4,159,592', current_value:'4,000,815', pl_pct:'-0.0382', alloc_pct:'0.0275', purchase_date:'2/12' },
-  'ETN': { name:'Eaton', entry_price:'342.96', cost_basis:'4,773,033', current_value:'5,567,909', pl_pct:'0.1666', alloc_pct:'0.0300', purchase_date:'8/27' },
-  'VRT': { name:'Vertiv Holdings', entry_price:'174.66', cost_basis:'1,335,222', current_value:'—', pl_pct:null, alloc_pct:'0.0213', purchase_date:'9/5' },
-  'ABBNY': { name:'ABB Ltd', entry_price:'73.09', cost_basis:'2,645,331', current_value:'3,867,436', pl_pct:'0.4619', alloc_pct:'0.0150', purchase_date:'11/10' },
-  'FCX': { name:'Freeport-McMoRan', entry_price:'49.19', cost_basis:'5,369,694', current_value:'7,317,993', pl_pct:'0.3629', alloc_pct:'0.0400', purchase_date:'10/30' },
-  'SCCO': { name:'Southern Copper', entry_price:'142.62', cost_basis:'1,504,493', current_value:'—', pl_pct:null, alloc_pct:'0.0100', purchase_date:'10/30' },
-  'CCJ': { name:'Cameco', entry_price:'88.46', cost_basis:'4,112,207', current_value:'5,233,810', pl_pct:'0.2728', alloc_pct:'0.0301', purchase_date:'8/27' },
-  'GLD': { name:'SPDR Gold Shares', entry_price:'334.37', cost_basis:'12,539,804', current_value:'15,423,484', pl_pct:'0.2300', alloc_pct:'0.1001', purchase_date:'—' },
-  'PSLV': { name:'Sprott Physical Silver', entry_price:'21.91', cost_basis:'10,063,641', current_value:'10,923,509', pl_pct:'0.0853', alloc_pct:'0.0730', purchase_date:'12/9' },
-  'CAT': { name:'Caterpillar', entry_price:'707.38', cost_basis:'3,426,984', current_value:'4,192,358', pl_pct:'0.2233', alloc_pct:'0.0200', purchase_date:'—' },
-  'RTX': { name:'RTX Corp', entry_price:'197.32', cost_basis:'3,451,940', current_value:'3,051,115', pl_pct:'-0.1161', alloc_pct:'0.0200', purchase_date:'3/17' },
-  'WMT': { name:'Walmart', entry_price:'93.40', cost_basis:'4,138,688', current_value:'5,078,046', pl_pct:'0.2270', alloc_pct:'0.0275', purchase_date:'—' }
+  'CEG': { name:'Constellation Energy', entry_price:'278.86', cost_basis:'2800856', current_value:'2666456', pl_pct:'-0.0480', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
+  'VST': { name:'Vistra Corp', entry_price:'160.90', cost_basis:'4159592', current_value:'4000815', pl_pct:'-0.0382', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
+  'ETN': { name:'Eaton', entry_price:'342.96', cost_basis:'4773033', current_value:'5567909', pl_pct:'0.1666', alloc_pct:'0.0300', purchase_date:'8/27/2024' },
+  'VRT': { name:'Vertiv Holdings', entry_price:'174.66', cost_basis:'1335222', current_value:'1726326', pl_pct:'0.0000', alloc_pct:'0.0213', purchase_date:'9/5/2024' },
+  'ABBNY': { name:'ABB Ltd', entry_price:'73.09', cost_basis:'2645331', current_value:'3867436', pl_pct:'0.4619', alloc_pct:'0.0150', purchase_date:'11/10/2024' },
+  'FCX': { name:'Freeport-McMoRan', entry_price:'49.19', cost_basis:'5369694', current_value:'7317993', pl_pct:'0.3629', alloc_pct:'0.0400', purchase_date:'10/30/2024' },
+  'SCCO': { name:'Southern Copper', entry_price:'142.62', cost_basis:'1504493', current_value:'1953403', pl_pct:'0.0000', alloc_pct:'0.0100', purchase_date:'10/30/2024' },
+  'CCJ': { name:'Cameco', entry_price:'88.46', cost_basis:'4112207', current_value:'5233810', pl_pct:'0.2728', alloc_pct:'0.0301', purchase_date:'8/27/2024' },
+  'GLD': { name:'SPDR Gold Shares', entry_price:'334.37', cost_basis:'12539804', current_value:'15423484', pl_pct:'0.2300', alloc_pct:'0.1001', purchase_date:'—' },
+  'PSLV': { name:'Sprott Physical Silver', entry_price:'21.91', cost_basis:'10063641', current_value:'10923509', pl_pct:'0.0853', alloc_pct:'0.0730', purchase_date:'12/9/2025' },
+  'CAT': { name:'Caterpillar', entry_price:'707.38', cost_basis:'3426984', current_value:'4192358', pl_pct:'0.2233', alloc_pct:'0.0200', purchase_date:'—' },
+  'RTX': { name:'RTX Corp', entry_price:'197.32', cost_basis:'3451940', current_value:'3051115', pl_pct:'-0.1161', alloc_pct:'0.0200', purchase_date:'3/17/2025' },
+  'WMT': { name:'Walmart', entry_price:'93.40', cost_basis:'4138688', current_value:'5078046', pl_pct:'0.2270', alloc_pct:'0.0275', purchase_date:'—' }
 };
 
 function renderPhaseSecurities(tickers, dataMap, color) {
@@ -1079,7 +1085,9 @@ function renderPhaseSecDetail(ticker, d) {
       if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
     }
   }
-  var unrealized = (d.current_value && d.cost_basis) ? parseFloat(d.current_value) - parseFloat(d.cost_basis) : null;
+  var cv = d.current_value ? parseFloat(String(d.current_value).replace(/,/g,'')) : null;
+  var cb = d.cost_basis ? parseFloat(String(d.cost_basis).replace(/,/g,'')) : null;
+  var unrealized = (cv && cb && !isNaN(cv) && !isNaN(cb)) ? cv - cb : null;
   var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
   var cells = [
     ['Entry Price', fmtDollar(d.entry_price)],
