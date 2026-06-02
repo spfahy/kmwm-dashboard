@@ -967,14 +967,16 @@ var PHASE_CONFIG = {
 
 document.getElementById('phase-overlay-close').addEventListener('click', function() {
   document.getElementById('phase-overlay').classList.remove('open');
+  activePhaseSecTicker = null;
 });
 document.getElementById('phase-overlay').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
+  if (e.target === this) { this.classList.remove('open'); activePhaseSecTicker = null; }
 });
 
 function openPhaseOverlay(phase) {
   var cfg = PHASE_CONFIG[phase];
   if (!cfg) return;
+  activePhaseSecTicker = null;
   document.getElementById('phase-overlay-title').textContent = cfg.title;
   document.getElementById('phase-overlay-sub').textContent = cfg.tickers.join(' · ');
   document.getElementById('phase-thesis-content').innerHTML = '<p>' + cfg.summary + '</p><p style="color:var(--dim);font-style:italic;font-size:11px">Loading database synthesis...</p>';
@@ -991,10 +993,15 @@ function openPhaseOverlay(phase) {
     order: 'ticker.asc'
   }).then(function(data) {
     var dataMap = {};
+    // Seed with known data first
+    cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
+    // Overlay live data where available
     if (data && data.length) data.forEach(function(r) { dataMap[r.ticker] = r; });
     renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
   }).catch(function() {
-    renderPhaseSecurities(cfg.tickers, {}, cfg.color);
+    var dataMap = {};
+    cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
+    renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
   });
 
   // Pull thesis synthesis from database
@@ -1020,7 +1027,22 @@ function openPhaseOverlay(phase) {
   });
 }
 
-var activePhaseSecTicker = null;
+// Known cost basis data from context document — fallback when holdings_detail lacks Phase 2/3/4
+var KNOWN_HOLDINGS = {
+  'CEG': { name:'Constellation Energy', entry_price:'279.00', cost_basis:'~$279 avg', alloc_pct:'0.0275', purchase_date:'5/7' },
+  'VST': { name:'Vistra', entry_price:'141.00', cost_basis:'~$141 avg', alloc_pct:'0.0275', purchase_date:'5/7' },
+  'ETN': { name:'Eaton', entry_price:'341.00', cost_basis:'~$341 avg', alloc_pct:'0.0300', purchase_date:'3/17' },
+  'VRT': { name:'Vertiv Holdings', entry_price:'172.00', cost_basis:'~$172 avg', alloc_pct:'0.0213', purchase_date:'4/13' },
+  'ABBNY': { name:'ABB Ltd', entry_price:'—', cost_basis:'—', alloc_pct:'0.0150', purchase_date:'—' },
+  'FCX': { name:'Freeport-McMoRan', entry_price:'—', cost_basis:'—', alloc_pct:'0.0400', purchase_date:'—' },
+  'SCCO': { name:'Southern Copper', entry_price:'—', cost_basis:'—', alloc_pct:'0.0100', purchase_date:'—' },
+  'CCJ': { name:'Cameco', entry_price:'—', cost_basis:'—', alloc_pct:'0.0301', purchase_date:'—' },
+  'GLD': { name:'SPDR Gold Shares', entry_price:'405.61', cost_basis:'~$405.61 trim', alloc_pct:'0.1001', purchase_date:'—' },
+  'PSLV': { name:'Sprott Physical Silver', entry_price:'—', cost_basis:'—', alloc_pct:'—', purchase_date:'—' },
+  'CAT': { name:'Caterpillar', entry_price:'—', cost_basis:'—', alloc_pct:'0.0200', purchase_date:'—' },
+  'RTX': { name:'Raytheon Technologies', entry_price:'—', cost_basis:'—', alloc_pct:'0.0200', purchase_date:'—' },
+  'WMT': { name:'Walmart', entry_price:'—', cost_basis:'—', alloc_pct:'0.0275', purchase_date:'—' }
+};
 
 function renderPhaseSecurities(tickers, dataMap, color) {
   var html = tickers.map(function(ticker) {
