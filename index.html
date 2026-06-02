@@ -40,8 +40,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .nav-badge{margin-left:auto;font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:8px;background:var(--amber-dim);color:var(--amber)}
 .nav-badge.red{background:var(--red-dim);color:var(--red)}
 .sidebar-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border)}
-.intake-btn{width:100%;padding:9px 12px;background:var(--red-dim);border:1px solid rgba(160,24,24,0.25);border-radius:7px;font-size:12px;font-weight:500;color:var(--red);cursor:pointer;font-family:var(--sans);margin-bottom:12px;transition:all 0.12s}
-.intake-btn:hover{background:rgba(160,24,24,0.14)}
+.intake-btn{width:100%;padding:9px 12px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:7px;font-size:12px;font-weight:500;color:var(--green);cursor:pointer;font-family:var(--sans);margin-bottom:12px;transition:all 0.12s}
+.intake-btn:hover{background:var(--green-mid)}
 .ts-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:2px}
 .ts-val{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px}
 
@@ -77,17 +77,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .m-sub.bad{color:var(--red)}
 
 /* Cash detail popup */
-.cash-popup{display:none;position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:20px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,0.14)}
-.cash-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.cash-popup-title{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
-.cash-popup-close{background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:0}
-.cash-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg3);border-radius:6px;margin-bottom:6px}
-.cash-row-ticker{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text)}
-.cash-row-name{font-size:12px;color:var(--muted);margin-top:2px}
+.cash-popup{display:none;position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;width:310px;box-shadow:0 8px 32px rgba(0,0,0,0.14)}
+.cash-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cash-popup-title{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
+.cash-popup-close{background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);padding:0}
+.cash-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--bg3);border-radius:6px;margin-bottom:5px}
+.cash-row-ticker{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
+.cash-row-name{font-size:10px;color:var(--muted);margin-top:1px}
 .cash-row-right{text-align:right}
-.cash-row-val{font-family:var(--mono);font-size:14px;color:var(--text)}
-.cash-row-pct{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.cash-total{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--amber-dim);border-radius:6px;margin-top:10px;border:1px solid rgba(122,74,8,0.12)}
+.cash-row-val{font-family:var(--mono);font-size:12px;color:var(--text)}
+.cash-row-pct{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.cash-total{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--amber-dim);border-radius:6px;margin-top:8px;border:1px solid rgba(122,74,8,0.12)}
 
 /* FOMC gate */
 .fomc-gate{background:var(--bg2);border:1px solid rgba(26,61,143,0.2);border-radius:10px;padding:18px 22px;margin-bottom:18px;position:relative}
@@ -168,15 +168,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .modal-left{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px;gap:10px;overflow-y:auto}
 .modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .modal-output{flex:1;overflow-y:auto;padding:18px;font-size:13px;line-height:1.7;color:var(--text)}
-.modal-output.large-text{font-size:15px;line-height:1.8}
-.modal-output.large-text h3{font-size:16px}
 .modal-output p{margin-bottom:8px}
 .modal-output h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px;color:var(--text)}
 .modal-output strong{font-weight:500;color:var(--text)}
 .modal-output .placeholder{color:var(--dim);font-style:italic}
-.btn-font-toggle{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:0.03em}
-.btn-font-toggle:hover{background:var(--bg3);color:var(--text)}
-.btn-font-toggle.active{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
 .modal-footer{display:none;padding:10px 18px;border-top:1px solid var(--border);background:var(--bg2);align-items:center;gap:8px;flex-shrink:0}
 .modal-footer.visible{display:flex}
 .field-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px}
@@ -194,103 +189,12 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .intake-status{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center}
 .intake-status.active{color:var(--green)}
 .intake-status.error{color:var(--red)}
-.intake-progress{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px;display:none}
-.intake-progress.visible{display:block}
-.intake-progress-bar{height:100%;width:40%;background:var(--green);border-radius:2px}
-.intake-progress-bar.indeterminate{animation:progress-slide 1.4s ease-in-out infinite}
-@keyframes progress-slide{0%{margin-left:-40%}100%{margin-left:100%}}
 .signal-badge{font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;display:none}
 .signal-act{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.2)}
 .signal-read{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.2)}
 .signal-file{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
 .save-note{font-size:11px;color:var(--muted);margin-left:auto}
 .success-banner{margin-top:14px;padding:9px 12px;background:var(--green-dim);border-radius:7px;color:var(--green);font-family:var(--mono);font-size:11px;border:1px solid var(--green-mid)}
-.top-toggle{padding:3px 10px;background:none;border:1px solid var(--border2);border-radius:5px;font-size:10px;font-family:var(--mono);color:var(--muted);cursor:pointer;transition:all 0.12s}
-.top-toggle:hover{background:var(--bg3);color:var(--text)}
-.top-toggle.active{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
-.top5-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
-.top5-row:last-child{border-bottom:none}
-.top5-row:hover{background:var(--bg3)}
-.top5-rank{font-family:var(--mono);font-size:11px;color:var(--dim);width:18px;flex-shrink:0}
-.top5-ticker{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);width:46px;flex-shrink:0}
-.top5-bar-wrap{flex:1;height:4px;background:var(--bg3);border-radius:2px}
-.top5-bar{height:4px;border-radius:2px;background:var(--green)}
-.top5-count{font-family:var(--mono);font-size:10px;color:var(--muted);width:52px;text-align:right}
-.summary-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:2000;align-items:center;justify-content:center}
-.summary-overlay.open{display:flex}
-.summary-box{background:var(--bg2);border-radius:12px;width:720px;max-width:94vw;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
-.summary-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
-.summary-title{font-family:var(--serif);font-size:16px;color:var(--text)}
-.summary-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.summary-body{flex:1;overflow-y:auto;padding:20px;font-size:13px;line-height:1.7;color:var(--text)}
-.summary-body.large-text{font-size:15px;line-height:1.8}
-.summary-body h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px}
-.summary-body p{margin-bottom:8px}
-.summary-body strong{font-weight:500}
-.btn-copy{padding:4px 10px;background:none;border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--mono)}
-.btn-copy:hover{background:var(--bg3);color:var(--text)}
-.btn-copy.copied{color:var(--green);border-color:var(--green-mid)}
-.wi-detail-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:2000;align-items:center;justify-content:center}
-.wi-detail-overlay.open{display:flex}
-.wi-detail-box{background:var(--bg2);border-radius:12px;width:580px;max-width:94vw;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
-.wi-detail-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
-.wi-detail-body{padding:18px 20px;font-size:13px;line-height:1.6;color:var(--text)}
-.wi-detail-field{margin-bottom:10px}
-.wi-detail-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px}
-.wi-detail-val{font-size:13px;color:var(--text)}
-.wi-detail-footer{display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--border)}
-.btn-wi-complete{padding:7px 16px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans)}
-.btn-wi-kill{padding:7px 16px;background:none;color:var(--red);border:1px solid rgba(160,24,24,0.25);border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--sans)}
-.btn-wi-kill:hover{background:var(--red-dim)}
-.phase-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center}
-.phase-overlay.open{display:flex}
-.phase-box{background:var(--bg2);border-radius:14px;width:92vw;max-width:1100px;height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.22)}
-.phase-box-header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);flex-shrink:0}
-.phase-box-title{font-family:var(--serif);font-size:20px;color:var(--text)}
-.phase-box-sub{font-size:12px;color:var(--muted);margin-top:3px}
-.phase-box-body{flex:1;display:flex;overflow:hidden}
-.phase-thesis{width:340px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:22px 24px;font-size:13px;line-height:1.75;color:var(--text)}
-.phase-thesis h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px;color:var(--text)}
-.phase-thesis p{margin-bottom:10px}
-.phase-thesis strong{font-weight:500}
-.phase-thesis-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px}
-.phase-securities{flex:1;overflow-y:auto}
-.phase-sec-header{display:grid;grid-template-columns:32px 72px 1fr 110px 110px 110px 90px;padding:9px 24px;border-bottom:1px solid var(--border2);background:var(--bg3)}
-.phase-sec-col{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase}
-.phase-sec-row{display:grid;grid-template-columns:32px 72px 1fr 110px 110px 110px 90px;padding:14px 24px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;align-items:center}
-.phase-sec-row:hover{background:var(--bg3)}
-.phase-sec-row.expanded{background:var(--green-dim)}
-.phase-sec-dot{width:7px;height:7px;border-radius:50%}
-.phase-sec-ticker{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text)}
-.phase-sec-name{font-size:13px;color:var(--muted)}
-.phase-sec-val{font-family:var(--mono);font-size:13px;color:var(--text);text-align:right;padding-right:8px}
-.phase-sec-pl{font-family:var(--mono);font-size:13px;text-align:right;padding-right:8px}
-.phase-sec-pl.pos{color:var(--green)}
-.phase-sec-pl.neg{color:var(--red)}
-.phase-sec-detail{display:none;padding:18px 24px;background:var(--bg3);border-bottom:1px solid var(--border2)}
-.phase-sec-detail.open{display:block}
-.phase-detail-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
-.phase-detail-cell{background:var(--bg2);border-radius:8px;padding:14px 16px}
-.phase-detail-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
-.phase-detail-val{font-family:var(--mono);font-size:15px;color:var(--text)}
-.chat-area{display:none;flex-direction:column;flex:1;overflow:hidden;background:var(--bg2)}
-.chat-area.visible{display:flex}
-.chat-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
-.chat-msg{font-size:13px;line-height:1.7;padding:10px 14px;border-radius:8px;max-width:92%}
-.chat-msg.user{background:var(--green-dim);color:var(--text);border:1px solid var(--green-mid);align-self:flex-end}
-.chat-msg.assistant{background:var(--bg3);color:var(--text);border:1px solid var(--border2);align-self:flex-start;width:100%}
-.chat-msg.assistant strong{font-weight:500}
-.chat-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
-.chat-input-row textarea{flex:1;resize:none;height:36px;padding:8px 10px;font-size:12px;line-height:1.4;border-radius:6px}
-.btn-chat-send{padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0}
-.btn-chat-send:hover{opacity:0.88}
-.btn-chat-send:disabled{opacity:0.45;cursor:not-allowed}
-.chat-toggle{padding:6px 14px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans)}
-.chat-toggle:hover{background:var(--bg3);color:var(--text)}
-.chat-progress{height:3px;background:var(--border);overflow:hidden;flex-shrink:0;display:none}
-.chat-progress.visible{display:block}
-.chat-progress-bar{height:100%;width:40%;background:var(--green);animation:progress-slide 1.4s ease-in-out infinite}
-.modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
@@ -311,13 +215,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       <div class="nav-item active"><span class="nav-dot"></span> Dashboard</div>
       <div class="nav-item"><span class="nav-dot"></span> Phase tracker</div>
       <div class="nav-item"><span class="nav-dot"></span> Portfolio</div>
-    </div>
-    <div class="nav-group">
-      <div class="nav-label">Phases</div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 1')" style="cursor:pointer"><span class="nav-dot" style="background:var(--green)"></span> Phase 1 · Energy <span class="nav-badge" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)">Active</span></div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 2')" style="cursor:pointer"><span class="nav-dot" style="background:var(--blue)"></span> Phase 2 · Power <span class="nav-badge" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.2)">Deploy</span></div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 3')" style="cursor:pointer"><span class="nav-dot" style="background:var(--muted)"></span> Phase 3 · Metals</div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 4')" style="cursor:pointer"><span class="nav-dot" style="background:var(--amber)"></span> Phase 4 · Gold</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Research</div>
@@ -365,8 +262,8 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         </div>
         <div class="metric-card red">
           <div class="m-label">30-Yr Treasury</div>
-          <div class="m-val" id="treasury-val">—</div>
-          <div class="m-sub warn" id="treasury-sub">Loading...</div>
+          <div class="m-val" id="tsy-val">—</div>
+          <div class="m-sub" id="tsy-sub">Loading...</div>
         </div>
         <div class="metric-card blue">
           <div class="m-label">Active Watch Items</div>
@@ -408,29 +305,13 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       <!-- Two Column -->
       <div class="two-col">
 
-        <!-- Top Research Items -->
+        <!-- Phase 1 Holdings -->
         <div class="panel">
           <div class="panel-header">
-            <div class="panel-title">Top Research Items</div>
-            <div style="display:flex;gap:5px;">
-              <button class="top-toggle active" id="toggle-tickers" onclick="switchTopView('tickers')">Tickers</button>
-              <button class="top-toggle" id="toggle-themes" onclick="switchTopView('themes')">Themes</button>
-            </div>
+            <div class="panel-title">Phase 1 Holdings</div>
+            <div class="panel-count" id="holdings-count">Loading...</div>
           </div>
-          <div id="top-search-row" style="display:none;padding:8px 12px;border-bottom:1px solid var(--border);">
-            <div style="display:flex;gap:6px;">
-              <input type="text" id="ticker-search-input" placeholder="Enter ticker (e.g. CEG)" style="flex:1;height:30px;font-size:12px;padding:4px 8px;" onkeydown="if(event.key==='Enter')searchTicker()">
-              <button onclick="searchTicker()" style="padding:4px 12px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--sans);">Search</button>
-              <button onclick="clearTickerSearch()" style="padding:4px 10px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Clear</button>
-            </div>
-          </div>
-          <div id="top5-list"><div class="loading">Loading...</div></div>
-          <div id="more-themes-row" style="display:none;border-top:1px solid var(--border);">
-            <div id="more-themes-toggle" onclick="toggleMoreThemes()" style="padding:9px 16px;font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;">
-              <span id="more-themes-arrow">▼</span> More themes
-            </div>
-            <div id="more-themes-list" style="display:none;"></div>
-          </div>
+          <div id="holdings-list"><div class="loading">Fetching from portfolio...</div></div>
         </div>
 
         <!-- Watch Items -->
@@ -447,70 +328,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
   </div>
 </div>
 
-<!-- Phase Overlay -->
-<div class="phase-overlay" id="phase-overlay">
-  <div class="phase-box">
-    <div class="phase-box-header">
-      <div>
-        <div class="phase-box-title" id="phase-overlay-title">Phase 1 — Energy / LNG</div>
-        <div class="phase-box-sub" id="phase-overlay-sub">Loading...</div>
-      </div>
-      <button class="modal-close" id="phase-overlay-close">Close ✕</button>
-    </div>
-    <div class="phase-box-body">
-      <div class="phase-thesis" id="phase-thesis-panel">
-        <div class="phase-thesis-label">Phase Thesis</div>
-        <div id="phase-thesis-content"><p style="color:var(--dim);font-style:italic">Loading thesis...</p></div>
-      </div>
-      <div class="phase-securities">
-        <div class="phase-sec-header">
-          <div class="phase-sec-col"></div>
-          <div class="phase-sec-col">Ticker</div>
-          <div class="phase-sec-col">Name</div>
-          <div class="phase-sec-col" style="text-align:right;padding-right:8px">Entry</div>
-          <div class="phase-sec-col" style="text-align:right;padding-right:8px">Value</div>
-          <div class="phase-sec-col" style="text-align:right;padding-right:8px">P&amp;L</div>
-          <div class="phase-sec-col" style="text-align:right;padding-right:8px">Weight</div>
-        </div>
-        <div id="phase-securities-list"><div class="loading" style="padding:20px">Loading securities...</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Research Summary Modal -->
-<div class="summary-overlay" id="summary-modal">
-  <div class="summary-box">
-    <div class="summary-header">
-      <div>
-        <div class="summary-title" id="summary-title">Research Summary</div>
-        <div class="summary-sub" id="summary-sub">Synthesized from database</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button class="btn-font-toggle" id="summary-font-btn">A+</button>
-        <button class="btn-copy" id="summary-copy-btn">Copy</button>
-        <button class="modal-close" id="summary-close-btn">Close ✕</button>
-      </div>
-    </div>
-    <div class="summary-body" id="summary-body"><p class="placeholder">Loading...</p></div>
-  </div>
-</div>
-
-<!-- Watch Item Detail Modal -->
-<div class="wi-detail-overlay" id="wi-detail-modal">
-  <div class="wi-detail-box">
-    <div class="wi-detail-header">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase">Watch Item Detail</div>
-      <button class="modal-close" id="wi-detail-close">Close ✕</button>
-    </div>
-    <div class="wi-detail-body" id="wi-detail-body"></div>
-    <div class="wi-detail-footer">
-      <button class="btn-wi-complete" id="wi-complete-btn">Mark Complete</button>
-      <button class="btn-wi-kill" id="wi-kill-btn">Kill</button>
-    </div>
-  </div>
-</div>
-
 <!-- Research Intake Modal -->
 <div class="modal-overlay" id="intake-modal">
   <div class="modal-box">
@@ -521,7 +338,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <span class="signal-badge" id="signal-badge"></span>
-        <button class="btn-font-toggle" id="font-toggle-btn">A+</button>
         <button class="modal-close" id="intake-close-btn">Close ✕</button>
       </div>
     </div>
@@ -540,24 +356,14 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         </div>
         <button class="btn-primary" id="intake-analyze-btn">Analyze with Claude →</button>
         <div class="intake-status" id="intake-status">Ready — paste article and analyze</div>
-        <div class="intake-progress" id="intake-progress"><div class="intake-progress-bar" id="intake-progress-bar"></div></div>
       </div>
       <div class="modal-right">
         <div class="modal-output" id="intake-output">
           <p class="placeholder">Analysis will appear here after you submit an article.</p>
         </div>
-        <div class="chat-area" id="intake-chat-area">
-          <div class="chat-messages" id="intake-chat-messages"></div>
-          <div class="chat-progress" id="chat-progress"><div class="chat-progress-bar"></div></div>
-          <div class="chat-input-row">
-            <textarea id="intake-chat-input" placeholder="Ask a follow-up question about this analysis..." rows="1"></textarea>
-            <button class="btn-chat-send" id="intake-chat-send">Send</button>
-          </div>
-        </div>
         <div class="modal-footer" id="intake-footer">
           <button class="btn-save" id="intake-save-btn">Save to Database</button>
           <button class="btn-kill" id="intake-kill-btn">Kill</button>
-          <button class="chat-toggle" id="intake-chat-toggle">Ask follow-up ↑</button>
           <span class="save-note" id="intake-save-note">Review before saving</span>
         </div>
       </div>
@@ -605,11 +411,11 @@ fomcCountdown();
 
 // Format helpers
 function fmtDollar(v) {
-  if (v == null || v === '' || v === '—') return '—';
-  var n = parseFloat(String(v).replace(/,/g, ''));
+  if (v == null || v === '') return '—';
+  var n = parseFloat(v);
   if (isNaN(n)) return '—';
   if (n >= 1000000000) return '$' + (n/1000000000).toFixed(1) + 'B';
-  if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
   if (n >= 1000) return '$' + (n/1000).toFixed(0) + 'K';
   return '$' + n.toFixed(2);
 }
@@ -629,35 +435,6 @@ function plColor(v) {
   if (v == null) return 'var(--muted)';
   return parseFloat(v) >= 0 ? 'var(--green)' : 'var(--red)';
 }
-
-// Load 30-year Treasury yield from Watch Item 28
-supaFetch('watch_items', { select: 'current_value,last_checked_at', id: 'eq.28', limit: 1 }).then(function(data) {
-  if (!data || !data.length || !data[0].current_value) return;
-  var val = parseFloat(data[0].current_value);
-  if (isNaN(val)) return;
-  var pct = val.toFixed(3) + '%';
-  var card = document.getElementById('treasury-val').closest('.metric-card');
-  document.getElementById('treasury-val').textContent = pct;
-  var trigger = 5.00;
-  var sub = document.getElementById('treasury-sub');
-  if (val >= 5.25) {
-    sub.textContent = 'ABOVE WI-75 threshold 5.25%';
-    sub.className = 'm-sub bad';
-    card.className = card.className.replace(/\b(green|amber|red|blue)\b/, 'red');
-  } else if (val >= 5.00) {
-    sub.textContent = 'Above 5.00% — WI-28 active';
-    sub.className = 'm-sub bad';
-    card.className = card.className.replace(/\b(green|amber|red|blue)\b/, 'red');
-  } else {
-    var bps = Math.round((trigger - val) * 100);
-    sub.textContent = bps + 'bps below 5.00% trigger';
-    sub.className = 'm-sub warn';
-  }
-  if (data[0].last_checked_at) {
-    var checked = new Date(data[0].last_checked_at);
-    sub.textContent += ' · ' + checked.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  }
-}).catch(function() {});
 
 // Load record count
 supaFetch('research_chunks', { select: 'id', limit: 1 });
@@ -686,6 +463,31 @@ supaFetch('portfolio_metrics', { select: 'cash_sleeve_pct,sgov_pct,fduxx_pct,fts
   document.getElementById('sync-time').textContent = syncStr;
   document.getElementById('sync-time').style.color = 'var(--green)';
 }).catch(function() {});
+
+
+// Load 30-yr Treasury yield from Watch Item 28
+supaFetch('watch_items', { select: 'current_value,last_checked_at', id: 'eq.28', limit: 1 }).then(function(data) {
+  if (!data || !data.length || !data[0].current_value) return;
+  var val = parseFloat(data[0].current_value);
+  document.getElementById('tsy-val').textContent = val.toFixed(2) + '%';
+  var trigger = 5.00;
+  var diff = (val - trigger).toFixed(2);
+  var sub = document.getElementById('tsy-sub');
+  if (val >= trigger) {
+    sub.textContent = 'WI-28 TRIGGERED — above 5.00%';
+    sub.className = 'm-sub bad';
+    document.querySelector('.metric-card.red::before') ;
+  } else {
+    sub.textContent = diff + '% from 5.00% trigger';
+    sub.className = 'm-sub warn';
+  }
+  var checked = new Date(data[0].last_checked_at);
+  sub.textContent += ' · ' + checked.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}).catch(function() {
+  document.getElementById('tsy-val').textContent = '5.07%';
+  document.getElementById('tsy-sub').textContent = 'WI-28: above 5.00% trigger';
+  document.getElementById('tsy-sub').className = 'm-sub bad';
+});
 
 // Cash popup
 document.getElementById('cash-card').addEventListener('click', function(e) {
@@ -805,19 +607,13 @@ function toggleHolding(ticker) {
   panel.style.display = 'block';
   var d = holdingsData[ticker] || {};
   var daysHeld = '—';
-  if (d.purchase_date && d.purchase_date !== '—') {
-    var pd = new Date(d.purchase_date);
-    if (isNaN(pd.getTime())) {
-      // Try M/D format without year — assume most recent past occurrence
-      var parts = String(d.purchase_date).split('/');
-      if (parts.length >= 2) {
-        var yr = parts.length >= 3 ? parseInt(parts[2]) : new Date().getFullYear();
-        pd = new Date(yr, parseInt(parts[0])-1, parseInt(parts[1]));
-        if (pd > new Date()) pd.setFullYear(pd.getFullYear() - 1);
-      }
+  if (d.purchase_date) {
+    var parts = String(d.purchase_date).split('/');
+    if (parts.length >= 2) {
+      var pd = new Date(parseInt(parts[2] || 2026), parseInt(parts[0])-1, parseInt(parts[1]));
+      var diff = Math.floor((new Date() - pd) / 86400000);
+      if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
     }
-    var diff = Math.floor((new Date() - pd) / 86400000);
-    if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
   }
   var unrealized = (d.current_value && d.cost_basis) ? parseFloat(d.current_value) - parseFloat(d.cost_basis) : null;
   var cells = [
@@ -857,415 +653,12 @@ supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase
     var meta = wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : (wi.trigger_condition ? wi.trigger_condition.substring(0,45) : 'No date set');
     if (wi.phase_tag) meta += ' · ' + wi.phase_tag;
     var txt = wi.item.length > 70 ? wi.item.substring(0,70) + '…' : wi.item;
-    return '<div class="wi-row" id="wi-row-' + wi.id + '" onclick=\'openWiDetail(' + JSON.stringify({id:wi.id,item:wi.item,trigger_date:wi.trigger_date,trigger_condition:wi.trigger_condition,phase_tag:wi.phase_tag,owner:wi.owner,status:wi.status}) + ')\'><div class="wi-num">WI-' + wi.id + '</div><div class="wi-content"><div class="wi-text">' + txt + '</div><div class="wi-meta">' + meta + '</div></div><div class="wi-badge ' + badgeCls + '">' + badgeTxt + '</div></div>';
+    return '<div class="wi-row"><div class="wi-num">WI-' + wi.id + '</div><div class="wi-content"><div class="wi-text">' + txt + '</div><div class="wi-meta">' + meta + '</div></div><div class="wi-badge ' + badgeCls + '">' + badgeTxt + '</div></div>';
   }).join('');
   document.getElementById('wi-list').innerHTML = html;
 }).catch(function(e) {
   document.getElementById('wi-list').innerHTML = '<div class="error-msg">Could not load: ' + e.message + '</div>';
 });
-
-// Load Top Research Items — tickers default
-var currentTopView = 'tickers';
-
-function switchTopView(view) {
-  currentTopView = view;
-  document.getElementById('toggle-tickers').classList.toggle('active', view === 'tickers');
-  document.getElementById('toggle-themes').classList.toggle('active', view === 'themes');
-  document.getElementById('top-search-row').style.display = view === 'tickers' ? 'block' : 'none';
-  document.getElementById('more-themes-row').style.display = 'none';
-  document.getElementById('more-themes-list').style.display = 'none';
-  document.getElementById('ticker-search-input') && (document.getElementById('ticker-search-input').value = '');
-  document.getElementById('top5-list').innerHTML = '<div class="loading">Loading...</div>';
-  loadTopItems(view);
-}
-
-function loadTopItems(view) {
-  var endpoint = view === 'tickers' ? 'top_research_tags' : 'top_theme_tags';
-  var limit = view === 'themes' ? 30 : 10;
-  fetch(SUPA_URL + '/rest/v1/rpc/' + endpoint, {
-    method: 'POST',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tag_limit: limit })
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    renderTopItems(data, view);
-  }).catch(function() {
-    if (view === 'tickers') {
-      renderTopItems([
-        {tag:'LNG',frequency:186},{tag:'WMB',frequency:156},{tag:'EOG',frequency:156},
-        {tag:'CEG',frequency:145},{tag:'EPD',frequency:145},{tag:'VST',frequency:142},
-        {tag:'NEXT',frequency:134},{tag:'GLD',frequency:111},{tag:'INSW',frequency:89},{tag:'CF',frequency:82}
-      ], view);
-    } else {
-      renderTopItems([
-        {tag:'Hormuz',frequency:76},{tag:'macro',frequency:64},{tag:'stagflation',frequency:50},
-        {tag:'LNG export',frequency:44},{tag:'Phase 2',frequency:43}
-      ], view);
-    }
-  });
-}
-
-function renderTopItems(data, view) {
-  if (!data || !data.length) { document.getElementById('top5-list').innerHTML = '<div class="loading">No data</div>'; return; }
-  var top = data.slice(0, 10);
-  var max = top[0].frequency;
-  var html = top.map(function(item, i) {
-    var pct = Math.round((item.frequency / max) * 100);
-    var rawLabel = item.tag.replace(/_/g, ' ');
-    var displayLabel = view === 'themes' ? rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1) : rawLabel;
-    var label = displayLabel.length > 22 ? displayLabel.substring(0,22) + '…' : displayLabel;
-    return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'' + view + '\')">' +
-      '<div class="top5-rank">' + (i+1) + '</div>' +
-      '<div class="top5-ticker" style="width:' + (view === 'themes' ? '130px' : '46px') + ';font-size:' + (view === 'themes' ? '11px' : '13px') + '">' + label + '</div>' +
-      '<div class="top5-bar-wrap"><div class="top5-bar" style="width:' + pct + '%"></div></div>' +
-      '<div class="top5-count">' + item.frequency + '</div>' +
-      '</div>';
-  }).join('');
-  document.getElementById('top5-list').innerHTML = html;
-
-  // Show more themes button if there are extras
-  if (view === 'themes' && data.length > 10) {
-    var extras = data.slice(10);
-    document.getElementById('more-themes-row').style.display = 'block';
-    var extraHtml = extras.map(function(item, i) {
-      var rawLabel = item.tag.replace(/_/g, ' ');
-      var displayLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
-      var label = displayLabel.length > 22 ? displayLabel.substring(0,22) + '…' : displayLabel;
-      return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'themes\')">' +
-        '<div class="top5-rank">' + (i+11) + '</div>' +
-        '<div class="top5-ticker" style="width:130px;font-size:11px">' + label + '</div>' +
-        '<div class="top5-bar-wrap"><div class="top5-bar" style="width:' + Math.round((item.frequency / max) * 100) + '%"></div></div>' +
-        '<div class="top5-count">' + item.frequency + '</div>' +
-        '</div>';
-    }).join('');
-    document.getElementById('more-themes-list').innerHTML = extraHtml;
-  } else {
-    document.getElementById('more-themes-row').style.display = 'none';
-  }
-}
-
-function toggleMoreThemes() {
-  var list = document.getElementById('more-themes-list');
-  var arrow = document.getElementById('more-themes-arrow');
-  var isOpen = list.style.display !== 'none';
-  list.style.display = isOpen ? 'none' : 'block';
-  arrow.textContent = isOpen ? '▼' : '▲';
-  document.getElementById('more-themes-toggle').querySelector('span:last-child') &&
-    (document.getElementById('more-themes-toggle').lastChild.textContent = isOpen ? ' More themes' : ' Less themes');
-}
-
-function searchTicker() {
-  var input = document.getElementById('ticker-search-input').value.trim().toUpperCase();
-  if (!input) return;
-  openSummary(input, 'tickers');
-}
-
-function clearTickerSearch() {
-  document.getElementById('ticker-search-input').value = '';
-  loadTopItems('tickers');
-}
-
-// Initial load
-document.getElementById('top-search-row').style.display = 'block';
-loadTopItems('tickers');
-
-// Phase definitions
-var PHASE_CONFIG = {
-  'Phase 1': {
-    title: 'Phase 1 — Energy / LNG',
-    color: 'var(--green)',
-    tickers: ['LNG','NEXT','EOG','WMB','EPD','CF','INSW'],
-    thesisTag: 'Phase 1',
-    summary: 'Hormuz closure thesis: U.S. energy producers, midstream infrastructure, LNG exporters, and nitrogen fertilizer producers positioned to outperform through mine clearance timeline (6+ months) and Ras Laffan repair window (3–5 years).'
-  },
-  'Phase 2': {
-    title: 'Phase 2 — Power / Grid',
-    color: 'var(--blue)',
-    tickers: ['CEG','VST','ETN','VRT','ABBNY'],
-    thesisTag: 'Phase 2',
-    summary: 'AI compute demand driving structural power deficit. Positioned at the power infrastructure input layer — electricity generators and electrical equipment manufacturers. June 17 Warsh FOMC is the next deployment gate.'
-  },
-  'Phase 3': {
-    title: 'Phase 3 — Critical Metals',
-    color: 'var(--muted)',
-    tickers: ['FCX','SCCO','CCJ'],
-    thesisTag: 'Phase 3',
-    summary: 'Critical minerals thesis. Copper (FCX, SCCO) and uranium (CCJ). Crowding risk active. No adds pending Phase 3 confirmation triggers.'
-  },
-  'Phase 4': {
-    title: 'Phase 4 — Monetary / Gold',
-    color: 'var(--amber)',
-    tickers: ['GLD','PSLV'],
-    thesisTag: 'Phase 4',
-    summary: 'Monetary reset hedge. GLD ~10.01% total (9% core + ~1.01% dry powder). Mental accounting: 9% = core position, above 9% = dry powder deployed into better asset class than cash.'
-  }
-};
-
-document.getElementById('phase-overlay-close').addEventListener('click', function() {
-  document.getElementById('phase-overlay').classList.remove('open');
-  activePhaseSecTicker = null;
-});
-document.getElementById('phase-overlay').addEventListener('click', function(e) {
-  if (e.target === this) { this.classList.remove('open'); activePhaseSecTicker = null; }
-});
-
-function openPhaseOverlay(phase) {
-  var cfg = PHASE_CONFIG[phase];
-  if (!cfg) return;
-  activePhaseSecTicker = null;
-  document.getElementById('phase-overlay-title').textContent = cfg.title;
-  document.getElementById('phase-overlay-sub').textContent = cfg.tickers.join(' · ');
-  document.getElementById('phase-thesis-content').innerHTML = '<p>' + cfg.summary + '</p><p style="color:var(--dim);font-style:italic;font-size:11px">Loading database synthesis...</p>';
-  document.getElementById('phase-securities-list').innerHTML = '<div class="loading" style="padding:20px">Loading securities...</div>';
-  document.getElementById('phase-overlay').classList.add('open');
-
-  // Load holdings data for this phase
-  var today = new Date().toISOString().split('T')[0];
-  var tickerFilter = 'in.(' + cfg.tickers.join(',') + ')';
-  supaFetch('holdings_detail', {
-    select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date',
-    metric_date: 'eq.' + today,
-    ticker: tickerFilter,
-    order: 'ticker.asc'
-  }).then(function(data) {
-    var dataMap = {};
-    // Seed with known data first
-    cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
-    // Overlay live data where available
-    if (data && data.length) data.forEach(function(r) { dataMap[r.ticker] = r; });
-    renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
-  }).catch(function() {
-    var dataMap = {};
-    cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
-    renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
-  });
-
-  // Pull thesis synthesis from database
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"' + cfg.thesisTag + '"}&select=content&order=created_at.desc&limit=5', {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-  }).then(function(r) { return r.json(); }).then(function(records) {
-    if (!records || !records.length) return;
-    var context = records.map(function(r,i) { return (i+1)+'. '+(r.content||'').substring(0,600); }).join('\n\n');
-    fetch(SUPA_URL + '/functions/v1/analyze-article', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
-      body: JSON.stringify({ mode: 'chat', conversation: [{
-        role: 'user',
-        content: 'Synthesize these recent KMWM analysis records for ' + phase + ':\n\n' + context + '\n\nProvide a concise 3-4 paragraph thesis summary covering: current thesis status, key drivers, active risks, and next catalyst. Bold KMWM conclusions. Be direct and terse.'
-      }]})
-    }).then(function(r) { return r.json(); }).then(function(data) {
-      var reply = data.analysis || cfg.summary;
-      document.getElementById('phase-thesis-content').innerHTML = '<p>' + reply
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
-        .replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>';
-    });
-  });
-}
-
-// Known holdings data sourced from Google Sheets (updated from live spreadsheet)
-var KNOWN_HOLDINGS = {
-  'CEG': { name:'Constellation Energy', entry_price:'278.86', cost_basis:'2800856', current_value:'2666456', pl_pct:'-0.0480', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
-  'VST': { name:'Vistra Corp', entry_price:'160.90', cost_basis:'4159592', current_value:'4000815', pl_pct:'-0.0382', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
-  'ETN': { name:'Eaton', entry_price:'342.96', cost_basis:'4773033', current_value:'5567909', pl_pct:'0.1666', alloc_pct:'0.0300', purchase_date:'8/27/2024' },
-  'VRT': { name:'Vertiv Holdings', entry_price:'174.66', cost_basis:'1335222', current_value:'1726326', pl_pct:'0.0000', alloc_pct:'0.0213', purchase_date:'9/5/2024' },
-  'ABBNY': { name:'ABB Ltd', entry_price:'73.09', cost_basis:'2645331', current_value:'3867436', pl_pct:'0.4619', alloc_pct:'0.0150', purchase_date:'11/10/2024' },
-  'FCX': { name:'Freeport-McMoRan', entry_price:'49.19', cost_basis:'5369694', current_value:'7317993', pl_pct:'0.3629', alloc_pct:'0.0400', purchase_date:'10/30/2025' },
-  'SCCO': { name:'Southern Copper', entry_price:'142.62', cost_basis:'1504493', current_value:'1953403', pl_pct:'0.0000', alloc_pct:'0.0100', purchase_date:'10/30/2025' },
-  'CCJ': { name:'Cameco', entry_price:'88.46', cost_basis:'4112207', current_value:'5233810', pl_pct:'0.2728', alloc_pct:'0.0301', purchase_date:'8/27/2025' },
-  'GLD': { name:'SPDR Gold Shares', entry_price:'334.37', cost_basis:'12539804', current_value:'15423484', pl_pct:'0.2300', alloc_pct:'0.1001', purchase_date:'—' },
-  'PSLV': { name:'Sprott Physical Silver', entry_price:'21.91', cost_basis:'10063641', current_value:'10923509', pl_pct:'0.0853', alloc_pct:'0.0730', purchase_date:'12/9/2025' },
-  'CAT': { name:'Caterpillar', entry_price:'707.38', cost_basis:'3426984', current_value:'4192358', pl_pct:'0.2233', alloc_pct:'0.0200', purchase_date:'—' },
-  'RTX': { name:'RTX Corp', entry_price:'197.32', cost_basis:'3451940', current_value:'3051115', pl_pct:'-0.1161', alloc_pct:'0.0200', purchase_date:'3/17/2025' },
-  'WMT': { name:'Walmart', entry_price:'93.40', cost_basis:'4138688', current_value:'5078046', pl_pct:'0.2270', alloc_pct:'0.0275', purchase_date:'—' }
-};
-
-function renderPhaseSecurities(tickers, dataMap, color) {
-  var html = tickers.map(function(ticker) {
-    var d = dataMap[ticker] || {};
-    var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
-    var plTxt = pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—';
-    var plCls = pl != null ? (pl >= 0 ? 'pos' : 'neg') : '';
-    var alloc = d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—';
-    var val = fmtDollar(d.current_value);
-    var entry = fmtDollar(d.entry_price);
-    return '<div class="phase-sec-row" id="psrow-' + ticker + '" onclick="togglePhaseSec(\'' + ticker + '\')">' +
-      '<div><div class="phase-sec-dot" style="background:' + color + '"></div></div>' +
-      '<div class="phase-sec-ticker">' + ticker + '</div>' +
-      '<div class="phase-sec-name">' + (d.name || ticker) + '</div>' +
-      '<div class="phase-sec-val">' + entry + '</div>' +
-      '<div class="phase-sec-val">' + val + '</div>' +
-      '<div class="phase-sec-pl ' + plCls + '">' + plTxt + '</div>' +
-      '<div class="phase-sec-val">' + alloc + '</div>' +
-      '</div>' +
-      '<div class="phase-sec-detail" id="psdetail-' + ticker + '">' +
-        renderPhaseSecDetail(ticker, d) +
-      '</div>';
-  }).join('');
-  document.getElementById('phase-securities-list').innerHTML = html;
-}
-
-function renderPhaseSecDetail(ticker, d) {
-  var daysHeld = '—';
-  if (d.purchase_date) {
-    var parts = String(d.purchase_date).split('/');
-    if (parts.length >= 2) {
-      var pd = new Date(parseInt(parts[2]||2026), parseInt(parts[0])-1, parseInt(parts[1]));
-      var diff = Math.floor((new Date() - pd) / 86400000);
-      if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
-    }
-  }
-  var cv = d.current_value ? parseFloat(String(d.current_value).replace(/,/g,'')) : null;
-  var cb = d.cost_basis ? parseFloat(String(d.cost_basis).replace(/,/g,'')) : null;
-  var unrealized = (cv && cb && !isNaN(cv) && !isNaN(cb)) ? cv - cb : null;
-  var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
-  var cells = [
-    ['Entry Price', fmtDollar(d.entry_price)],
-    ['Cost Basis', fmtDollar(d.cost_basis)],
-    ['Current Value', fmtDollar(d.current_value)],
-    ['Unrealized G/L', unrealized != null ? (unrealized >= 0 ? '+' : '') + fmtDollar(unrealized) : '—'],
-    ['P / L %', pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—'],
-    ['Weight', d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—'],
-    ['Purchase Date', d.purchase_date || '—'],
-    ['Holding Period', daysHeld]
-  ];
-  return '<div class="phase-detail-grid">' + cells.map(function(c) {
-    return '<div class="phase-detail-cell"><div class="phase-detail-label">' + c[0] + '</div><div class="phase-detail-val">' + c[1] + '</div></div>';
-  }).join('') + '</div>';
-}
-
-function togglePhaseSec(ticker) {
-  if (activePhaseSecTicker && activePhaseSecTicker !== ticker) {
-    document.getElementById('psdetail-' + activePhaseSecTicker).classList.remove('open');
-    document.getElementById('psrow-' + activePhaseSecTicker).classList.remove('expanded');
-  }
-  var detail = document.getElementById('psdetail-' + ticker);
-  var row = document.getElementById('psrow-' + ticker);
-  var isOpen = detail.classList.contains('open');
-  detail.classList.toggle('open', !isOpen);
-  row.classList.toggle('expanded', !isOpen);
-  activePhaseSecTicker = isOpen ? null : ticker;
-}
-
-// Summary modal controls
-document.getElementById('summary-close-btn').addEventListener('click', function() {
-  document.getElementById('summary-modal').classList.remove('open');
-});
-document.getElementById('summary-modal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-});
-document.getElementById('summary-font-btn').addEventListener('click', function() {
-  var body = document.getElementById('summary-body');
-  var isLarge = body.classList.contains('large-text');
-  body.classList.toggle('large-text', !isLarge);
-  this.textContent = isLarge ? 'A+' : 'A−';
-  this.classList.toggle('active', !isLarge);
-});
-document.getElementById('summary-copy-btn').addEventListener('click', function() {
-  var body = document.getElementById('summary-body');
-  var text = body.innerText || body.textContent;
-  navigator.clipboard.writeText(text).then(function() {
-    var btn = document.getElementById('summary-copy-btn');
-    btn.textContent = 'Copied ✓';
-    btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-  });
-});
-
-// Watch item detail modal
-var activeWiId = null;
-document.getElementById('wi-detail-close').addEventListener('click', function() {
-  document.getElementById('wi-detail-modal').classList.remove('open');
-});
-document.getElementById('wi-detail-modal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-});
-document.getElementById('wi-complete-btn').addEventListener('click', function() {
-  if (!activeWiId) return;
-  fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
-    method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ status: 'completed' })
-  }).then(function() {
-    document.getElementById('wi-detail-modal').classList.remove('open');
-    document.getElementById('wi-row-' + activeWiId) && document.getElementById('wi-row-' + activeWiId).remove();
-  });
-});
-document.getElementById('wi-kill-btn').addEventListener('click', function() {
-  if (!activeWiId) return;
-  if (!confirm('Kill watch item WI-' + activeWiId + '? This cannot be undone.')) return;
-  fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
-    method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ status: 'killed' })
-  }).then(function() {
-    document.getElementById('wi-detail-modal').classList.remove('open');
-    document.getElementById('wi-row-' + activeWiId) && document.getElementById('wi-row-' + activeWiId).remove();
-  });
-});
-
-function openWiDetail(wi) {
-  activeWiId = wi.id;
-  var fields = [
-    ['ID', 'WI-' + wi.id],
-    ['Item', wi.item],
-    ['Trigger Date', wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—'],
-    ['Trigger Condition', wi.trigger_condition || '—'],
-    ['Phase', wi.phase_tag || '—'],
-    ['Owner', wi.owner || '—'],
-    ['Status', wi.status]
-  ];
-  document.getElementById('wi-detail-body').innerHTML = fields.map(function(f) {
-    return '<div class="wi-detail-field"><div class="wi-detail-label">' + f[0] + '</div><div class="wi-detail-val">' + (f[1] || '—') + '</div></div>';
-  }).join('');
-  document.getElementById('wi-detail-modal').classList.add('open');
-}
-
-function openSummary(tag, view) {
-  var isTheme = view === 'themes';
-  document.getElementById('summary-title').textContent = tag + ' — Research Summary';
-  document.getElementById('summary-sub').textContent = 'Synthesizing from database...';
-  document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading analysis records...</p>';
-  document.getElementById('summary-modal').classList.add('open');
-
-  // Build query — tickers use company_tags, themes use topic_tags
-  var filterParam = isTheme
-    ? 'topic_tags=cs.{"' + tag + '"}'
-    : 'company_tags=cs.{"' + tag + '"}';
-
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&' + filterParam + '&select=content,created_at&order=created_at.desc&limit=20', {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-  }).then(function(r) { return r.json(); }).then(function(records) {
-    if (!records || !records.length) {
-      document.getElementById('summary-body').innerHTML = '<p>No analysis records found for ' + tag + '.</p>';
-      return;
-    }
-    var totalRefs = document.querySelector('.top5-row[onclick*="' + tag.replace(/'/g,"\\'") + '"] .top5-count');
-    var totalCount = totalRefs ? totalRefs.textContent : '?';
-    document.getElementById('summary-sub').textContent = records.length + ' of ' + totalCount + ' records · Generating summary...';
-    var context = records.map(function(r, i) { return (i+1) + '. ' + (r.content || '').substring(0, 800); }).join('\n\n');
-    fetch(SUPA_URL + '/functions/v1/analyze-article', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
-      body: JSON.stringify({
-        mode: 'chat',
-        conversation: [{
-          role: 'user',
-          content: 'Here are the most recent KMWM analysis records mentioning "' + tag + '":\n\n' + context + '\n\nSynthesize these into a concise research summary for "' + tag + '". Cover: (1) what the collective research says about this ' + (isTheme ? 'theme' : 'company') + ', (2) key thesis points that recur, (3) any tensions or risks flagged, (4) current portfolio relevance. Be direct and terse. Use bold for KMWM conclusions.'
-        }]
-      })
-    }).then(function(r) { return r.json(); }).then(function(data) {
-      var reply = data.analysis || data.reply || 'No summary generated.';
-      document.getElementById('summary-sub').textContent = records.length + ' most recent records synthesized';
-      document.getElementById('summary-body').innerHTML = '<p>' + reply
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
-        .replace(/\n\n/g,'</p><p>')
-        .replace(/\n/g,'<br>') + '</p>';
-    });
-  }).catch(function(e) {
-    document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
-  });
-}
 
 // Research Intake Modal
 var intakeAnalysis = '';
@@ -1287,19 +680,11 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
   if (!article) { setIntakeStatus('Please paste article text first.', 'error'); return; }
   intakeArticle = article;
   intakeAnalysis = '';
-  intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
-  document.getElementById('intake-chat-messages').innerHTML = '';
-  document.getElementById('intake-chat-area').classList.remove('visible');
-  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
   document.getElementById('intake-analyze-btn').disabled = true;
   document.getElementById('intake-footer').classList.remove('visible');
   document.getElementById('signal-badge').style.display = 'none';
   document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analyzing with Claude...</p>';
   setIntakeStatus('Sending to Claude...', 'active');
-  var prog = document.getElementById('intake-progress');
-  var progBar = document.getElementById('intake-progress-bar');
-  prog.classList.add('visible');
-  progBar.classList.add('indeterminate');
   var sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management. Analyze research documents using the KMWM framework. Determine the source and phase yourself from the content. Format your response with these sections: SIGNAL RATING (include SIGNAL TIER: ACT or READ or FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT with phase and tickers), then Section 1 Article Summary, Section 2 Executive Overview, Section 3 Strong Points (KMWM conclusions in bold), Section 4 Weak Points, Section 5 Additional Thoughts, Section 6 KMWM Portfolio Verdict. Author: ' + author + '. Spell out all abbreviations on first use.';
   fetch(SUPA_URL + '/functions/v1/analyze-article', {
     method: 'POST',
@@ -1330,10 +715,6 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
     setIntakeStatus('Error: ' + e.message, 'error');
   }).finally(function() {
     document.getElementById('intake-analyze-btn').disabled = false;
-    var prog = document.getElementById('intake-progress');
-    var progBar = document.getElementById('intake-progress-bar');
-    progBar.classList.remove('indeterminate');
-    prog.classList.remove('visible');
   });
 });
 
@@ -1368,22 +749,14 @@ function setIntakeStatus(msg, type) {
 document.getElementById('intake-save-btn').addEventListener('click', function() {
   var author = document.getElementById('intake-author').value;
   var dateStr = new Date().toISOString().split('T')[0];
-  // Derive source from analysis text or fall back to 'research-intake'
-  var sourceRaw = 'research-intake';
-  var srcMatch = intakeAnalysis.match(/source[:\s]+([^\n]{3,40})/i);
-  if (srcMatch) sourceRaw = srcMatch[1].trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g,'').substring(0,30);
-  // Derive phase tag
-  var phaseTag = 'phase-1';
-  if (/phase 2/i.test(intakeAnalysis)) phaseTag = 'phase-2';
-  else if (/phase 3/i.test(intakeAnalysis)) phaseTag = 'phase-3';
-  var ts = Date.now().toString().slice(-6); var slug = (sourceRaw + '-' + dateStr + '-' + ts).substring(0, 60);
-  var fileName = sourceRaw + ' \u2014 ' + new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+  var slug = (source + '-' + dateStr).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 60);
+  var fileName = source + ' \u2014 ' + new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
   document.getElementById('intake-save-note').textContent = 'Saving...';
   var base = {
     source_file_id: slug, source_file_name: fileName,
     source_folder: 'Research Intake', company_tags: '{}',
-    topic_tags: '{"author: ' + author + '","source: ' + sourceRaw + '","' + phaseTag + '"}',
-    portfolio_impact_tags: '{"' + phaseTag + '"}',
+    topic_tags: '{"author: ' + author + '","source: ' + source + '","' + phase + '"}',
+    portfolio_impact_tags: '{"' + phase + '"}',
     portfolio_status: '{"research"}', research_stage: 'analyzed',
     is_analyzed: true, read_by_steve: author === 'Steve', read_by_michael: author === 'Michael'
   };
@@ -1397,19 +770,8 @@ document.getElementById('intake-save-btn').addEventListener('click', function() 
       document.getElementById('intake-output').innerHTML += '<div class="success-banner">\u2713 Records committed to database</div>';
       setIntakeStatus('Saved to database', 'active');
       document.getElementById('intake-text').value = '';
-      intakeParentSlug = slug; // set parent so any pending thread records link correctly
+      
       intakeArticle = ''; intakeAnalysis = '';
-      // Auto-close modal after 2 seconds
-      setTimeout(function() {
-        document.getElementById('intake-modal').classList.remove('open');
-        document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analysis will appear here after you submit an article.</p>';
-        document.getElementById('signal-badge').style.display = 'none';
-        document.getElementById('intake-chat-messages').innerHTML = '';
-        document.getElementById('intake-chat-area').classList.remove('visible');
-        document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
-        setIntakeStatus('Ready \u2014 paste article and analyze');
-        intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
-      }, 2000);
       return;
     }
     fetch(SUPA_URL + '/rest/v1/research_chunks', {
@@ -1417,115 +779,19 @@ document.getElementById('intake-save-btn').addEventListener('click', function() 
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify(records[i])
     }).then(function(r) {
-      if (!r.ok) { r.text().then(function(t) { document.getElementById('intake-save-note').textContent = 'Error: ' + t.substring(0,80); }); return; }
+      if (!r.ok) { r.text().then(function(t) { document.getElementById('intake-save-note').textContent = 'Error: ' + t.substring(0,60); }); return; }
       saveNext(i + 1);
     }).catch(function(e) { document.getElementById('intake-save-note').textContent = 'Error: ' + e.message; });
   };
   saveNext(0);
 });
 
-// Font size toggle
-document.getElementById('font-toggle-btn').addEventListener('click', function() {
-  var output = document.getElementById('intake-output');
-  var isLarge = output.classList.contains('large-text');
-  output.classList.toggle('large-text', !isLarge);
-  this.textContent = isLarge ? 'A+' : 'A−';
-  this.classList.toggle('active', !isLarge);
-});
-
-// Chat toggle
-document.getElementById('intake-chat-toggle').addEventListener('click', function() {
-  var area = document.getElementById('intake-chat-area');
-  var isOpen = area.classList.contains('visible');
-  area.classList.toggle('visible', !isOpen);
-  this.textContent = isOpen ? 'Ask follow-up \u2191' : 'Ask follow-up \u2193';
-});
-
-// Chat send
-var intakeChatHistory = [];
-var intakeThreadIndex = 0;
-var intakeParentSlug = '';
-
-document.getElementById('intake-chat-send').addEventListener('click', sendChatMessage);
-document.getElementById('intake-chat-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
-});
-
-function saveThreadRecord(role, content) {
-  if (!intakeParentSlug) return; // no parent yet — will save when user clicks Save
-  fetch(SUPA_URL + '/rest/v1/research_threads', {
-    method: 'POST',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ parent_source_file_id: intakeParentSlug, thread_index: intakeThreadIndex++, role: role, content: content })
-  }).catch(function() {}); // silent — don't interrupt the UI on thread save failure
-}
-
-function sendChatMessage() {
-  var input = document.getElementById('intake-chat-input');
-  var msg = input.value.trim();
-  if (!msg) return;
-  if (!intakeAnalysis) { appendChatMsg('assistant', 'Please run an analysis first before asking follow-up questions.'); return; }
-  input.value = '';
-  appendChatMsg('user', msg);
-  saveThreadRecord('user', msg);
-  document.getElementById('intake-chat-send').disabled = true;
-  document.getElementById('chat-progress').classList.add('visible');
-
-  // Build message history — first message injects full article + analysis as context
-  if (intakeChatHistory.length === 0) {
-    intakeChatHistory.push({
-      role: 'user',
-      content: 'Here is the article I submitted:\n\n' + intakeArticle + '\n\n---\n\nHere is the KMWM analysis you produced:\n\n' + intakeAnalysis + '\n\n---\n\nNow I have a follow-up question: ' + msg
-    });
-  } else {
-    intakeChatHistory.push({ role: 'user', content: msg });
-  }
-
-  // Route through Edge Function to avoid CORS
-  fetch(SUPA_URL + '/functions/v1/analyze-article', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
-    body: JSON.stringify({ mode: 'chat', conversation: intakeChatHistory })
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.error) throw new Error(data.error);
-    var reply = data.analysis || data.reply || 'No response received.';
-    intakeChatHistory.push({ role: 'assistant', content: reply });
-    appendChatMsg('assistant', reply);
-    saveThreadRecord('assistant', reply);
-  }).catch(function(e) {
-    appendChatMsg('assistant', 'Error: ' + e.message);
-  }).finally(function() {
-    document.getElementById('intake-chat-send').disabled = false;
-    document.getElementById('chat-progress').classList.remove('visible');
-  });
-}
-
-function appendChatMsg(role, text) {
-  var container = document.getElementById('intake-chat-messages');
-  var div = document.createElement('div');
-  div.className = 'chat-msg ' + role;
-  // Simple markdown: bold
-  div.innerHTML = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-  container.appendChild(div);
-  if (role === 'assistant') {
-    div.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
-    container.scrollTop = container.scrollHeight;
-  }
-  // Auto-open chat area if not already open
-  document.getElementById('intake-chat-area').classList.add('visible');
-  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2193';
-}
-
 document.getElementById('intake-kill-btn').addEventListener('click', function() {
   document.getElementById('intake-footer').classList.remove('visible');
   document.getElementById('intake-output').innerHTML = '<p class="placeholder">Killed \u2014 not saved. Ready for next article.</p>';
   document.getElementById('signal-badge').style.display = 'none';
   setIntakeStatus('Killed \u2014 not saved');
-  intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
-  document.getElementById('intake-chat-messages').innerHTML = '';
-  document.getElementById('intake-chat-area').classList.remove('visible');
-  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
+  intakeArticle = ''; intakeAnalysis = '';
 });
 </script>
 </body>
