@@ -348,28 +348,11 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
           <textarea id="intake-text" rows="11" placeholder="Paste full article text here..."></textarea>
         </div>
         <div>
-          <div class="field-label">Source</div>
-          <input type="text" id="intake-source" placeholder="WSJ, Bloomberg, Reuters...">
-        </div>
-        <div class="row2">
-          <div>
-            <div class="field-label">Author</div>
-            <select id="intake-author">
-              <option value="Steve">Steve</option>
-              <option value="Michael">Michael</option>
-            </select>
-          </div>
-          <div>
-            <div class="field-label">Phase</div>
-            <select id="intake-phase">
-              <option value="Phase 1">Phase 1</option>
-              <option value="Phase 2">Phase 2</option>
-              <option value="Phase 3">Phase 3</option>
-              <option value="Phase 4">Phase 4</option>
-              <option value="macro">Macro</option>
-              <option value="general">General</option>
-            </select>
-          </div>
+          <div class="field-label">Author</div>
+          <select id="intake-author">
+            <option value="Steve">Steve</option>
+            <option value="Michael">Michael</option>
+          </select>
         </div>
         <button class="btn-primary" id="intake-analyze-btn">Analyze with Claude →</button>
         <div class="intake-status" id="intake-status">Ready — paste article and analyze</div>
@@ -668,9 +651,7 @@ document.getElementById('intake-modal').addEventListener('click', function(e) {
 
 document.getElementById('intake-analyze-btn').addEventListener('click', function() {
   var article = document.getElementById('intake-text').value.trim();
-  var source = document.getElementById('intake-source').value.trim() || 'Unknown';
   var author = document.getElementById('intake-author').value;
-  var phase = document.getElementById('intake-phase').value;
   if (!article) { setIntakeStatus('Please paste article text first.', 'error'); return; }
   intakeArticle = article;
   intakeAnalysis = '';
@@ -679,7 +660,7 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
   document.getElementById('signal-badge').style.display = 'none';
   document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analyzing with Claude...</p>';
   setIntakeStatus('Sending to Claude...', 'active');
-  var sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management. Analyze research documents using the KMWM framework. Format your response with these sections: SIGNAL RATING (include SIGNAL TIER: ACT or READ or FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT), then Section 1 Article Summary, Section 2 Executive Overview, Section 3 Strong Points (KMWM conclusions in bold), Section 4 Weak Points, Section 5 Additional Thoughts, Section 6 KMWM Portfolio Verdict. Source: ' + source + '. Author: ' + author + '. Phase: ' + phase + '. Spell out all abbreviations on first use.';
+  var sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management. Analyze research documents using the KMWM framework. Determine the source and phase yourself from the content. Format your response with these sections: SIGNAL RATING (include SIGNAL TIER: ACT or READ or FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT with phase and tickers), then Section 1 Article Summary, Section 2 Executive Overview, Section 3 Strong Points (KMWM conclusions in bold), Section 4 Weak Points, Section 5 Additional Thoughts, Section 6 KMWM Portfolio Verdict. Author: ' + author + '. Spell out all abbreviations on first use.';
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -748,9 +729,7 @@ function setIntakeStatus(msg, type) {
 }
 
 document.getElementById('intake-save-btn').addEventListener('click', function() {
-  var source = document.getElementById('intake-source').value.trim() || 'Unknown';
   var author = document.getElementById('intake-author').value;
-  var phase = document.getElementById('intake-phase').value;
   var dateStr = new Date().toISOString().split('T')[0];
   var slug = (source + '-' + dateStr).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 60);
   var fileName = source + ' \u2014 ' + new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
@@ -773,7 +752,7 @@ document.getElementById('intake-save-btn').addEventListener('click', function() 
       document.getElementById('intake-output').innerHTML += '<div class="success-banner">\u2713 Records committed to database</div>';
       setIntakeStatus('Saved to database', 'active');
       document.getElementById('intake-text').value = '';
-      document.getElementById('intake-source').value = '';
+      
       intakeArticle = ''; intakeAnalysis = '';
       return;
     }
