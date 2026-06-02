@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KMWM Research Dashboard</title>
@@ -1027,21 +1027,21 @@ function openPhaseOverlay(phase) {
   });
 }
 
-// Known cost basis data from context document — fallback when holdings_detail lacks Phase 2/3/4
+// Known holdings data sourced from Google Sheets (updated from live spreadsheet)
 var KNOWN_HOLDINGS = {
-  'CEG': { name:'Constellation Energy', entry_price:'279.00', cost_basis:'~$279 avg', alloc_pct:'0.0275', purchase_date:'5/7' },
-  'VST': { name:'Vistra', entry_price:'141.00', cost_basis:'~$141 avg', alloc_pct:'0.0275', purchase_date:'5/7' },
-  'ETN': { name:'Eaton', entry_price:'341.00', cost_basis:'~$341 avg', alloc_pct:'0.0300', purchase_date:'3/17' },
-  'VRT': { name:'Vertiv Holdings', entry_price:'172.00', cost_basis:'~$172 avg', alloc_pct:'0.0213', purchase_date:'4/13' },
-  'ABBNY': { name:'ABB Ltd', entry_price:'—', cost_basis:'—', alloc_pct:'0.0150', purchase_date:'—' },
-  'FCX': { name:'Freeport-McMoRan', entry_price:'—', cost_basis:'—', alloc_pct:'0.0400', purchase_date:'—' },
-  'SCCO': { name:'Southern Copper', entry_price:'—', cost_basis:'—', alloc_pct:'0.0100', purchase_date:'—' },
-  'CCJ': { name:'Cameco', entry_price:'—', cost_basis:'—', alloc_pct:'0.0301', purchase_date:'—' },
-  'GLD': { name:'SPDR Gold Shares', entry_price:'405.61', cost_basis:'~$405.61 trim', alloc_pct:'0.1001', purchase_date:'—' },
-  'PSLV': { name:'Sprott Physical Silver', entry_price:'—', cost_basis:'—', alloc_pct:'—', purchase_date:'—' },
-  'CAT': { name:'Caterpillar', entry_price:'—', cost_basis:'—', alloc_pct:'0.0200', purchase_date:'—' },
-  'RTX': { name:'Raytheon Technologies', entry_price:'—', cost_basis:'—', alloc_pct:'0.0200', purchase_date:'—' },
-  'WMT': { name:'Walmart', entry_price:'—', cost_basis:'—', alloc_pct:'0.0275', purchase_date:'—' }
+  'CEG': { name:'Constellation Energy', entry_price:'278.86', cost_basis:'2,800,856', current_value:'2,666,456', pl_pct:'-0.0480', alloc_pct:'0.0275', purchase_date:'2/12' },
+  'VST': { name:'Vistra Corp', entry_price:'160.90', cost_basis:'4,159,592', current_value:'4,000,815', pl_pct:'-0.0382', alloc_pct:'0.0275', purchase_date:'2/12' },
+  'ETN': { name:'Eaton', entry_price:'342.96', cost_basis:'4,773,033', current_value:'5,567,909', pl_pct:'0.1666', alloc_pct:'0.0300', purchase_date:'8/27' },
+  'VRT': { name:'Vertiv Holdings', entry_price:'174.66', cost_basis:'1,335,222', current_value:'—', pl_pct:null, alloc_pct:'0.0213', purchase_date:'9/5' },
+  'ABBNY': { name:'ABB Ltd', entry_price:'73.09', cost_basis:'2,645,331', current_value:'3,867,436', pl_pct:'0.4619', alloc_pct:'0.0150', purchase_date:'11/10' },
+  'FCX': { name:'Freeport-McMoRan', entry_price:'49.19', cost_basis:'5,369,694', current_value:'7,317,993', pl_pct:'0.3629', alloc_pct:'0.0400', purchase_date:'10/30' },
+  'SCCO': { name:'Southern Copper', entry_price:'142.62', cost_basis:'1,504,493', current_value:'—', pl_pct:null, alloc_pct:'0.0100', purchase_date:'10/30' },
+  'CCJ': { name:'Cameco', entry_price:'88.46', cost_basis:'4,112,207', current_value:'5,233,810', pl_pct:'0.2728', alloc_pct:'0.0301', purchase_date:'8/27' },
+  'GLD': { name:'SPDR Gold Shares', entry_price:'334.37', cost_basis:'12,539,804', current_value:'15,423,484', pl_pct:'0.2300', alloc_pct:'0.1001', purchase_date:'—' },
+  'PSLV': { name:'Sprott Physical Silver', entry_price:'21.91', cost_basis:'10,063,641', current_value:'10,923,509', pl_pct:'0.0853', alloc_pct:'0.0730', purchase_date:'12/9' },
+  'CAT': { name:'Caterpillar', entry_price:'707.38', cost_basis:'3,426,984', current_value:'4,192,358', pl_pct:'0.2233', alloc_pct:'0.0200', purchase_date:'—' },
+  'RTX': { name:'RTX Corp', entry_price:'197.32', cost_basis:'3,451,940', current_value:'3,051,115', pl_pct:'-0.1161', alloc_pct:'0.0200', purchase_date:'3/17' },
+  'WMT': { name:'Walmart', entry_price:'93.40', cost_basis:'4,138,688', current_value:'5,078,046', pl_pct:'0.2270', alloc_pct:'0.0275', purchase_date:'—' }
 };
 
 function renderPhaseSecurities(tickers, dataMap, color) {
