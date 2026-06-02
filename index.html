@@ -223,9 +223,25 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .summary-title{font-family:var(--serif);font-size:16px;color:var(--text)}
 .summary-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .summary-body{flex:1;overflow-y:auto;padding:20px;font-size:13px;line-height:1.7;color:var(--text)}
+.summary-body.large-text{font-size:15px;line-height:1.8}
 .summary-body h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px}
 .summary-body p{margin-bottom:8px}
 .summary-body strong{font-weight:500}
+.btn-copy{padding:4px 10px;background:none;border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--mono)}
+.btn-copy:hover{background:var(--bg3);color:var(--text)}
+.btn-copy.copied{color:var(--green);border-color:var(--green-mid)}
+.wi-detail-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:2000;align-items:center;justify-content:center}
+.wi-detail-overlay.open{display:flex}
+.wi-detail-box{background:var(--bg2);border-radius:12px;width:580px;max-width:94vw;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
+.wi-detail-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
+.wi-detail-body{padding:18px 20px;font-size:13px;line-height:1.6;color:var(--text)}
+.wi-detail-field{margin-bottom:10px}
+.wi-detail-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px}
+.wi-detail-val{font-size:13px;color:var(--text)}
+.wi-detail-footer{display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--border)}
+.btn-wi-complete{padding:7px 16px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans)}
+.btn-wi-kill{padding:7px 16px;background:none;color:var(--red);border:1px solid rgba(160,24,24,0.25);border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--sans)}
+.btn-wi-kill:hover{background:var(--red-dim)}
 .chat-area{display:none;flex-direction:column;flex:1;overflow:hidden;background:var(--bg2)}
 .chat-area.visible{display:flex}
 .chat-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
@@ -264,6 +280,13 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       <div class="nav-item active"><span class="nav-dot"></span> Dashboard</div>
       <div class="nav-item"><span class="nav-dot"></span> Phase tracker</div>
       <div class="nav-item"><span class="nav-dot"></span> Portfolio</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Phases</div>
+      <div class="nav-item"><span class="nav-dot" style="background:var(--green)"></span> Phase 1 · Energy <span class="nav-badge" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)">Active</span></div>
+      <div class="nav-item"><span class="nav-dot" style="background:var(--blue)"></span> Phase 2 · Power <span class="nav-badge" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.2)">Deploy</span></div>
+      <div class="nav-item"><span class="nav-dot" style="background:var(--muted)"></span> Phase 3 · Metals</div>
+      <div class="nav-item"><span class="nav-dot" style="background:var(--amber)"></span> Phase 4 · Gold</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Research</div>
@@ -388,9 +411,28 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         <div class="summary-title" id="summary-title">Research Summary</div>
         <div class="summary-sub" id="summary-sub">Synthesized from database</div>
       </div>
-      <button class="modal-close" id="summary-close-btn">Close ✕</button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="btn-font-toggle" id="summary-font-btn">A+</button>
+        <button class="btn-copy" id="summary-copy-btn">Copy</button>
+        <button class="modal-close" id="summary-close-btn">Close ✕</button>
+      </div>
     </div>
     <div class="summary-body" id="summary-body"><p class="placeholder">Loading...</p></div>
+  </div>
+</div>
+
+<!-- Watch Item Detail Modal -->
+<div class="wi-detail-overlay" id="wi-detail-modal">
+  <div class="wi-detail-box">
+    <div class="wi-detail-header">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase">Watch Item Detail</div>
+      <button class="modal-close" id="wi-detail-close">Close ✕</button>
+    </div>
+    <div class="wi-detail-body" id="wi-detail-body"></div>
+    <div class="wi-detail-footer">
+      <button class="btn-wi-complete" id="wi-complete-btn">Mark Complete</button>
+      <button class="btn-wi-kill" id="wi-kill-btn">Kill</button>
+    </div>
   </div>
 </div>
 
@@ -705,7 +747,7 @@ supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase
     var meta = wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : (wi.trigger_condition ? wi.trigger_condition.substring(0,45) : 'No date set');
     if (wi.phase_tag) meta += ' · ' + wi.phase_tag;
     var txt = wi.item.length > 70 ? wi.item.substring(0,70) + '…' : wi.item;
-    return '<div class="wi-row"><div class="wi-num">WI-' + wi.id + '</div><div class="wi-content"><div class="wi-text">' + txt + '</div><div class="wi-meta">' + meta + '</div></div><div class="wi-badge ' + badgeCls + '">' + badgeTxt + '</div></div>';
+    return '<div class="wi-row" id="wi-row-' + wi.id + '" onclick=\'openWiDetail(' + JSON.stringify({id:wi.id,item:wi.item,trigger_date:wi.trigger_date,trigger_condition:wi.trigger_condition,phase_tag:wi.phase_tag,owner:wi.owner,status:wi.status}) + ')\'><div class="wi-num">WI-' + wi.id + '</div><div class="wi-content"><div class="wi-text">' + txt + '</div><div class="wi-meta">' + meta + '</div></div><div class="wi-badge ' + badgeCls + '">' + badgeTxt + '</div></div>';
   }).join('');
   document.getElementById('wi-list').innerHTML = html;
 }).catch(function(e) {
@@ -771,13 +813,79 @@ function renderTopItems(data, view) {
 // Initial load
 loadTopItems('tickers');
 
-// Summary modal
+// Summary modal controls
 document.getElementById('summary-close-btn').addEventListener('click', function() {
   document.getElementById('summary-modal').classList.remove('open');
 });
 document.getElementById('summary-modal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
+document.getElementById('summary-font-btn').addEventListener('click', function() {
+  var body = document.getElementById('summary-body');
+  var isLarge = body.classList.contains('large-text');
+  body.classList.toggle('large-text', !isLarge);
+  this.textContent = isLarge ? 'A+' : 'A−';
+  this.classList.toggle('active', !isLarge);
+});
+document.getElementById('summary-copy-btn').addEventListener('click', function() {
+  var body = document.getElementById('summary-body');
+  var text = body.innerText || body.textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('summary-copy-btn');
+    btn.textContent = 'Copied ✓';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+});
+
+// Watch item detail modal
+var activeWiId = null;
+document.getElementById('wi-detail-close').addEventListener('click', function() {
+  document.getElementById('wi-detail-modal').classList.remove('open');
+});
+document.getElementById('wi-detail-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+document.getElementById('wi-complete-btn').addEventListener('click', function() {
+  if (!activeWiId) return;
+  fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ status: 'completed' })
+  }).then(function() {
+    document.getElementById('wi-detail-modal').classList.remove('open');
+    document.getElementById('wi-row-' + activeWiId) && document.getElementById('wi-row-' + activeWiId).remove();
+  });
+});
+document.getElementById('wi-kill-btn').addEventListener('click', function() {
+  if (!activeWiId) return;
+  if (!confirm('Kill watch item WI-' + activeWiId + '? This cannot be undone.')) return;
+  fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ status: 'killed' })
+  }).then(function() {
+    document.getElementById('wi-detail-modal').classList.remove('open');
+    document.getElementById('wi-row-' + activeWiId) && document.getElementById('wi-row-' + activeWiId).remove();
+  });
+});
+
+function openWiDetail(wi) {
+  activeWiId = wi.id;
+  var fields = [
+    ['ID', 'WI-' + wi.id],
+    ['Item', wi.item],
+    ['Trigger Date', wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—'],
+    ['Trigger Condition', wi.trigger_condition || '—'],
+    ['Phase', wi.phase_tag || '—'],
+    ['Owner', wi.owner || '—'],
+    ['Status', wi.status]
+  ];
+  document.getElementById('wi-detail-body').innerHTML = fields.map(function(f) {
+    return '<div class="wi-detail-field"><div class="wi-detail-label">' + f[0] + '</div><div class="wi-detail-val">' + (f[1] || '—') + '</div></div>';
+  }).join('');
+  document.getElementById('wi-detail-modal').classList.add('open');
+}
 
 function openSummary(tag, view) {
   var isTheme = view === 'themes';
@@ -791,14 +899,16 @@ function openSummary(tag, view) {
     ? 'topic_tags=cs.{"' + tag + '"}'
     : 'company_tags=cs.{"' + tag + '"}';
 
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&' + filterParam + '&select=content,created_at&order=created_at.desc&limit=8', {
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&' + filterParam + '&select=content,created_at&order=created_at.desc&limit=20', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r) { return r.json(); }).then(function(records) {
     if (!records || !records.length) {
       document.getElementById('summary-body').innerHTML = '<p>No analysis records found for ' + tag + '.</p>';
       return;
     }
-    document.getElementById('summary-sub').textContent = records.length + ' records found · Generating summary...';
+    var totalRefs = document.querySelector('.top5-row[onclick*="' + tag.replace(/'/g,"\\'") + '"] .top5-count');
+    var totalCount = totalRefs ? totalRefs.textContent : '?';
+    document.getElementById('summary-sub').textContent = records.length + ' of ' + totalCount + ' records · Generating summary...';
     var context = records.map(function(r, i) { return (i+1) + '. ' + (r.content || '').substring(0, 800); }).join('\n\n');
     fetch(SUPA_URL + '/functions/v1/analyze-article', {
       method: 'POST',
@@ -812,7 +922,7 @@ function openSummary(tag, view) {
       })
     }).then(function(r) { return r.json(); }).then(function(data) {
       var reply = data.analysis || data.reply || 'No summary generated.';
-      document.getElementById('summary-sub').textContent = records.length + ' records synthesized';
+      document.getElementById('summary-sub').textContent = records.length + ' most recent records synthesized';
       document.getElementById('summary-body').innerHTML = '<p>' + reply
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
