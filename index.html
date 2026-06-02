@@ -753,7 +753,11 @@ function renderTopItems(data, view) {
   var max = top[0].frequency;
   var html = top.map(function(item, i) {
     var pct = Math.round((item.frequency / max) * 100);
-    var label = item.tag.length > 22 ? item.tag.substring(0,22) + '…' : item.tag;
+    var rawLabel = item.tag.replace(/_/g, ' ');
+    var displayLabel = view === 'themes'
+      ? rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1)
+      : rawLabel;
+    var label = displayLabel.length > 22 ? displayLabel.substring(0,22) + '…' : displayLabel;
     return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'' + view + '\')">' +
       '<div class="top5-rank">' + (i+1) + '</div>' +
       '<div class="top5-ticker" style="width:' + (view === 'themes' ? '130px' : '46px') + ';font-size:' + (view === 'themes' ? '11px' : '13px') + '">' + label + '</div>' +
