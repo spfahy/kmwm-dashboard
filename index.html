@@ -5,300 +5,199 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KMWM Research Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2f1ee;--bg2:#fafaf8;--bg3:#eceae6;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1a1916;--muted:#6b6860;--dim:#b0aea8;
+  --green:#1a5c30;--green-dim:rgba(26,92,48,0.08);--green-mid:rgba(26,92,48,0.15);
+  --amber:#7a4a08;--amber-dim:rgba(122,74,8,0.08);
+  --red:#a01818;--red-dim:rgba(160,24,24,0.08);
+  --blue:#1a3d8f;--blue-dim:rgba(26,61,143,0.08);
+  --serif:'Playfair Display',Georgia,serif;
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5}
 
-  :root {
-    --bg: #f0f0ee;
-    --bg2: #fafaf8;
-    --bg3: #e8e8e6;
-    --border: rgba(0,0,0,0.09);
-    --border2: rgba(0,0,0,0.14);
-    --text: #1a1a1c;
-    --muted: #606068;
-    --dim: #a0a0a8;
-    --green: #1d7a3a;
-    --green-dim: rgba(29,122,58,0.08);
-    --amber: #92570a;
-    --amber-dim: rgba(146,87,10,0.08);
-    --red: #b91c1c;
-    --red-dim: rgba(185,28,28,0.08);
-    --blue: #1d4ed8;
-    --blue-dim: rgba(29,78,216,0.07);
-    --teal: #0d766e;
-    --accent: #1d7a3a;
-    --mono: 'DM Mono', monospace;
-    --serif: 'Instrument Serif', serif;
-    --sans: 'DM Sans', sans-serif;
-  }
+/* Layout */
+.shell{display:flex;height:100vh;overflow:hidden}
 
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+/* Sidebar */
+.sidebar{width:216px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-logo{padding:22px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo-name{font-family:var(--serif);font-size:17px;color:var(--text);line-height:1.2}
+.sidebar-logo-sub{font-style:italic;font-size:13px;color:var(--muted);margin-top:1px}
+.sidebar-version{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;margin-top:8px}
+.nav-group{padding:14px 10px 6px}
+.nav-label{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--dim);text-transform:uppercase;padding:0 8px;margin-bottom:3px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--muted);transition:all 0.12s}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--green-dim);color:var(--green);font-weight:500}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.nav-badge{margin-left:auto;font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:8px;background:var(--amber-dim);color:var(--amber)}
+.nav-badge.red{background:var(--red-dim);color:var(--red)}
+.sidebar-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border)}
+.intake-btn{width:100%;padding:9px 12px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:7px;font-size:12px;font-weight:500;color:var(--green);cursor:pointer;font-family:var(--sans);margin-bottom:12px;transition:all 0.12s}
+.intake-btn:hover{background:var(--green-mid)}
+.ts-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:2px}
+.ts-val{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px}
 
-  /* Layout */
-  .shell { display: flex; height: 100vh; overflow: hidden; }
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:10px}
+.topbar-title{font-family:var(--serif);font-size:16px;color:var(--text);flex:1}
+.phase-tag{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:20px;letter-spacing:0.03em}
+.tag-green{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
+.tag-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.15)}
+.tag-dim{background:rgba(0,0,0,0.04);color:var(--muted);border:1px solid var(--border)}
+.topbar-clock{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.live-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);margin-right:5px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
-  /* Sidebar */
-  .sidebar {
-    width: 220px; flex-shrink: 0;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    padding: 0;
-    overflow-y: auto;
-    height: 100vh;
-  }
-  .sidebar .nav-section { flex-shrink: 0; }
-  .sidebar-header {
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-logo {
-    font-family: var(--serif);
-    font-size: 18px;
-    color: var(--text);
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-  }
-  .sidebar-logo span { color: var(--muted); font-style: italic; font-size: 14px; display: block; margin-top: 2px; }
-  .sidebar-version {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--dim);
-    margin-top: 10px;
-    letter-spacing: 0.05em;
-  }
+.content{flex:1;overflow-y:auto;padding:22px 24px}
 
-  .nav-section { padding: 16px 12px 8px; }
-  .nav-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.12em;
-    color: var(--dim);
-    text-transform: uppercase;
-    padding: 0 8px;
-    margin-bottom: 4px;
-  }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--muted);
-    transition: all 0.15s;
-    border: 1px solid transparent;
-  }
-  .nav-item:hover { background: var(--bg3); color: var(--text); }
-  .nav-item.active { background: var(--green-dim); color: var(--green); border-color: rgba(74,222,128,0.15); }
-  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-  .nav-badge {
-    margin-left: auto;
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 1px 6px;
-    border-radius: 10px;
-    background: var(--amber-dim);
-    color: var(--amber);
-  }
-  .nav-badge.red { background: var(--red-dim); color: var(--red); }
+/* Metric cards */
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;position:relative;z-index:50}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:visible}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0}
+.metric-card.green::before{background:var(--green)}
+.metric-card.amber::before{background:var(--amber)}
+.metric-card.red::before{background:var(--red)}
+.metric-card.blue::before{background:var(--blue)}
+.metric-card.clickable{cursor:pointer}
+.metric-card.clickable:hover{background:var(--bg3)}
+.m-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.m-val{font-family:var(--serif);font-size:26px;color:var(--text);letter-spacing:-0.01em;line-height:1}
+.m-sub{font-size:11px;color:var(--muted);margin-top:5px}
+.m-sub.warn{color:var(--amber)}
+.m-sub.good{color:var(--green)}
+.m-sub.bad{color:var(--red)}
 
-  /* Main */
-  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+/* Cash detail popup */
+.cash-popup{display:none;position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;width:310px;box-shadow:0 8px 32px rgba(0,0,0,0.14)}
+.cash-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cash-popup-title{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
+.cash-popup-close{background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);padding:0}
+.cash-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--bg3);border-radius:6px;margin-bottom:5px}
+.cash-row-ticker{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
+.cash-row-name{font-size:10px;color:var(--muted);margin-top:1px}
+.cash-row-right{text-align:right}
+.cash-row-val{font-family:var(--mono);font-size:12px;color:var(--text)}
+.cash-row-pct{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.cash-total{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--amber-dim);border-radius:6px;margin-top:8px;border:1px solid rgba(122,74,8,0.12)}
 
-  .topbar {
-    height: 56px; flex-shrink: 0;
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center;
-    padding: 0 28px; gap: 12px;
-  }
-  .topbar-title {
-    font-family: var(--serif);
-    font-size: 17px;
-    color: var(--text);
-    flex: 1;
-  }
-  .phase-tag {
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: 0.04em;
-  }
-  .tag-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
-  .tag-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
-  .tag-dim { background: rgba(0,0,0,0.04); color: var(--muted); border: 1px solid var(--border); }
-  .tag-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,0.2); }
+/* FOMC gate */
+.fomc-gate{background:var(--bg2);border:1px solid rgba(26,61,143,0.2);border-radius:10px;padding:18px 22px;margin-bottom:18px;position:relative}
+.fomc-gate::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.fomc-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.fomc-days{font-family:var(--serif);font-size:40px;color:var(--blue);line-height:1;flex-shrink:0}
+.fomc-days span{font-size:14px;color:var(--muted);font-family:var(--sans);font-style:normal}
+.fomc-title{font-size:14px;font-weight:500;color:var(--text)}
+.fomc-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.fomc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.fomc-cell{background:var(--bg3);border-radius:7px;padding:9px 12px}
+.fomc-cell-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px}
+.fomc-cell-val{font-family:var(--mono);font-size:13px;color:var(--text)}
+.scenario-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.scenario-btn{padding:9px 12px;border-radius:7px;border:1px solid;font-size:12px;font-weight:500;text-align:center;cursor:pointer;transition:opacity 0.12s;font-family:var(--sans)}
+.scenario-btn:hover{opacity:0.82}
+.s-green{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
+.s-red{background:var(--red-dim);color:var(--red);border-color:rgba(160,24,24,0.2)}
+.s-amber{background:var(--amber-dim);color:var(--amber);border-color:rgba(122,74,8,0.2)}
 
-  .topbar-time {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-  }
+/* Two column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative;z-index:1}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.panel-title{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
+.panel-count{font-family:var(--mono);font-size:10px;color:var(--dim)}
 
-  /* Content */
-  .content { flex: 1; overflow-y: auto; padding: 24px 28px; position: relative; }
+/* Holdings */
+.holding-row{display:flex;align-items:center;gap:8px;padding:9px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
+.holding-row:last-child{border-bottom:none}
+.holding-row:hover{background:var(--bg3)}
+.holding-row.active-row{background:var(--green-dim)}
+.h-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green)}
+.dot-amber{background:var(--amber)}
+.h-ticker{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text);width:42px;flex-shrink:0}
+.h-name{font-size:11px;color:var(--muted);flex:1}
+.h-bar-wrap{width:44px;height:3px;background:var(--bg3);border-radius:2px}
+.h-bar{height:3px;border-radius:2px}
+.h-pl{font-family:var(--mono);font-size:11px;min-width:52px;text-align:right}
+.h-alloc{font-family:var(--mono);font-size:11px;color:var(--muted);width:36px;text-align:right}
 
-  /* Metric row */
-  .metric-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; position: relative; z-index: 500; }
-  .metric-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 18px;
-    position: relative;
-    overflow: hidden;
-  }
-  .metric-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  }
-  .metric-card.green::before { background: var(--green); }
-  .metric-card.amber::before { background: var(--amber); }
-  .metric-card.red::before { background: var(--red); }
-  .metric-card.blue::before { background: var(--blue); }
+/* Inline detail panel */
+.detail-panel{display:none;background:var(--bg3);border-bottom:1px solid var(--border2);padding:12px 16px}
+.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.detail-cell{background:var(--bg2);border-radius:6px;padding:7px 10px}
+.detail-cell-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:2px}
+.detail-cell-val{font-family:var(--mono);font-size:11px;color:var(--text)}
 
-  .metric-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
-  .metric-val { font-family: var(--serif); font-size: 28px; color: var(--text); letter-spacing: -0.02em; line-height: 1; }
-  .metric-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
-  .metric-sub.good { color: var(--green); }
-  .metric-sub.warn { color: var(--amber); }
-  .metric-sub.bad { color: var(--red); }
+/* Watch items */
+.wi-row{display:flex;align-items:flex-start;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);transition:background 0.1s}
+.wi-row:last-child{border-bottom:none}
+.wi-row:hover{background:var(--bg3)}
+.wi-num{font-family:var(--mono);font-size:9px;color:var(--dim);width:34px;flex-shrink:0;padding-top:2px}
+.wi-content{flex:1}
+.wi-text{font-size:12px;color:var(--text);line-height:1.4}
+.wi-meta{font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:2px}
+.wi-badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:8px;flex-shrink:0;margin-top:1px}
+.wi-act{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.15)}
+.wi-watch{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.15)}
+.wi-pend{background:rgba(0,0,0,0.04);color:var(--muted);border:1px solid var(--border)}
+.wi-gate{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.15)}
 
-  /* FOMC gate */
-  .fomc-gate {
-    background: var(--bg2);
-    border: 1px solid rgba(96,165,250,0.25);
-    border-radius: 12px;
-    padding: 20px 24px;
-    margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-  .fomc-gate::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--blue), transparent);
-  }
-  .fomc-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
-  .fomc-countdown {
-    font-family: var(--serif);
-    font-size: 42px;
-    color: var(--blue);
-    letter-spacing: -0.03em;
-    line-height: 1;
-  }
-  .fomc-countdown span { font-size: 16px; color: var(--muted); font-family: var(--sans); }
-  .fomc-info { flex: 1; }
-  .fomc-title { font-size: 15px; font-weight: 500; color: var(--text); }
-  .fomc-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
-  .fomc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-  .fomc-cell {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-  }
-  .fomc-cell-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
-  .fomc-cell-val { font-family: var(--mono); font-size: 14px; color: var(--text); }
-  .scenario-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .scenario-btn {
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    text-align: center;
-    transition: all 0.15s;
-  }
-  .scenario-btn:hover { opacity: 0.85; }
-  .s-green { background: var(--green-dim); color: var(--green); border-color: rgba(74,222,128,0.3); }
-  .s-red { background: var(--red-dim); color: var(--red); border-color: rgba(248,113,113,0.3); }
-  .s-amber { background: var(--amber-dim); color: var(--amber); border-color: rgba(251,191,36,0.3); }
+/* Loading / error */
+.loading{padding:16px;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.error-msg{padding:12px 16px;font-size:11px;color:var(--red)}
 
-  /* Two col */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; position: relative; z-index: 1; }
+/* Intake Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--bg2);border-radius:12px;width:900px;max-width:94vw;height:84vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{font-family:var(--serif);font-size:16px;color:var(--text)}
+.modal-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.modal-close{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;color:var(--muted);font-family:var(--sans)}
+.modal-close:hover{background:var(--bg3)}
+.modal-body{display:flex;flex:1;overflow:hidden}
+.modal-left{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px;gap:10px;overflow-y:auto}
+.modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.modal-output{flex:1;overflow-y:auto;padding:18px;font-size:13px;line-height:1.7;color:var(--text)}
+.modal-output p{margin-bottom:8px}
+.modal-output h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px;color:var(--text)}
+.modal-output strong{font-weight:500;color:var(--text)}
+.modal-output .placeholder{color:var(--dim);font-style:italic}
+.modal-footer{display:none;padding:10px 18px;border-top:1px solid var(--border);background:var(--bg2);align-items:center;gap:8px;flex-shrink:0}
+.modal-footer.visible{display:flex}
+.field-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px}
+textarea,input[type=text],select{width:100%;border:1px solid var(--border2);border-radius:7px;background:var(--bg3);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;transition:border-color 0.12s}
+textarea{resize:none;line-height:1.5}
+textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);background:var(--bg2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-primary{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity 0.12s}
+.btn-primary:hover{opacity:0.88}
+.btn-primary:disabled{opacity:0.45;cursor:not-allowed}
+.btn-save{padding:7px 16px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans)}
+.btn-save:hover{opacity:0.88}
+.btn-kill{padding:7px 16px;background:none;color:var(--red);border:1px solid rgba(160,24,24,0.25);border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--sans)}
+.btn-kill:hover{background:var(--red-dim)}
+.intake-status{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center}
+.intake-status.active{color:var(--green)}
+.intake-status.error{color:var(--red)}
+.signal-badge{font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;display:none}
+.signal-act{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.2)}
+.signal-read{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.2)}
+.signal-file{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
+.save-note{font-size:11px;color:var(--muted);margin-left:auto}
+.success-banner{margin-top:14px;padding:9px 12px;background:var(--green-dim);border-radius:7px;color:var(--green);font-family:var(--mono);font-size:11px;border:1px solid var(--green-mid)}
 
-  .panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .panel-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-  }
-  .panel-title { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
-  .panel-count { font-family: var(--mono); font-size: 11px; color: var(--dim); }
-
-  /* Holdings */
-  .holding-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 18px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-  }
-  .holding-row:last-child { border-bottom: none; }
-  .holding-row:hover { background: var(--bg3); }
-
-  .h-ticker { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); width: 46px; flex-shrink: 0; }
-  .h-name { font-size: 12px; color: var(--muted); flex: 1; }
-  .h-bar-wrap { width: 60px; height: 3px; background: var(--bg3); border-radius: 2px; }
-  .h-bar { height: 3px; border-radius: 2px; background: var(--green); }
-  .h-alloc { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 38px; text-align: right; }
-  .status-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-  .dot-green { background: var(--green); }
-  .dot-amber { background: var(--amber); box-shadow: 0 0 4px var(--amber); }
-  .dot-red { background: var(--red); }
-
-  /* Watch items */
-  .wi-row {
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-  }
-  .wi-row:last-child { border-bottom: none; }
-  .wi-row:hover { background: var(--bg3); }
-
-  .wi-num { font-family: var(--mono); font-size: 10px; color: var(--dim); width: 36px; flex-shrink: 0; padding-top: 2px; }
-  .wi-content { flex: 1; }
-  .wi-text { font-size: 12px; color: var(--text); line-height: 1.4; }
-  .wi-meta { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 3px; }
-  .wi-badge {
-    font-family: var(--mono);
-    font-size: 9px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .wi-act { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
-  .wi-watch { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,0.2); }
-  .wi-pend { background: rgba(0,0,0,0.04); color: var(--muted); border: 1px solid var(--border); }
-  .wi-gate { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
-
-  /* Loading / error */
-  .loading { padding: 24px 18px; font-family: var(--mono); font-size: 11px; color: var(--dim); }
-  .error { padding: 16px 18px; font-size: 12px; color: var(--red); }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #b8b8c0; border-radius: 2px; }
-
-  /* Pulse animation for live dot */
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: pulse 2s infinite; }
-
-  /* Fade in */
-  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-  .fade-up { animation: fadeUp 0.35s ease forwards; }
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 </style>
 </head>
 <body>
@@ -306,36 +205,34 @@
 
   <!-- Sidebar -->
   <div class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">Kelley & Mullis<span>Wealth Management</span></div>
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-name">Kelley &amp; Mullis</div>
+      <div class="sidebar-logo-sub">Wealth Management</div>
       <div class="sidebar-version">Research System v10.2</div>
     </div>
-
-    <div class="nav-section">
+    <div class="nav-group">
       <div class="nav-label">Overview</div>
       <div class="nav-item active"><span class="nav-dot"></span> Dashboard</div>
       <div class="nav-item"><span class="nav-dot"></span> Phase tracker</div>
       <div class="nav-item"><span class="nav-dot"></span> Portfolio</div>
     </div>
-
-    <div class="nav-section">
+    <div class="nav-group">
       <div class="nav-label">Research</div>
       <div class="nav-item"><span class="nav-dot"></span> Articles <span class="nav-badge red" id="unread-badge">—</span></div>
-      <div class="nav-item"><span class="nav-dot"></span> Watch items <span class="nav-badge" id="wi-badge">—</span></div>
+      <div class="nav-item"><span class="nav-dot"></span> Watch items <span class="nav-badge" id="wi-nav-badge">—</span></div>
       <div class="nav-item"><span class="nav-dot"></span> Alerts</div>
     </div>
-
-    <div class="nav-section">
+    <div class="nav-group">
       <div class="nav-label">System</div>
       <div class="nav-item"><span class="nav-dot"></span> Database</div>
       <div class="nav-item"><span class="nav-dot"></span> Settings</div>
-      <div style="margin-top:auto;padding:16px;border-top:1px solid var(--border);">
-        <button onclick="openIntake()" style="display:block;width:100%;text-align:center;padding:9px 12px;background:var(--green-dim);border:1px solid rgba(29,122,58,0.2);border-radius:8px;font-size:12px;font-weight:500;color:var(--green);cursor:pointer;font-family:var(--sans);margin-bottom:14px;">+ Research Intake</button>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.05em;margin-bottom:3px;">DEPLOYED</div>
-        <div id="deploy-time" style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px;">—</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.05em;margin-bottom:3px;">LAST SYNCED</div>
-        <div id="sync-time" style="font-family:var(--mono);font-size:10px;color:var(--muted);">—</div>
-      </div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="intake-btn" id="intake-open-btn">+ Research Intake</button>
+      <div class="ts-label">Deployed</div>
+      <div class="ts-val" id="deploy-time">—</div>
+      <div class="ts-label">Last Synced</div>
+      <div class="ts-val" id="sync-time">—</div>
     </div>
   </div>
 
@@ -346,66 +243,57 @@
       <span class="phase-tag tag-green">Phase 1 · Active</span>
       <span class="phase-tag tag-blue">Phase 2 · Deploying</span>
       <span class="phase-tag tag-dim">Phase 3 · Watching</span>
-      <div class="topbar-time"><span class="live-dot"></span><span id="clock"></span></div>
+      <div class="topbar-clock"><span class="live-dot"></span><span id="clock"></span></div>
     </div>
 
     <div class="content">
 
-      <!-- Metric cards -->
-      <div class="metric-row fade-up">
+      <!-- Metric Row -->
+      <div class="metric-row">
         <div class="metric-card green">
-          <div class="metric-label">Research Records</div>
-          <div class="metric-val" id="record-count">—</div>
-          <div class="metric-sub" id="record-sub">Loading...</div>
+          <div class="m-label">Research Records</div>
+          <div class="m-val" id="rec-count">—</div>
+          <div class="m-sub" id="rec-sub">Loading...</div>
         </div>
-        <div class="metric-card amber" style="cursor:pointer;" onclick="showCashDetail()" title="Click for breakdown">
-          <div class="metric-label">Cash Sleeve <span style="font-size:9px;opacity:0.6;">▼</span></div>
-          <div class="metric-val" id="cash-sleeve-val">—</div>
-          <div class="metric-sub warn" id="cash-sleeve-sub">Loading...</div>
-        </div>
-
-        <!-- Cash Sleeve Detail Popup -->
-        <div id="cash-detail" style="display:none;position:fixed;z-index:1000;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <span style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;">Cash Sleeve Breakdown</span>
-            <button onclick="document.getElementById('cash-detail').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);">✕</button>
-          </div>
-          <div id="cash-detail-content"></div>
+        <div class="metric-card amber clickable" id="cash-card">
+          <div class="m-label">Cash Sleeve ▾</div>
+          <div class="m-val" id="cash-val">—</div>
+          <div class="m-sub warn" id="cash-sub">Loading...</div>
         </div>
         <div class="metric-card red">
-          <div class="metric-label">30-Yr Treasury</div>
-          <div class="metric-val">4.975%</div>
-          <div class="metric-sub warn">WI-28 trigger: 5.00%</div>
+          <div class="m-label">30-Yr Treasury</div>
+          <div class="m-val">4.975%</div>
+          <div class="m-sub warn">WI-28 trigger: 5.00%</div>
         </div>
         <div class="metric-card blue">
-          <div class="metric-label">Active Watch Items</div>
-          <div class="metric-val" id="wi-count">—</div>
-          <div class="metric-sub" id="wi-sub">Loading...</div>
+          <div class="m-label">Active Watch Items</div>
+          <div class="m-val" id="wi-count">—</div>
+          <div class="m-sub" id="wi-count-sub">Loading...</div>
         </div>
       </div>
 
+      <!-- Cash Popup (outside metric row to avoid z-index issues) -->
+      <div class="cash-popup" id="cash-popup">
+        <div class="cash-popup-header">
+          <span class="cash-popup-title">Cash Sleeve Breakdown</span>
+          <button class="cash-popup-close" id="cash-popup-close">✕</button>
+        </div>
+        <div id="cash-popup-body"><div class="loading">Loading...</div></div>
+      </div>
+
       <!-- FOMC Gate -->
-      <div class="fomc-gate fade-up" style="animation-delay:0.08s">
+      <div class="fomc-gate">
         <div class="fomc-header">
-          <div class="fomc-countdown" id="fomc-days">17<span>days</span></div>
-          <div class="fomc-info">
+          <div class="fomc-days" id="fomc-days">—<span>days</span></div>
+          <div>
             <div class="fomc-title">Warsh FOMC — June 17, 2026 · Primary Phase 2 Gate</div>
             <div class="fomc-sub">Pre-committed rule: dovish → deploy CEG/VST · hawkish → full stop · ambiguous → hold</div>
           </div>
         </div>
         <div class="fomc-grid">
-          <div class="fomc-cell">
-            <div class="fomc-cell-label">CEG add zone</div>
-            <div class="fomc-cell-val">$284 – $297</div>
-          </div>
-          <div class="fomc-cell">
-            <div class="fomc-cell-label">VST add zone</div>
-            <div class="fomc-cell-val">$140 – $146</div>
-          </div>
-          <div class="fomc-cell">
-            <div class="fomc-cell-label">Core PCE (Apr)</div>
-            <div class="fomc-cell-val">3.3% YoY</div>
-          </div>
+          <div class="fomc-cell"><div class="fomc-cell-label">CEG Add Zone</div><div class="fomc-cell-val">$284 – $297</div></div>
+          <div class="fomc-cell"><div class="fomc-cell-label">VST Add Zone</div><div class="fomc-cell-val">$140 – $146</div></div>
+          <div class="fomc-cell"><div class="fomc-cell-label">Core PCE (Apr)</div><div class="fomc-cell-val">3.3% YoY</div></div>
         </div>
         <div class="scenario-row">
           <div class="scenario-btn s-green">Dovish → Deploy CEG / VST</div>
@@ -414,31 +302,19 @@
         </div>
       </div>
 
-      <!-- Two column -->
-      <div class="two-col fade-up" style="animation-delay:0.16s">
+      <!-- Two Column -->
+      <div class="two-col">
 
         <!-- Phase 1 Holdings -->
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">Phase 1 Holdings</div>
-            <div class="panel-count" id="h-panel-count">8 positions</div>
+            <div class="panel-count" id="holdings-count">Loading...</div>
           </div>
           <div id="holdings-list"><div class="loading">Fetching from portfolio...</div></div>
         </div>
 
-        <!-- Inline Detail Panel (appears below clicked row) -->
-        <div id="side-panel" style="display:none; background:var(--bg3); border:1px solid var(--border2); border-radius:8px; margin:4px 12px 8px; padding:14px 16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span id="sp-ticker" style="font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);"></span>
-              <span id="sp-name" style="font-size:11px;color:var(--muted);"></span>
-            </div>
-            <button onclick="closePanel()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;color:var(--muted);">✕</button>
-          </div>
-          <div id="sp-content"></div>
-        </div>
-
-        <!-- Watch Items - live from Supabase -->
+        <!-- Watch Items -->
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">Active Watch Items</div>
@@ -448,565 +324,478 @@
         </div>
 
       </div>
-
     </div>
   </div>
-  <!-- Research Intake Modal -->
-  <div id="intake-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
-    <div style="background:var(--bg2);border-radius:12px;width:880px;max-width:95vw;height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.2);">
-      
-      <!-- Modal Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;">
-        <div>
-          <div style="font-family:var(--serif);font-size:17px;color:var(--text);">Research Intake</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Paste article text — Claude analyzes and saves to database</div>
-        </div>
-        <button onclick="closeIntake()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:var(--muted);">Close ✕</button>
+</div>
+
+<!-- Research Intake Modal -->
+<div class="modal-overlay" id="intake-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Research Intake</div>
+        <div class="modal-sub">Paste article text · Claude analyzes · saves to database</div>
       </div>
-
-      <!-- Modal Body -->
-      <div style="display:flex;flex:1;overflow:hidden;">
-        
-        <!-- Left: Input -->
-        <div style="width:340px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px;gap:12px;overflow-y:auto;">
-          <div>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px;">Article Text</div>
-            <textarea id="intake-article" rows="12" style="width:100%;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text);font-family:var(--sans);font-size:12px;padding:10px 12px;resize:none;outline:none;line-height:1.5;" placeholder="Paste full article text here..."></textarea>
-          </div>
-          <div>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px;">Source</div>
-            <input type="text" id="intake-source" style="width:100%;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 12px;outline:none;" placeholder="WSJ, Bloomberg, Reuters...">
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div>
-              <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px;">Author</div>
-              <select id="intake-author" style="width:100%;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;">
-                <option value="Steve">Steve</option>
-                <option value="Michael">Michael</option>
-              </select>
-            </div>
-            <div>
-              <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px;">Phase</div>
-              <select id="intake-phase" style="width:100%;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;">
-                <option value="Phase 1">Phase 1</option>
-                <option value="Phase 2">Phase 2</option>
-                <option value="Phase 3">Phase 3</option>
-                <option value="Phase 4">Phase 4</option>
-                <option value="macro">Macro</option>
-                <option value="general">General</option>
-              </select>
-            </div>
-          </div>
-          <button id="intake-btn" onclick="runIntake()" style="width:100%;padding:11px;background:var(--green);color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Analyze with Claude →</button>
-          <div id="intake-status" style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;">Ready</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="signal-badge" id="signal-badge"></span>
+        <button class="modal-close" id="intake-close-btn">Close ✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-left">
+        <div>
+          <div class="field-label">Article Text</div>
+          <textarea id="intake-text" rows="11" placeholder="Paste full article text here..."></textarea>
         </div>
-
-        <!-- Right: Analysis Output -->
-        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-          <div style="flex:1;overflow-y:auto;padding:20px;font-size:13px;line-height:1.7;color:var(--text);" id="intake-output">
-            <p style="color:var(--dim);font-style:italic;">Analysis will appear here...</p>
+        <div>
+          <div class="field-label">Source</div>
+          <input type="text" id="intake-source" placeholder="WSJ, Bloomberg, Reuters...">
+        </div>
+        <div class="row2">
+          <div>
+            <div class="field-label">Author</div>
+            <select id="intake-author">
+              <option value="Steve">Steve</option>
+              <option value="Michael">Michael</option>
+            </select>
           </div>
-          <div id="intake-save-bar" style="display:none;padding:12px 20px;border-top:1px solid var(--border);background:var(--bg2);display:none;align-items:center;gap:8px;">
-            <button onclick="saveIntake()" style="padding:8px 18px;background:var(--green);color:white;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;">Save to Database</button>
-            <button onclick="killIntake()" style="padding:8px 18px;background:none;color:var(--red);border:1px solid rgba(185,28,28,0.3);border-radius:7px;font-size:12px;cursor:pointer;">Kill</button>
-            <span id="intake-save-note" style="font-size:11px;color:var(--muted);margin-left:auto;">Review before saving</span>
+          <div>
+            <div class="field-label">Phase</div>
+            <select id="intake-phase">
+              <option value="Phase 1">Phase 1</option>
+              <option value="Phase 2">Phase 2</option>
+              <option value="Phase 3">Phase 3</option>
+              <option value="Phase 4">Phase 4</option>
+              <option value="macro">Macro</option>
+              <option value="general">General</option>
+            </select>
           </div>
         </div>
-
+        <button class="btn-primary" id="intake-analyze-btn">Analyze with Claude →</button>
+        <div class="intake-status" id="intake-status">Ready — paste article and analyze</div>
+      </div>
+      <div class="modal-right">
+        <div class="modal-output" id="intake-output">
+          <p class="placeholder">Analysis will appear here after you submit an article.</p>
+        </div>
+        <div class="modal-footer" id="intake-footer">
+          <button class="btn-save" id="intake-save-btn">Save to Database</button>
+          <button class="btn-kill" id="intake-kill-btn">Kill</button>
+          <span class="save-note" id="intake-save-note">Review before saving</span>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-const SUPABASE_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
+var SUPA_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
 
-async function query(table, params) {
-  const parts = [];
-  for (const k in params) {
-    parts.push(k + '=' + params[k]);
-  }
-  const url = SUPABASE_URL + '/rest/v1/' + table + '?' + parts.join('&');
-  const res = await fetch(url, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json'
-    }
-  });
-  if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
-  return res.json();
+function supaFetch(table, params) {
+  var parts = [];
+  for (var k in params) { parts.push(k + '=' + params[k]); }
+  var url = SUPA_URL + '/rest/v1/' + table + '?' + parts.join('&');
+  return fetch(url, {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); });
 }
 
 // Clock
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',timeZoneName:'short'});
+function tick() {
+  var now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', timeZoneName:'short'});
 }
-updateClock();
-setInterval(updateClock, 1000);
+tick();
+setInterval(tick, 1000);
+
+// Deploy time
+var dm = document.lastModified;
+if (dm) {
+  var d = new Date(dm);
+  document.getElementById('deploy-time').textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
 
 // FOMC countdown
-function updateFOMC() {
-  const fomc = new Date('2026-06-17');
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const days = Math.ceil((fomc - today) / 86400000);
-  const el = document.getElementById('fomc-days');
-  el.innerHTML = `${days}<span>days</span>`;
+function fomcCountdown() {
+  var target = new Date('2026-06-17');
+  var today = new Date(); today.setHours(0,0,0,0);
+  var days = Math.ceil((target - today) / 86400000);
+  var el = document.getElementById('fomc-days');
+  el.innerHTML = days + '<span>days</span>';
 }
-updateFOMC();
+fomcCountdown();
+
+// Format helpers
+function fmtDollar(v) {
+  if (v == null || v === '') return '—';
+  var n = parseFloat(v);
+  if (isNaN(n)) return '—';
+  if (n >= 1000000000) return '$' + (n/1000000000).toFixed(1) + 'B';
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return '$' + (n/1000).toFixed(0) + 'K';
+  return '$' + n.toFixed(2);
+}
+function fmtPct(v) {
+  if (v == null || v === '') return '—';
+  var n = parseFloat(v);
+  if (isNaN(n)) return '—';
+  return (n * 100).toFixed(2) + '%';
+}
+function fmtPl(v) {
+  if (v == null || v === '') return '—';
+  var n = parseFloat(v) * 100;
+  if (isNaN(n)) return '—';
+  return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+function plColor(v) {
+  if (v == null) return 'var(--muted)';
+  return parseFloat(v) >= 0 ? 'var(--green)' : 'var(--red)';
+}
 
 // Load record count
-async function loadRecordCount() {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/research_chunks?select=id&limit=1`, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Prefer': 'count=exact',
-        'Range': '0-0'
-      }
-    });
-    const count = res.headers.get('content-range');
-    if (count) {
-      const total = count.split('/')[1];
-      document.getElementById('record-count').textContent = parseInt(total).toLocaleString();
-      document.getElementById('record-sub').textContent = 'records in database';
-      document.getElementById('record-sub').className = 'metric-sub good';
-    }
-  } catch(e) {
-    document.getElementById('record-sub').textContent = 'Could not load';
+supaFetch('research_chunks', { select: 'id', limit: 1 });
+fetch(SUPA_URL + '/rest/v1/research_chunks?select=id&limit=1', {
+  headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+}).then(function(r) {
+  var cr = r.headers.get('content-range');
+  if (cr) {
+    var total = cr.split('/')[1];
+    document.getElementById('rec-count').textContent = parseInt(total).toLocaleString();
+    document.getElementById('rec-sub').textContent = 'records in database';
+    document.getElementById('rec-sub').className = 'm-sub good';
   }
-}
+}).catch(function() {});
 
-// Load watch items
-async function loadWatchItems() {
-  try {
-    const data = await query('watch_items', {
-      select: 'id,item,trigger_date,trigger_condition,phase_tag,status',
-      status: 'eq.active',
-      order: 'trigger_date.asc.nullslast',
-      limit: 8
-    });
+// Load cash sleeve
+var cashData = {};
+supaFetch('portfolio_metrics', { select: 'cash_sleeve_pct,sgov_pct,fduxx_pct,ftsm_pct,ptshx_pct,gld_total_pct,gld_excess_pct,sgov_value,fduxx_value,ftsm_value,ptshx_value,gld_excess_value,last_synced_at', order: 'metric_date.desc', limit: 1 }).then(function(data) {
+  if (!data || !data.length) return;
+  cashData = data[0];
+  var pct = (parseFloat(cashData.cash_sleeve_pct) * 100).toFixed(2);
+  document.getElementById('cash-val').textContent = pct + '%';
+  var synced = new Date(cashData.last_synced_at);
+  var syncStr = synced.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + synced.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('cash-sub').textContent = 'SGOV · FDUXX · GLD dry powder · ' + syncStr;
+  document.getElementById('sync-time').textContent = syncStr;
+  document.getElementById('sync-time').style.color = 'var(--green)';
+}).catch(function() {});
 
-    // Count for badges
-    document.getElementById('wi-count').textContent = data.length + '+';
-    document.getElementById('wi-sub').textContent = 'active · monitoring';
-    document.getElementById('wi-panel-count').textContent = `${data.length} shown`;
-    document.getElementById('wi-badge').textContent = data.length;
-    document.getElementById('unread-badge').textContent = '—';
-
-    if (!data.length) {
-      document.getElementById('wi-list').innerHTML = '<div class="loading">No active watch items found.</div>';
-      return;
-    }
-
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    const html = data.map(wi => {
-      let badge = 'wi-pend';
-      let badgeText = 'Pending';
-
-      if (wi.trigger_date) {
-        const td = new Date(wi.trigger_date);
-        const diff = Math.ceil((td - today) / 86400000);
-        if (diff <= 0) { badge = 'wi-act'; badgeText = 'Overdue'; }
-        else if (diff <= 7) { badge = 'wi-act'; badgeText = `${diff}d`; }
-        else if (diff <= 30) { badge = 'wi-watch'; badgeText = `${diff}d`; }
-        else { badge = 'wi-pend'; badgeText = new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
-      } else if (wi.trigger_condition) {
-        badge = 'wi-watch'; badgeText = 'Condition';
-      }
-
-      const phaseTag = wi.phase_tag ? `<span style="font-family:var(--mono);font-size:9px;color:var(--dim)">${wi.phase_tag}</span>` : '';
-      const truncated = wi.item.length > 72 ? wi.item.slice(0,72) + '…' : wi.item;
-      const meta = wi.trigger_date
-        ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
-        : (wi.trigger_condition ? wi.trigger_condition.slice(0,48) : 'No date set');
-
-      return `<div class="wi-row">
-        <div class="wi-num">WI-${wi.id}</div>
-        <div class="wi-content">
-          <div class="wi-text">${truncated}</div>
-          <div class="wi-meta">${meta} ${phaseTag ? '· ' : ''}${phaseTag}</div>
-        </div>
-        <div class="wi-badge ${badge}">${badgeText}</div>
-      </div>`;
-    }).join('');
-
-    document.getElementById('wi-list').innerHTML = html;
-
-  } catch(e) {
-    document.getElementById('wi-list').innerHTML = `<div class="error">Could not load watch items: ${e.message}</div>`;
-    document.getElementById('wi-panel-count').textContent = 'Error';
+// Cash popup
+document.getElementById('cash-card').addEventListener('click', function(e) {
+  var popup = document.getElementById('cash-popup');
+  if (popup.style.display === 'block') { popup.style.display = 'none'; return; }
+  var card = document.getElementById('cash-card');
+  var rect = card.getBoundingClientRect();
+  popup.style.top = (rect.bottom + 6) + 'px';
+  popup.style.left = rect.left + 'px';
+  popup.style.display = 'block';
+  var rows = [
+    ['SGOV', 'iShares 0-3M Treasury', cashData.sgov_pct, cashData.sgov_value],
+    ['FDUXX', 'Fidelity Money Market', cashData.fduxx_pct, cashData.fduxx_value],
+    ['FTSM', 'First Trust Short Maturity', cashData.ftsm_pct, cashData.ftsm_value],
+    ['PTSHX', 'PIMCO Short-Term', cashData.ptshx_pct, cashData.ptshx_value],
+    ['GLD', 'SPDR Gold (above 9% core)', cashData.gld_excess_pct, cashData.gld_excess_value]
+  ];
+  var html = rows.map(function(r) {
+    return '<div class="cash-row"><div><div class="cash-row-ticker">' + r[0] + '</div><div class="cash-row-name">' + r[1] + '</div></div><div class="cash-row-right"><div class="cash-row-val">' + fmtDollar(r[3]) + '</div><div class="cash-row-pct">' + fmtPct(r[2]) + '</div></div></div>';
+  }).join('');
+  var total = cashData.cash_sleeve_pct ? (parseFloat(cashData.cash_sleeve_pct)*100).toFixed(2) + '%' : '—';
+  html += '<div class="cash-total"><span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--amber)">Total Cash Sleeve</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber)">' + total + '</span></div>';
+  document.getElementById('cash-popup-body').innerHTML = html;
+});
+document.getElementById('cash-popup-close').addEventListener('click', function() {
+  document.getElementById('cash-popup').style.display = 'none';
+});
+document.addEventListener('click', function(e) {
+  var popup = document.getElementById('cash-popup');
+  var card = document.getElementById('cash-card');
+  if (popup.style.display === 'block' && !popup.contains(e.target) && !card.contains(e.target)) {
+    popup.style.display = 'none';
   }
-}
+});
 
-// Load cash sleeve from Supabase
-async function loadCashSleeve() {
-  try {
-    const data = await query('portfolio_metrics', {
-      select: 'cash_sleeve_pct,sgov_pct,fduxx_pct,ftsm_pct,ptshx_pct,gld_excess_pct,last_synced_at',
-      order: 'metric_date.desc',
-      limit: 1
-    });
-    if (data && data.length > 0) {
-      const m = data[0];
-      const pct = (m.cash_sleeve_pct * 100).toFixed(2);
-      document.getElementById('cash-sleeve-val').textContent = pct + '%';
-      cashMetrics = m;
-      const synced = new Date(m.last_synced_at).toLocaleDateString('en-US', {month:'short', day:'numeric'});
-      document.getElementById('cash-sleeve-sub').textContent = 'SGOV · FDUXX · GLD dry powder · as of ' + synced;
-      // Update sidebar sync time
-      const syncEl = document.getElementById('sync-time');
-      if (syncEl) syncEl.textContent = 'Jun ' + new Date(m.last_synced_at).getDate() + ', ' + new Date(m.last_synced_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    } else {
-      document.getElementById('cash-sleeve-val').textContent = '—';
-      document.getElementById('cash-sleeve-sub').textContent = 'No data yet';
-    }
-  } catch(e) {
-    document.getElementById('cash-sleeve-val').textContent = '—';
-    document.getElementById('cash-sleeve-sub').textContent = 'Could not load';
-  }
-}
+// Load phase tickers then holdings
+var PHASE1 = [];
+var holdingsData = {};
+var activeHoldingTicker = null;
 
-// Init
-// Set deploy time
-const deployTime = document.lastModified 
-  ? new Date(document.lastModified).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
-  : 'Unknown';
-document.getElementById('deploy-time').textContent = deployTime;
-
-loadRecordCount();
-loadWatchItems();
-loadCashSleeve();
-// Load tickers first, then holdings
-loadPhaseTickers().then(() => loadHoldings());
-
-// Phase 1 tickers — loaded from Supabase
-let PHASE1 = [];
-let holdingsData = {};
-let activeTicker = null;
-let cashMetrics = {};
-
-async function loadPhaseTickers() {
-  try {
-    const data = await query('phase_tickers', {
-      select: 'ticker,name,sort_order',
-      phase: 'eq.Phase 1',
-      status: 'eq.active',
-      order: 'sort_order.asc'
-    });
-    if (data && data.length > 0) {
-      PHASE1 = data.map(d => ({ticker: d.ticker, name: d.name}));
-    }
-  } catch(e) {
-    console.error('Could not load phase tickers:', e);
-    // Fallback
+supaFetch('phase_tickers', { select: 'ticker,name,sort_order', phase: 'eq.Phase 1', status: 'eq.active', order: 'sort_order.asc' }).then(function(data) {
+  if (data && data.length) {
+    PHASE1 = data;
+  } else {
     PHASE1 = [
-      {ticker:'LNG', name:'Cheniere Energy'},
-      {ticker:'NEXT', name:'NextDecade'},
-      {ticker:'EOG', name:'EOG Resources'},
-      {ticker:'WMB', name:'Williams Companies'},
-      {ticker:'EPD', name:'Enterprise Products'},
-      {ticker:'CF', name:'CF Industries'},
-      {ticker:'INSW', name:'Intl Seaways'}
+      {ticker:'LNG',name:'Cheniere Energy'},{ticker:'NEXT',name:'NextDecade'},
+      {ticker:'EOG',name:'EOG Resources'},{ticker:'WMB',name:'Williams Companies'},
+      {ticker:'EPD',name:'Enterprise Products'},{ticker:'CF',name:'CF Industries'},
+      {ticker:'INSW',name:'Intl Seaways'}
     ];
   }
-}
+  return loadHoldings();
+}).catch(function() {
+  PHASE1 = [
+    {ticker:'LNG',name:'Cheniere Energy'},{ticker:'NEXT',name:'NextDecade'},
+    {ticker:'EOG',name:'EOG Resources'},{ticker:'WMB',name:'Williams Companies'},
+    {ticker:'EPD',name:'Enterprise Products'},{ticker:'CF',name:'CF Industries'},
+    {ticker:'INSW',name:'Intl Seaways'}
+  ];
+  loadHoldings();
+});
 
-async function loadHoldings() {
-  try {
-    const today = new Date().toISOString().split('T')[0];
-    const data = await query('holdings_detail', {
-      select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date,last_synced_at',
-      metric_date: 'eq.' + today,
-      order: 'ticker.asc'
-    });
-    if (data && data.length > 0) {
-      for (const row of data) holdingsData[row.ticker] = row;
-      const syncEl = document.getElementById('sync-time');
-      if (syncEl && data[0].last_synced_at) {
-        const d = new Date(data[0].last_synced_at);
-        syncEl.textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-        syncEl.style.color = 'var(--green)';
-      }
+function loadHoldings() {
+  var today = new Date().toISOString().split('T')[0];
+  return supaFetch('holdings_detail', { select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date', metric_date: 'eq.' + today, order: 'ticker.asc' }).then(function(data) {
+    if (data && data.length) {
+      data.forEach(function(row) { holdingsData[row.ticker] = row; });
     }
     renderHoldings();
-  } catch(e) {
-    document.getElementById('holdings-list').innerHTML = '<div class="error">Could not load: ' + e.message + '</div>';
-  }
+  }).catch(function() { renderHoldings(); });
 }
 
 function renderHoldings() {
-  const list = document.getElementById('holdings-list');
-  if (!list) return;
-  let html = '';
-  for (const h of PHASE1) {
-    const d = holdingsData[h.ticker] || {};
-    const alloc = d.alloc_pct ? (d.alloc_pct*100).toFixed(2)+'%' : '—';
-    const pl = d.pl_pct != null ? parseFloat(d.pl_pct)*100 : null;
-    const plColor = pl==null?'var(--muted)':pl>=0?'var(--green)':'var(--red)';
-    const plText = pl!=null?(pl>=0?'+':'')+pl.toFixed(2)+'%':'—';
-    const dotClass = h.ticker==='NEXT'?'dot-amber':'dot-green';
-    const barW = d.alloc_pct ? Math.min(100,d.alloc_pct*100/0.05) : 20;
-    html += `<div id="row-${h.ticker}" class="holding-row" style="cursor:pointer;flex-wrap:wrap;" onclick="showPanel('${h.ticker}')">
-      <span class="status-dot ${dotClass}"></span>
-      <span class="h-ticker">${h.ticker}</span>
-      <span class="h-name">${h.name}</span>
-      <div class="h-bar-wrap"><div class="h-bar" style="width:${barW}%;background:${dotClass==='dot-amber'?'var(--amber)':'var(--green)'};"></div></div>
-      <span style="font-family:var(--mono);font-size:11px;color:${plColor};min-width:52px;text-align:right;">${plText}</span>
-      <span class="h-alloc">${alloc}</span>
-    </div>`;
-  }
+  var list = document.getElementById('holdings-list');
+  if (!PHASE1.length) { list.innerHTML = '<div class="loading">No tickers configured</div>'; return; }
+  document.getElementById('holdings-count').textContent = PHASE1.length + ' positions';
+  var html = '';
+  PHASE1.forEach(function(h) {
+    var d = holdingsData[h.ticker] || {};
+    var alloc = d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—';
+    var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
+    var plTxt = pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—';
+    var plClr = pl != null ? (pl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--muted)';
+    var dotCls = h.ticker === 'NEXT' ? 'dot-amber' : 'dot-green';
+    var barW = d.alloc_pct ? Math.min(100, parseFloat(d.alloc_pct)*100/0.05) : 15;
+    var barClr = h.ticker === 'NEXT' ? 'var(--amber)' : 'var(--green)';
+    html += '<div id="hrow-' + h.ticker + '" class="holding-row" onclick="toggleHolding(\'' + h.ticker + '\')">';
+    html += '<div class="h-dot ' + dotCls + '"></div>';
+    html += '<span class="h-ticker">' + h.ticker + '</span>';
+    html += '<span class="h-name">' + h.name + '</span>';
+    html += '<div class="h-bar-wrap"><div class="h-bar" style="width:' + barW + '%;background:' + barClr + '"></div></div>';
+    html += '<span class="h-pl" style="color:' + plClr + '">' + plTxt + '</span>';
+    html += '<span class="h-alloc">' + alloc + '</span>';
+    html += '</div>';
+    html += '<div class="detail-panel" id="detail-' + h.ticker + '">';
+    html += '<div class="detail-grid" id="detail-grid-' + h.ticker + '"><div class="loading" style="grid-column:1/-1">Loading detail...</div></div>';
+    html += '</div>';
+  });
   list.innerHTML = html;
-  document.getElementById('h-panel-count').textContent = PHASE1.length + ' positions';
 }
 
-function closePanel() {
-  document.getElementById('side-panel').style.display = 'none';
-  if (activeTicker) {
-    const row = document.getElementById('row-'+activeTicker);
-    if (row) row.style.background = '';
-    activeTicker = null;
-  }
-}
-
-function showPanel(ticker) {
-  if (activeTicker===ticker) { closePanel(); return; }
-  if (activeTicker) {
-    const prev = document.getElementById('row-'+activeTicker);
-    if (prev) prev.style.background = '';
-  }
-  activeTicker = ticker;
-  const row = document.getElementById('row-'+ticker);
-  if (row) {
-    row.style.background = 'var(--green-dim)';
-    const panel = document.getElementById('side-panel');
-    row.parentNode.insertBefore(panel, row.nextSibling);
-  }
-  const d = holdingsData[ticker] || {};
-  const h = PHASE1.find(x=>x.ticker===ticker) || {};
-  document.getElementById('sp-ticker').textContent = ticker;
-  document.getElementById('sp-name').textContent = h.name || '';
-  let daysHeld = '—';
-  if (d.purchase_date) {
-    const parts = String(d.purchase_date).replace(/[^0-9/]/g,'').split('/');
-    if (parts.length>=2) {
-      const pd = new Date(2026,parseInt(parts[0])-1,parseInt(parts[1]));
-      const diff = Math.floor((new Date()-pd)/86400000);
-      if (!isNaN(diff)&&diff>=0&&diff<3000) daysHeld = diff+' days';
-    }
-  }
-  const fmt = (v) => v!=null?'$'+parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
-  const pl = d.pl_pct!=null?parseFloat(d.pl_pct)*100:null;
-  const plColor = pl==null?'var(--muted)':pl>=0?'var(--green)':'var(--red)';
-  const unrealized = (d.current_value!=null&&d.cost_basis!=null)?(d.current_value-d.cost_basis):null;
-  const rows = [
-    ['Entry Price',fmt(d.entry_price)],
-    ['Cost Basis',fmt(d.cost_basis)],
-    ['Current Value',fmt(d.current_value)],
-    ['P/L',pl!=null?`<span style="color:${plColor}">${pl>=0?'+':''}${pl.toFixed(2)}%</span>`:'—'],
-    ['Unrealized',unrealized!=null?`<span style="color:${unrealized>=0?'var(--green)':'var(--red)'}">${unrealized>=0?'+':''}${fmt(unrealized)}</span>`:'—'],
-    ['Weight',d.alloc_pct?(d.alloc_pct*100).toFixed(2)+'%':'—'],
-    ['Days Held',daysHeld],
-    ['Purchased',d.purchase_date||'—']
-  ];
-  document.getElementById('sp-content').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${rows.map(([label,val])=>`<div style="background:var(--bg2);border-radius:6px;padding:8px 10px;"><div style="font-size:9px;color:var(--dim);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px;">${label}</div><div style="font-family:var(--mono);font-size:12px;color:var(--text);">${val}</div></div>`).join('')}</div>`;
-  document.getElementById('side-panel').style.display = 'block';
-}
-function showCashDetail() {
-  const card = document.querySelector('.metric-card.amber');
-  const detail = document.getElementById('cash-detail');
-  if (detail.style.display === 'block') {
-    detail.style.display = 'none';
+function toggleHolding(ticker) {
+  var panel = document.getElementById('detail-' + ticker);
+  var row = document.getElementById('hrow-' + ticker);
+  if (panel.style.display === 'block') {
+    panel.style.display = 'none';
+    row.classList.remove('active-row');
+    activeHoldingTicker = null;
     return;
   }
-  
-  const m = cashMetrics;
-  const fmt$ = (v) => {
-    if (v == null) return '—';
-    const n = parseFloat(v);
-    if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
-    if (n >= 1000) return '$' + (n/1000).toFixed(0) + 'K';
-    return '$' + n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
-  };
-  const fmtPct = (v) => v != null ? (parseFloat(v)*100).toFixed(2)+'%' : '—';
-  
-  const rows = [
-    ['SGOV', 'iShares 0-3M Treasury', m.sgov_pct, m.sgov_value],
-    ['FDUXX', 'Fidelity Money Market', m.fduxx_pct, m.fduxx_value],
-    ['FTSM', 'First Trust Short Maturity', m.ftsm_pct, m.ftsm_value],
-    ['PTSHX', 'PIMCO Short-Term', m.ptshx_pct, m.ptshx_value],
-    ['GLD', 'SPDR Gold (above 9% core)', m.gld_excess_pct, m.gld_excess_value]
+  if (activeHoldingTicker) {
+    document.getElementById('detail-' + activeHoldingTicker).style.display = 'none';
+    document.getElementById('hrow-' + activeHoldingTicker).classList.remove('active-row');
+  }
+  activeHoldingTicker = ticker;
+  row.classList.add('active-row');
+  panel.style.display = 'block';
+  var d = holdingsData[ticker] || {};
+  var daysHeld = '—';
+  if (d.purchase_date) {
+    var parts = String(d.purchase_date).split('/');
+    if (parts.length >= 2) {
+      var pd = new Date(parseInt(parts[2] || 2026), parseInt(parts[0])-1, parseInt(parts[1]));
+      var diff = Math.floor((new Date() - pd) / 86400000);
+      if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
+    }
+  }
+  var unrealized = (d.current_value && d.cost_basis) ? parseFloat(d.current_value) - parseFloat(d.cost_basis) : null;
+  var cells = [
+    ['Entry Price', fmtDollar(d.entry_price)],
+    ['Cost Basis', fmtDollar(d.cost_basis)],
+    ['Current Value', fmtDollar(d.current_value)],
+    ['P / L', '<span style="color:' + plColor(d.pl_pct) + '">' + fmtPl(d.pl_pct) + '</span>'],
+    ['Unrealized', unrealized != null ? '<span style="color:' + (unrealized>=0?'var(--green)':'var(--red)') + '">' + fmtDollar(unrealized) + '</span>' : '—'],
+    ['Weight', fmtPct(d.alloc_pct)],
+    ['Days Held', daysHeld],
+    ['Purchased', d.purchase_date || '—']
   ];
-  
-  const total_pct = (m.cash_sleeve_pct != null) ? (parseFloat(m.cash_sleeve_pct)*100).toFixed(2)+'%' : '—';
-  
-  document.getElementById('cash-detail-content').innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:6px;">
-      ${rows.map(([ticker, name, pct, val]) => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--bg3);border-radius:6px;">
-          <div>
-            <div style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text);">${ticker}</div>
-            <div style="font-size:10px;color:var(--muted);">${name}</div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-family:var(--mono);font-size:12px;color:var(--text);">${fmt$(val)}</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);">${fmtPct(pct)}</div>
-          </div>
-        </div>`).join('')}
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--amber-dim);border-radius:6px;margin-top:4px;border:1px solid rgba(146,87,10,0.15);">
-        <span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber);">Total Cash Sleeve</span>
-        <span style="font-family:var(--mono);font-size:13px;font-weight:500;color:var(--amber);">${total_pct}</span>
-      </div>
-    </div>`;
-  
-  // Position below the card
-  if (card) {
-    const rect = card.getBoundingClientRect();
-    detail.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-    detail.style.left = rect.left + 'px';
-  }
-  detail.style.display = 'block';
+  var ghtml = cells.map(function(c) {
+    return '<div class="detail-cell"><div class="detail-cell-label">' + c[0] + '</div><div class="detail-cell-val">' + c[1] + '</div></div>';
+  }).join('');
+  document.getElementById('detail-grid-' + ticker).innerHTML = ghtml;
 }
 
-// Close cash detail on outside click
-document.addEventListener('click', function(e) {
-  const detail = document.getElementById('cash-detail');
-  const card = document.querySelector('.metric-card.amber');
-  if (detail && detail.style.display === 'block') {
-    if (!detail.contains(e.target) && (!card || !card.contains(e.target))) {
-      detail.style.display = 'none';
-    }
-  }
+// Load watch items
+supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase_tag,status', status: 'eq.active', order: 'trigger_date.asc.nullslast', limit: 8 }).then(function(data) {
+  var today = new Date(); today.setHours(0,0,0,0);
+  document.getElementById('wi-count').textContent = (data && data.length) ? data.length + '+' : '—';
+  document.getElementById('wi-count-sub').textContent = 'active · monitoring';
+  document.getElementById('wi-nav-badge').textContent = (data && data.length) ? data.length : '—';
+  document.getElementById('wi-panel-count').textContent = (data && data.length) ? data.length + ' shown' : '—';
+  if (!data || !data.length) { document.getElementById('wi-list').innerHTML = '<div class="loading">No active watch items</div>'; return; }
+  var html = data.map(function(wi) {
+    var badgeCls = 'wi-pend', badgeTxt = 'Pending';
+    if (wi.trigger_date) {
+      var td = new Date(wi.trigger_date); td.setHours(0,0,0,0);
+      var diff = Math.ceil((td - today) / 86400000);
+      if (diff <= 0) { badgeCls = 'wi-act'; badgeTxt = 'Overdue'; }
+      else if (diff <= 7) { badgeCls = 'wi-act'; badgeTxt = diff + 'd'; }
+      else if (diff <= 30) { badgeCls = 'wi-watch'; badgeTxt = diff + 'd'; }
+      else { badgeCls = 'wi-pend'; badgeTxt = new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+    } else if (wi.trigger_condition) { badgeCls = 'wi-watch'; badgeTxt = 'Condition'; }
+    var meta = wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : (wi.trigger_condition ? wi.trigger_condition.substring(0,45) : 'No date set');
+    if (wi.phase_tag) meta += ' · ' + wi.phase_tag;
+    var txt = wi.item.length > 70 ? wi.item.substring(0,70) + '…' : wi.item;
+    return '<div class="wi-row"><div class="wi-num">WI-' + wi.id + '</div><div class="wi-content"><div class="wi-text">' + txt + '</div><div class="wi-meta">' + meta + '</div></div><div class="wi-badge ' + badgeCls + '">' + badgeTxt + '</div></div>';
+  }).join('');
+  document.getElementById('wi-list').innerHTML = html;
+}).catch(function(e) {
+  document.getElementById('wi-list').innerHTML = '<div class="error-msg">Could not load: ' + e.message + '</div>';
 });
 
-// Intake Modal
-let intakeAnalysis = '';
-let intakeArticle = '';
+// Research Intake Modal
+var intakeAnalysis = '';
+var intakeArticle = '';
 
-function openIntake() {
-  document.getElementById('intake-modal').style.display = 'flex';
-}
-function closeIntake() {
-  document.getElementById('intake-modal').style.display = 'none';
-}
-
-async function runIntake() {
-  const article = document.getElementById('intake-article').value.trim();
-  const source = document.getElementById('intake-source').value.trim();
-  const author = document.getElementById('intake-author').value;
-  const phase = document.getElementById('intake-phase').value;
-
-  if (!article) { document.getElementById('intake-status').textContent = 'Please paste article text first.'; return; }
-
-  intakeArticle = article;
-  document.getElementById('intake-btn').disabled = true;
-  document.getElementById('intake-save-bar').style.display = 'none';
-  document.getElementById('intake-output').innerHTML = '<p style="color:var(--dim);font-style:italic;">Analyzing with Claude...</p>';
-  document.getElementById('intake-status').textContent = 'Sending to Claude...';
-
-  try {
-    const sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management (KMWM). Analyze research documents using the KMWM framework. FORMAT: SIGNAL RATING (SIGNAL TIER: ACT/READ/FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT). Then: 1. Article Summary, 2. Executive Overview, 3. Strong Points, 4. Weak Points, 5. Additional Thoughts, 6. KMWM Portfolio Verdict. RULES: KMWM conclusions in BOLD. Source material plain text. Spell out all abbreviations first use. Source: ' + (source||'Unknown') + ' | Author: ' + author + ' | Phase: ' + phase;
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: sysPrompt,
-        messages: [{ role: 'user', content: 'Analyze this research document:\n\n' + article }]
-      })
-    });
-
-    const data = await response.json();
-    const text = data.content?.map(b => b.text||'').join('') || 'No response';
-    intakeAnalysis = text;
-
-    const html = text
-      .replace(/^## (.+)$/gm, '<h3 style="font-family:var(--serif);font-size:15px;margin:16px 0 6px;color:var(--text);">$1</h3>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/
-
-/g, '</p><p style="margin-bottom:8px;">')
-      .replace(/
-/g, '<br>');
-
-    document.getElementById('intake-output').innerHTML = '<p style="margin-bottom:8px;">' + html + '</p>';
-    document.getElementById('intake-save-bar').style.display = 'flex';
-    document.getElementById('intake-status').textContent = 'Analysis complete — save or kill';
-
-  } catch(e) {
-    document.getElementById('intake-output').innerHTML = '<p style="color:var(--red);">Error: ' + e.message + '</p>';
-    document.getElementById('intake-status').textContent = 'Error: ' + e.message;
-  }
-  document.getElementById('intake-btn').disabled = false;
-}
-
-async function saveIntake() {
-  const source = document.getElementById('intake-source').value.trim() || 'Unknown';
-  const author = document.getElementById('intake-author').value;
-  const phase = document.getElementById('intake-phase').value;
-  const dateStr = new Date().toISOString().split('T')[0];
-  const sourceFileId = (source + '-' + dateStr).toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,60);
-  const sourceFileName = source + ' — ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-
-  document.getElementById('intake-save-note').textContent = 'Saving...';
-
-  try {
-    const base = {
-      source_file_id: sourceFileId,
-      source_file_name: sourceFileName,
-      source_folder: 'Research Intake',
-      company_tags: [],
-      topic_tags: ['author: '+author, 'source: '+source, phase],
-      portfolio_impact_tags: [phase],
-      portfolio_status: ['research'],
-      research_stage: 'analyzed',
-      is_analyzed: true,
-      read_by_steve: author==='Steve',
-      read_by_michael: author==='Michael'
-    };
-
-    for (const [idx, type, text] of [[0,'research',intakeArticle],[1,'kmwm_analysis',intakeAnalysis]]) {
-      const res = await fetch(SUPABASE_URL+'/rest/v1/research_chunks', {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer '+SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify({...base, chunk_index:idx, research_type:type, content:text, content_summary:text.substring(0,200)+'...'})
-      });
-      if (!res.ok) throw new Error('Save failed: '+res.status);
-    }
-
-    document.getElementById('intake-save-bar').style.display = 'none';
-    document.getElementById('intake-output').innerHTML += '<div style="margin-top:16px;padding:10px 14px;background:var(--green-dim);border-radius:8px;color:var(--green);font-family:var(--mono);font-size:11px;">✓ Records committed to database</div>';
-    document.getElementById('intake-status').textContent = 'Saved to database';
-    document.getElementById('intake-article').value = '';
-    document.getElementById('intake-source').value = '';
-    intakeAnalysis = '';
-    intakeArticle = '';
-
-  } catch(e) {
-    document.getElementById('intake-save-note').textContent = 'Error: '+e.message;
-  }
-}
-
-function killIntake() {
-  document.getElementById('intake-save-bar').style.display = 'none';
-  document.getElementById('intake-output').innerHTML = '<p style="color:var(--dim);font-style:italic;">Killed — not saved. Ready for next article.</p>';
-  document.getElementById('intake-status').textContent = 'Killed';
-  intakeAnalysis = '';
-  intakeArticle = '';
-}
-
-// Close modal on background click
+document.getElementById('intake-open-btn').addEventListener('click', function() {
+  document.getElementById('intake-modal').classList.add('open');
+});
+document.getElementById('intake-close-btn').addEventListener('click', function() {
+  document.getElementById('intake-modal').classList.remove('open');
+});
 document.getElementById('intake-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeIntake();
+  if (e.target === this) this.classList.remove('open');
 });
 
+document.getElementById('intake-analyze-btn').addEventListener('click', function() {
+  var article = document.getElementById('intake-text').value.trim();
+  var source = document.getElementById('intake-source').value.trim() || 'Unknown';
+  var author = document.getElementById('intake-author').value;
+  var phase = document.getElementById('intake-phase').value;
+  if (!article) { setIntakeStatus('Please paste article text first.', 'error'); return; }
+  intakeArticle = article;
+  intakeAnalysis = '';
+  document.getElementById('intake-analyze-btn').disabled = true;
+  document.getElementById('intake-footer').classList.remove('visible');
+  document.getElementById('signal-badge').style.display = 'none';
+  document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analyzing with Claude...</p>';
+  setIntakeStatus('Sending to Claude...', 'active');
+  var sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management. Analyze research documents using the KMWM framework. Format your response with these sections: SIGNAL RATING (include SIGNAL TIER: ACT or READ or FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT), then Section 1 Article Summary, Section 2 Executive Overview, Section 3 Strong Points (KMWM conclusions in bold), Section 4 Weak Points, Section 5 Additional Thoughts, Section 6 KMWM Portfolio Verdict. Source: ' + source + '. Author: ' + author + '. Phase: ' + phase + '. Spell out all abbreviations on first use.';
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: sysPrompt,
+      messages: [{ role: 'user', content: 'Analyze this research document: ' + article }]
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    var text = '';
+    if (data.content && data.content.length) {
+      data.content.forEach(function(b) { if (b.text) text += b.text; });
+    }
+    if (!text) throw new Error('No response from Claude');
+    intakeAnalysis = text;
+    var html = renderMarkdown(text);
+    document.getElementById('intake-output').innerHTML = html;
+    var tierMatch = text.match(/SIGNAL TIER[:\s]+([A-Z]+)/i);
+    if (tierMatch) {
+      var tier = tierMatch[1].toUpperCase().trim();
+      var badge = document.getElementById('signal-badge');
+      badge.textContent = tier;
+      badge.className = 'signal-badge';
+      if (tier === 'ACT') badge.classList.add('signal-act');
+      else if (tier === 'READ') badge.classList.add('signal-read');
+      else badge.classList.add('signal-file');
+      badge.style.display = 'inline-block';
+    }
+    document.getElementById('intake-footer').classList.add('visible');
+    setIntakeStatus('Analysis complete — review and save or kill', 'active');
+  }).catch(function(e) {
+    document.getElementById('intake-output').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
+    setIntakeStatus('Error: ' + e.message, 'error');
+  }).finally(function() {
+    document.getElementById('intake-analyze-btn').disabled = false;
+  });
+});
+
+function renderMarkdown(text) {
+  var lines = text.split('\n');
+  var html = '';
+  lines.forEach(function(line) {
+    var trimmed = line.trim();
+    if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
+      var heading = trimmed.replace(/^#+\s*/, '');
+      html += '<h3>' + escHtml(heading) + '</h3>';
+    } else if (trimmed === '') {
+      html += '<br>';
+    } else {
+      var processed = escHtml(trimmed).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      html += '<p>' + processed + '</p>';
+    }
+  });
+  return html;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setIntakeStatus(msg, type) {
+  var el = document.getElementById('intake-status');
+  el.textContent = msg;
+  el.className = 'intake-status' + (type ? ' ' + type : '');
+}
+
+document.getElementById('intake-save-btn').addEventListener('click', function() {
+  var source = document.getElementById('intake-source').value.trim() || 'Unknown';
+  var author = document.getElementById('intake-author').value;
+  var phase = document.getElementById('intake-phase').value;
+  var dateStr = new Date().toISOString().split('T')[0];
+  var slug = (source + '-' + dateStr).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 60);
+  var fileName = source + ' \u2014 ' + new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('intake-save-note').textContent = 'Saving...';
+  var base = {
+    source_file_id: slug, source_file_name: fileName,
+    source_folder: 'Research Intake', company_tags: '{}',
+    topic_tags: '{"author: ' + author + '","source: ' + source + '","' + phase + '"}',
+    portfolio_impact_tags: '{"' + phase + '"}',
+    portfolio_status: '{"research"}', research_stage: 'analyzed',
+    is_analyzed: true, read_by_steve: author === 'Steve', read_by_michael: author === 'Michael'
+  };
+  var records = [
+    Object.assign({}, base, { chunk_index: 0, research_type: 'research', content: intakeArticle, content_summary: intakeArticle.substring(0,200) }),
+    Object.assign({}, base, { chunk_index: 1, research_type: 'kmwm_analysis', content: intakeAnalysis, content_summary: intakeAnalysis.substring(0,200) })
+  ];
+  var saveNext = function(i) {
+    if (i >= records.length) {
+      document.getElementById('intake-footer').classList.remove('visible');
+      document.getElementById('intake-output').innerHTML += '<div class="success-banner">\u2713 Records committed to database</div>';
+      setIntakeStatus('Saved to database', 'active');
+      document.getElementById('intake-text').value = '';
+      document.getElementById('intake-source').value = '';
+      intakeArticle = ''; intakeAnalysis = '';
+      return;
+    }
+    fetch(SUPA_URL + '/rest/v1/research_chunks', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(records[i])
+    }).then(function(r) {
+      if (!r.ok) { r.text().then(function(t) { document.getElementById('intake-save-note').textContent = 'Error: ' + t.substring(0,60); }); return; }
+      saveNext(i + 1);
+    }).catch(function(e) { document.getElementById('intake-save-note').textContent = 'Error: ' + e.message; });
+  };
+  saveNext(0);
+});
+
+document.getElementById('intake-kill-btn').addEventListener('click', function() {
+  document.getElementById('intake-footer').classList.remove('visible');
+  document.getElementById('intake-output').innerHTML = '<p class="placeholder">Killed \u2014 not saved. Ready for next article.</p>';
+  document.getElementById('signal-badge').style.display = 'none';
+  setIntakeStatus('Killed \u2014 not saved');
+  intakeArticle = ''; intakeAnalysis = '';
+});
 </script>
 </body>
+</html>
