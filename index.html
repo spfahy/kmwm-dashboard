@@ -694,7 +694,7 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
   if (!article) { setIntakeStatus('Please paste article text first.', 'error'); return; }
   intakeArticle = article;
   intakeAnalysis = '';
-  intakeChatHistory = [];
+  intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
   document.getElementById('intake-chat-messages').innerHTML = '';
   document.getElementById('intake-chat-area').classList.remove('visible');
   document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
@@ -804,6 +804,7 @@ document.getElementById('intake-save-btn').addEventListener('click', function() 
       document.getElementById('intake-output').innerHTML += '<div class="success-banner">\u2713 Records committed to database</div>';
       setIntakeStatus('Saved to database', 'active');
       document.getElementById('intake-text').value = '';
+      intakeParentSlug = slug; // set parent so any pending thread records link correctly
       intakeArticle = ''; intakeAnalysis = '';
       // Auto-close modal after 2 seconds
       setTimeout(function() {
@@ -814,7 +815,7 @@ document.getElementById('intake-save-btn').addEventListener('click', function() 
         document.getElementById('intake-chat-area').classList.remove('visible');
         document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
         setIntakeStatus('Ready \u2014 paste article and analyze');
-        intakeChatHistory = [];
+        intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
       }, 2000);
       return;
     }
@@ -849,11 +850,22 @@ document.getElementById('intake-chat-toggle').addEventListener('click', function
 
 // Chat send
 var intakeChatHistory = [];
+var intakeThreadIndex = 0;
+var intakeParentSlug = '';
 
 document.getElementById('intake-chat-send').addEventListener('click', sendChatMessage);
 document.getElementById('intake-chat-input').addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
 });
+
+function saveThreadRecord(role, content) {
+  if (!intakeParentSlug) return; // no parent yet — will save when user clicks Save
+  fetch(SUPA_URL + '/rest/v1/research_threads', {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ parent_source_file_id: intakeParentSlug, thread_index: intakeThreadIndex++, role: role, content: content })
+  }).catch(function() {}); // silent — don't interrupt the UI on thread save failure
+}
 
 function sendChatMessage() {
   var input = document.getElementById('intake-chat-input');
@@ -862,6 +874,7 @@ function sendChatMessage() {
   if (!intakeAnalysis) { appendChatMsg('assistant', 'Please run an analysis first before asking follow-up questions.'); return; }
   input.value = '';
   appendChatMsg('user', msg);
+  saveThreadRecord('user', msg);
   document.getElementById('intake-chat-send').disabled = true;
   document.getElementById('chat-progress').classList.add('visible');
 
@@ -885,6 +898,7 @@ function sendChatMessage() {
     var reply = data.analysis || data.reply || 'No response received.';
     intakeChatHistory.push({ role: 'assistant', content: reply });
     appendChatMsg('assistant', reply);
+    saveThreadRecord('assistant', reply);
   }).catch(function(e) {
     appendChatMsg('assistant', 'Error: ' + e.message);
   }).finally(function() {
@@ -915,7 +929,7 @@ document.getElementById('intake-kill-btn').addEventListener('click', function() 
   document.getElementById('intake-output').innerHTML = '<p class="placeholder">Killed \u2014 not saved. Ready for next article.</p>';
   document.getElementById('signal-badge').style.display = 'none';
   setIntakeStatus('Killed \u2014 not saved');
-  intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = [];
+  intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
   document.getElementById('intake-chat-messages').innerHTML = '';
   document.getElementById('intake-chat-area').classList.remove('visible');
   document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
