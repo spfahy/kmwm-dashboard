@@ -362,8 +362,9 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 </head>
 <body>
 
-<div class="view-only-banner" id="view-only-banner">VIEW ONLY — Kelley &amp; Mullis Research Dashboard · Read-only access</div>
-<div class="shell">
+<div style="background:var(--blue);color:#fff;font-family:var(--mono);font-size:11px;text-align:center;padding:7px;letter-spacing:0.06em;position:fixed;top:0;left:0;right:0;z-index:99999">VIEW ONLY · Kelley &amp; Mullis Wealth Management Research Dashboard · No editing permitted</div>
+<div style="height:33px;flex-shrink:0"></div>
+<div class="shell" style="height:calc(100vh - 33px)">
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -579,7 +580,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
           <div class="phase-box-title" id="phase-overlay-title">Phase 1 — Energy / LNG</div>
           <span id="phase-overlay-status-badge" style="font-family:var(--mono);font-size:11px;padding:3px 12px;border-radius:20px;background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)">—</span>
-          
         </div>
         <div class="phase-box-sub" id="phase-overlay-sub">Loading...</div>
         <div id="phase-overlay-updated" style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:3px"></div>
@@ -633,7 +633,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       <button class="modal-close" id="wi-detail-close">Close ✕</button>
     </div>
     <div class="wi-detail-body" id="wi-detail-body"></div>
-    <div class="wi-detail-footer"></div>
+    <div class="wi-detail-footer"><span style="font-family:var(--mono);font-size:10px;color:var(--dim)">View only</span></div>
   </div>
 </div>
 
@@ -643,7 +643,8 @@ var SUPA_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
 
 // ─── VIEW-ONLY MODE ────────────────────────────────────────────
 var VIEW_ONLY = true;
-// VIEW_ONLY is always true in this file
+if (VIEW_ONLY) {
+  }
 function applyViewOnly() {
   if (!VIEW_ONLY) return;
   // Hide edit controls
@@ -713,40 +714,9 @@ function loadPhaseStatus() {
 loadPhaseStatus();
 applyViewOnly();
 
-function openPhaseStatusEdit() {
-  if (!activePhaseId || !phaseStatusData[activePhaseId]) return;
-  var row = phaseStatusData[activePhaseId];
-  document.getElementById('phase-edit-name').textContent = 'Phase ' + activePhaseId + ' - ' + row.phase_name;
-  document.getElementById('phase-status-select').value = row.status;
-  document.getElementById('phase-edit-user').textContent = CURRENT_USER;
-  document.getElementById('phase-status-save-msg').textContent = '';
-  document.getElementById('phase-status-modal').classList.add('open');
-}
+function openPhaseStatusEdit() { /* read-only */ }
 
-function savePhaseStatus() {
-  if (!activePhaseId) return;
-  var newStatus = document.getElementById('phase-status-select').value;
-  var now = new Date().toISOString();
-  document.getElementById('phase-status-save-msg').textContent = 'Saving...';
-  fetch(SUPA_URL + '/rest/v1/phase_status?phase_id=eq.' + activePhaseId, {
-    method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ status: newStatus, updated_by: CURRENT_USER, updated_at: now })
-  }).then(function(r) {
-    if (!r.ok) { document.getElementById('phase-status-save-msg').textContent = 'Error saving'; return; }
-    phaseStatusData[activePhaseId].status = newStatus;
-    phaseStatusData[activePhaseId].updated_by = CURRENT_USER;
-    phaseStatusData[activePhaseId].updated_at = now;
-    var badge = document.getElementById('phase-badge-' + activePhaseId);
-    if (badge) { badge.textContent = newStatus; var s = STATUS_STYLES[newStatus] || STATUS_STYLES['Watching']; badge.style.background = s.bg; badge.style.color = s.color; badge.style.border = s.border; }
-    var ob = document.getElementById('phase-overlay-status-badge');
-    if (ob) { ob.textContent = newStatus; var s2 = STATUS_STYLES[newStatus] || STATUS_STYLES['Watching']; ob.style.background = s2.bg; ob.style.color = s2.color; ob.style.border = s2.border; }
-    var updLine = document.getElementById('phase-overlay-updated');
-    if (updLine) updLine.textContent = 'Updated by ' + CURRENT_USER + ' at ' + new Date(now).toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + new Date(now).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('phase-status-save-msg').textContent = 'Saved';
-    setTimeout(function() { document.getElementById('phase-status-modal').classList.remove('open'); }, 800);
-  }).catch(function() { document.getElementById('phase-status-save-msg').textContent = 'Error saving'; });
-}
+function savePhaseStatus() { /* read-only */ }
 
 function supaFetch(table, params) {
   var parts = [];
@@ -835,25 +805,7 @@ function loadArticlesView() {
   });
 }
 
-function markRead(id, e) {
-  e.stopPropagation();
-  var readCol = 'read_by_' + CURRENT_USER.toLowerCase();
-  var payload = {}; payload[readCol] = true;
-  fetch(SUPA_URL + '/rest/v1/research_chunks?id=eq.' + id, {
-    method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify(payload)
-  }).then(function() {
-    var btn = document.getElementById('mrb-' + id);
-    if (btn) { btn.textContent = 'Read ✓'; btn.classList.add('done'); btn.disabled = true; }
-    var row = document.getElementById('article-row-' + id);
-    if (row) { row.style.opacity = '0.45'; }
-    // Update badge count
-    var badge = document.getElementById('unread-badge');
-    var current = parseInt(badge.textContent) || 0;
-    if (current > 0) badge.textContent = current - 1;
-  }).catch(function() {});
-}
+function markRead(id, e) { e.stopPropagation(); /* read-only */ }
 
 // ─── WATCH ITEMS FULL VIEW ─────────────────────────────────────
 function loadWatchItemsView() {
@@ -1242,15 +1194,6 @@ function openSummary(tag,view){
 var activeWiId=null;
 document.getElementById('wi-detail-close').addEventListener('click',function(){document.getElementById('wi-detail-modal').classList.remove('open');});
 document.getElementById('wi-detail-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
-document.getElementById('wi-complete-btn').addEventListener('click',function(){
-  if(!activeWiId)return;
-  fetch(SUPA_URL+'/rest/v1/watch_items?id=eq.'+activeWiId,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({status:'completed'})}).then(function(){document.getElementById('wi-detail-modal').classList.remove('open');var r=document.getElementById('wi-row-'+activeWiId);if(r)r.remove();});
-});
-document.getElementById('wi-kill-btn').addEventListener('click',function(){
-  if(!activeWiId)return;
-  if(!confirm('Kill watch item WI-'+activeWiId+'? This cannot be undone.'))return;
-  fetch(SUPA_URL+'/rest/v1/watch_items?id=eq.'+activeWiId,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({status:'killed'})}).then(function(){document.getElementById('wi-detail-modal').classList.remove('open');var r=document.getElementById('wi-row-'+activeWiId);if(r)r.remove();});
-});
 function openWiDetail(wi){
   activeWiId=wi.id;
   document.getElementById('wi-detail-body').innerHTML=[['ID','WI-'+wi.id],['Item',wi.item],['Trigger Date',wi.trigger_date?new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—'],['Trigger Condition',wi.trigger_condition||'—'],['Phase',wi.phase_tag||'—'],['Owner',wi.owner||'—'],['Status',wi.status]].map(function(f){return '<div class="wi-detail-field"><div class="wi-detail-label">'+f[0]+'</div><div class="wi-detail-val">'+(f[1]||'—')+'</div></div>';}).join('');
@@ -1260,54 +1203,13 @@ function openWiDetail(wi){
 // ─── INTAKE MODAL ──────────────────────────────────────────────
 var intakeAnalysis='';var intakeArticle='';var intakeChatHistory=[];var intakeThreadIndex=0;var intakeParentSlug='';
 function resetIntake(){intakeArticle='';intakeAnalysis='';intakeChatHistory=[];intakeThreadIndex=0;intakeParentSlug='';document.getElementById('intake-text').value='';document.getElementById('intake-output').innerHTML='<p class="placeholder">Analysis will appear here after you submit an article.</p>';document.getElementById('signal-badge').style.display='none';document.getElementById('output-toolbar').classList.remove('visible');document.getElementById('intake-footer').classList.remove('visible');document.getElementById('intake-chat-input-row').style.display='none';document.getElementById('pdf-drop-label').textContent='Drop PDF here or click to browse';setIntakeStatus('Ready — paste article and analyze');}
-document.getElementById('intake-open-btn').addEventListener('click',function(){document.getElementById('intake-modal').classList.add('open');});
-document.getElementById('intake-close-btn').addEventListener('click',function(){document.getElementById('intake-modal').classList.remove('open');document.getElementById('intake-text').value='';document.getElementById('pdf-drop-label').textContent='Drop PDF here or click to browse';});
-document.getElementById('intake-modal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('open');document.getElementById('intake-text').value='';document.getElementById('pdf-drop-label').textContent='Drop PDF here or click to browse';}});
-var dropZone=document.getElementById('pdf-drop-zone');var fileInput=document.getElementById('pdf-file-input');
-dropZone.addEventListener('dragover',function(e){e.preventDefault();dropZone.classList.add('drag-over');});
-dropZone.addEventListener('dragleave',function(){dropZone.classList.remove('drag-over');});
-dropZone.addEventListener('drop',function(e){e.preventDefault();dropZone.classList.remove('drag-over');var file=e.dataTransfer.files[0];if(file)handlePdfFile(file);});
-fileInput.addEventListener('change',function(){if(fileInput.files[0])handlePdfFile(fileInput.files[0]);});
-function handlePdfFile(file){if(file.type!=='application/pdf'){setIntakeStatus('Only PDF files are supported here.','error');return;}document.getElementById('pdf-drop-label').textContent=file.name+' — extracting text...';setIntakeStatus('Reading PDF...','active');if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';var reader=new FileReader();reader.onload=function(e){var ab=e.target.result;if(!window.pdfjsLib){setIntakeStatus('PDF.js not loaded — paste text manually.','error');return;}pdfjsLib.getDocument({data:ab}).promise.then(function(pdf){var pp=[];for(var i=1;i<=pdf.numPages;i++)pp.push(pdf.getPage(i).then(function(p){return p.getTextContent().then(function(tc){return tc.items.map(function(it){return it.str;}).join(' ');});}));return Promise.all(pp);}).then(function(pages){var ft=pages.join('\n\n').trim();if(ft){document.getElementById('intake-text').value=ft;document.getElementById('pdf-drop-label').textContent=file.name+' ✓ — text extracted ('+ft.length+' chars)';setIntakeStatus('PDF extracted — review text and click Analyze','active');}else{document.getElementById('pdf-drop-label').textContent=file.name+' — no text found';setIntakeStatus('No text extracted — PDF may be image-based.','error');}}).catch(function(err){document.getElementById('pdf-drop-label').textContent=file.name+' — extraction failed';setIntakeStatus('PDF extraction failed: '+err.message,'error');});};reader.readAsArrayBuffer(file);}
-document.getElementById('intake-analyze-btn').addEventListener('click',function(){
-  var article=document.getElementById('intake-text').value.trim();var author=document.getElementById('intake-author').value;
-  if(!article){setIntakeStatus('Please paste article text first.','error');return;}
-  intakeArticle=article;intakeAnalysis='';intakeChatHistory=[];intakeThreadIndex=0;intakeParentSlug='';
-  document.getElementById('intake-chat-input-row').style.display='none';document.getElementById('intake-analyze-btn').disabled=true;document.getElementById('intake-footer').classList.remove('visible');document.getElementById('output-toolbar').classList.remove('visible');document.getElementById('signal-badge').style.display='none';document.getElementById('intake-output').innerHTML='<p class="placeholder">Analyzing with Claude...</p>';setIntakeStatus('Sending to Claude...','active');
-  var prog=document.getElementById('intake-progress');var progBar=document.getElementById('intake-progress-bar');prog.classList.add('visible');progBar.classList.add('indeterminate');
-  fetch(SUPA_URL+'/functions/v1/analyze-article',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},body:JSON.stringify({article:article,author:author,max_tokens:4000})}).then(function(r){return r.json();}).then(function(data){
-    if(data.error)throw new Error(data.error);var text=data.analysis||'';if(!text)throw new Error('No response from Claude');
-    intakeAnalysis=text;document.getElementById('intake-output').innerHTML=renderMarkdown(text);
-    var tierMatch=text.match(/SIGNAL TIER[:\s]+([A-Z]+)/i);if(tierMatch){var tier=tierMatch[1].toUpperCase().trim();var badge=document.getElementById('signal-badge');badge.textContent=tier;badge.className='signal-badge';if(tier==='ACT')badge.classList.add('signal-act');else if(tier==='READ')badge.classList.add('signal-read');else badge.classList.add('signal-file');badge.style.display='inline-block';}
-    document.getElementById('output-toolbar').classList.add('visible');document.getElementById('intake-footer').classList.add('visible');document.getElementById('intake-chat-input-row').style.display='flex';setIntakeStatus('Analysis complete — review and save or kill','active');
-  }).catch(function(e){document.getElementById('intake-output').innerHTML='<p style="color:var(--red)">Error: '+e.message+'</p>';setIntakeStatus('Error: '+e.message,'error');}).finally(function(){document.getElementById('intake-analyze-btn').disabled=false;progBar.classList.remove('indeterminate');prog.classList.remove('visible');});
-});
-document.getElementById('intake-copy-btn').addEventListener('click',function(){var text=document.getElementById('intake-output').innerText||document.getElementById('intake-output').textContent;navigator.clipboard.writeText(text).then(function(){var btn=document.getElementById('intake-copy-btn');btn.textContent='Copied ✓';btn.classList.add('copied');setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied');},2000);});});
-document.getElementById('font-toggle-btn2').addEventListener('click',function(){var output=document.getElementById('intake-output');var isLarge=output.classList.contains('large-text');output.classList.toggle('large-text',!isLarge);this.textContent=isLarge?'A+':'A−';this.classList.toggle('active',!isLarge);document.getElementById('font-toggle-btn').textContent=isLarge?'A+':'A−';document.getElementById('font-toggle-btn').classList.toggle('active',!isLarge);});
-document.getElementById('font-toggle-btn').addEventListener('click',function(){var output=document.getElementById('intake-output');var isLarge=output.classList.contains('large-text');output.classList.toggle('large-text',!isLarge);this.textContent=isLarge?'A+':'A−';this.classList.toggle('active',!isLarge);document.getElementById('font-toggle-btn2').textContent=isLarge?'A+':'A−';document.getElementById('font-toggle-btn2').classList.toggle('active',!isLarge);});
-function renderMarkdown(text){var html='';text.split('\n').forEach(function(line){var trimmed=line.trim();if(trimmed.startsWith('## ')||trimmed.startsWith('# ')){html+='<h3>'+escHtml(trimmed.replace(/^#+\s*/,''))+'</h3>';}else if(trimmed===''){html+='<br>';}else{html+='<p>'+escHtml(trimmed).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')+'</p>';}});return html;}
-function setIntakeStatus(msg,type){var el=document.getElementById('intake-status');el.textContent=msg;el.className='intake-status'+(type?' '+type:'');}
-document.getElementById('intake-save-btn').addEventListener('click',function(){
-  var author=document.getElementById('intake-author').value;var dateStr=new Date().toISOString().split('T')[0];var sourceRaw='research-intake';
-  var srcMatch=intakeAnalysis.match(/source[:\s]+([^\n]{3,40})/i);if(srcMatch)sourceRaw=srcMatch[1].trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').substring(0,30);
-  var phaseTag='phase-1';if(/phase 2/i.test(intakeAnalysis))phaseTag='phase-2';else if(/phase 3/i.test(intakeAnalysis))phaseTag='phase-3';
-  var ts=Date.now().toString().slice(-6);var slug=(sourceRaw+'-'+dateStr+'-'+ts).substring(0,60);var fileName=sourceRaw+' — '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('intake-save-note').textContent='Saving...';
-  var base={source_file_id:slug,source_file_name:fileName,source_folder:'Research Intake',company_tags:'{}',topic_tags:'{"author: '+author+'","source: '+sourceRaw+'","'+phaseTag+'"}',portfolio_impact_tags:'{"'+phaseTag+'"}',portfolio_status:'{"research"}',research_stage:'analyzed',is_analyzed:true,read_by_steve:author==='Steve',read_by_michael:author==='Michael'};
-  var records=[Object.assign({},base,{chunk_index:0,research_type:'research',content:intakeArticle,content_summary:intakeArticle.substring(0,200)}),Object.assign({},base,{chunk_index:1,research_type:'kmwm_analysis',content:intakeAnalysis,content_summary:intakeAnalysis.substring(0,200)})];
-  var saveNext=function(i){if(i>=records.length){intakeParentSlug=slug;document.getElementById('intake-footer').classList.remove('visible');document.getElementById('intake-output').innerHTML+='<div class="success-banner">✓ Records committed to database</div>';setIntakeStatus('Saved to database','active');setTimeout(function(){document.getElementById('intake-modal').classList.remove('open');resetIntake();},2000);return;}fetch(SUPA_URL+'/rest/v1/research_chunks',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(records[i])}).then(function(r){if(!r.ok){r.text().then(function(t){document.getElementById('intake-save-note').textContent='Error: '+t.substring(0,80);});return;}saveNext(i+1);}).catch(function(e){document.getElementById('intake-save-note').textContent='Error: '+e.message;});};
-  saveNext(0);
-});
-document.getElementById('intake-kill-btn').addEventListener('click',function(){document.getElementById('intake-footer').classList.remove('visible');document.getElementById('output-toolbar').classList.remove('visible');document.getElementById('intake-output').innerHTML='<p class="placeholder">Killed — not saved. Ready for next article.</p>';document.getElementById('signal-badge').style.display='none';document.getElementById('intake-text').value='';document.getElementById('pdf-drop-label').textContent='Drop PDF here or click to browse';setIntakeStatus('Killed — not saved');intakeArticle='';intakeAnalysis='';intakeChatHistory=[];intakeThreadIndex=0;intakeParentSlug='';document.getElementById('intake-chat-input-row').style.display='none';});
-document.getElementById('intake-chat-send').addEventListener('click',sendChatMessage);
-document.getElementById('intake-chat-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage();}});
+// Intake listeners removed — read-only build
 function saveThreadRecord(role,content){if(!intakeParentSlug)return;fetch(SUPA_URL+'/rest/v1/research_threads',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({parent_source_file_id:intakeParentSlug,thread_index:intakeThreadIndex++,role:role,content:content})}).catch(function(){});}
 function sendChatMessage(){var input=document.getElementById('intake-chat-input');var msg=input.value.trim();if(!msg)return;if(!intakeAnalysis){appendChatMsg('assistant','Please run an analysis first before asking follow-up questions.');return;}input.value='';appendChatMsg('user',msg);saveThreadRecord('user',msg);document.getElementById('intake-chat-send').disabled=true;document.getElementById('chat-progress').classList.add('visible');if(intakeChatHistory.length===0){intakeChatHistory.push({role:'user',content:'Here is the article I submitted:\n\n'+intakeArticle+'\n\n---\n\nHere is the KMWM analysis you produced:\n\n'+intakeAnalysis+'\n\n---\n\nNow I have a follow-up question: '+msg});}else{intakeChatHistory.push({role:'user',content:msg});}fetch(SUPA_URL+'/functions/v1/analyze-article',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},body:JSON.stringify({mode:'chat',conversation:intakeChatHistory})}).then(function(r){return r.json();}).then(function(data){if(data.error)throw new Error(data.error);var reply=data.analysis||data.reply||'No response received.';intakeChatHistory.push({role:'assistant',content:reply});appendChatMsg('assistant',reply);saveThreadRecord('assistant',reply);}).catch(function(e){appendChatMsg('assistant','Error: '+e.message);}).finally(function(){document.getElementById('intake-chat-send').disabled=false;document.getElementById('chat-progress').classList.remove('visible');});}
 document.addEventListener("DOMContentLoaded", applyViewOnly);
 
 function appendChatMsg(role,text){var output=document.getElementById('intake-output');var div=document.createElement('div');if(role==='user'){div.style.cssText='margin:14px 0 8px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:7px;font-size:13px;color:var(--text);font-style:italic;';div.innerHTML='<span style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Follow-up question</span>'+escHtml(text).replace(/\n/g,'<br>');}else{div.style.cssText='margin:8px 0 14px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;font-size:13px;line-height:1.7;color:var(--text);';div.innerHTML='<span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Response</span>'+escHtml(text).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}output.appendChild(div);div.scrollIntoView({behavior:'smooth',block:'nearest'});}
 </script>
-
 
 </body>
 </html>
