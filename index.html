@@ -303,6 +303,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -1074,32 +1075,49 @@ function handlePdfFile(file) {
   }
   document.getElementById('pdf-drop-label').textContent = file.name + ' — extracting text...';
   setIntakeStatus('Reading PDF...', 'active');
-  // Use FileReader to read as base64, then send to Edge Function for extraction
+
+  // Set PDF.js worker source (cdnjs hosted)
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
   var reader = new FileReader();
   reader.onload = function(e) {
-    var base64 = e.target.result.split(',')[1];
-    fetch(SUPA_URL + '/functions/v1/analyze-article', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
-      body: JSON.stringify({ mode: 'pdf_extract', pdf_base64: base64, filename: file.name })
-    }).then(function(r) { return r.json(); }).then(function(data) {
-      var text = data.text || data.content || '';
-      if (text) {
-        document.getElementById('intake-text').value = text;
-        document.getElementById('pdf-drop-label').textContent = file.name + ' ✓ — text extracted';
-        setIntakeStatus('PDF extracted — review text and analyze', 'active');
-      } else {
-        // Fall back: set filename as hint, user pastes manually
-        document.getElementById('pdf-drop-label').textContent = file.name + ' — extraction unavailable, paste text manually';
-        setIntakeStatus('PDF extraction not supported by Edge Function — paste text manually.', 'error');
+    var arrayBuffer = e.target.result;
+    if (!window.pdfjsLib) {
+      setIntakeStatus('PDF.js not loaded — paste text manually.', 'error');
+      document.getElementById('pdf-drop-label').textContent = file.name + ' — extraction unavailable';
+      return;
+    }
+    pdfjsLib.getDocument({ data: arrayBuffer }).promise.then(function(pdf) {
+      var totalPages = pdf.numPages;
+      var pagePromises = [];
+      for (var i = 1; i <= totalPages; i++) {
+        pagePromises.push(pdf.getPage(i).then(function(page) {
+          return page.getTextContent().then(function(tc) {
+            return tc.items.map(function(item) { return item.str; }).join(' ');
+          });
+        }));
       }
-    }).catch(function() {
-      document.getElementById('pdf-drop-label').textContent = file.name + ' — could not extract';
-      setIntakeStatus('PDF extraction failed — paste text manually.', 'error');
+      return Promise.all(pagePromises);
+    }).then(function(pages) {
+      var fullText = pages.join('\n\n').trim();
+      if (fullText) {
+        document.getElementById('intake-text').value = fullText;
+        document.getElementById('pdf-drop-label').textContent = file.name + ' \u2713 — text extracted (' + fullText.length + ' chars)';
+        setIntakeStatus('PDF extracted — review text and click Analyze', 'active');
+      } else {
+        document.getElementById('pdf-drop-label').textContent = file.name + ' — no text found (scanned PDF?)';
+        setIntakeStatus('No text extracted — PDF may be image-based. Paste text manually.', 'error');
+      }
+    }).catch(function(err) {
+      document.getElementById('pdf-drop-label').textContent = file.name + ' — extraction failed';
+      setIntakeStatus('PDF extraction failed: ' + err.message, 'error');
     });
   };
-  reader.readAsDataURL(file);
+  reader.readAsArrayBuffer(file);
 }
+
 
 // Analyze button
 document.getElementById('intake-analyze-btn').addEventListener('click', function() {
