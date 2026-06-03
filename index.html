@@ -368,15 +368,13 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
     <div class="nav-group">
       <div class="nav-label">Overview</div>
       <div class="nav-item active" onclick="showView('dashboard')"><span class="nav-dot"></span> Dashboard</div>
-      <div class="nav-item" onclick="showView('phase-tracker')"><span class="nav-dot"></span> Phase tracker</div>
-      <div class="nav-item" onclick="showView('portfolio')"><span class="nav-dot"></span> Portfolio</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Phases</div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 1')" style="cursor:pointer"><span class="nav-dot" style="background:var(--green)"></span> Phase 1 · Energy <span class="nav-badge" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)">Active</span></div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 2')" style="cursor:pointer"><span class="nav-dot" style="background:var(--blue)"></span> Phase 2 · Power <span class="nav-badge" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.2)">Deploy</span></div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 3')" style="cursor:pointer"><span class="nav-dot" style="background:var(--muted)"></span> Phase 3 · Metals</div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 4')" style="cursor:pointer"><span class="nav-dot" style="background:var(--amber)"></span> Phase 4 · Gold</div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 1')" style="cursor:pointer"><span class="nav-dot" style="background:var(--green)"></span> Phase 1 · Energy <span class="nav-badge" id="phase-badge-1">—</span></div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 2')" style="cursor:pointer"><span class="nav-dot" style="background:var(--blue)"></span> Phase 2 · Power <span class="nav-badge" id="phase-badge-2">—</span></div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 3')" style="cursor:pointer"><span class="nav-dot" style="background:var(--muted)"></span> Phase 3 · Metals <span class="nav-badge" id="phase-badge-3">—</span></div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 4')" style="cursor:pointer"><span class="nav-dot" style="background:var(--amber)"></span> Phase 4 · Gold <span class="nav-badge" id="phase-badge-4">—</span></div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Research</div>
@@ -571,9 +569,14 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 <div class="phase-overlay" id="phase-overlay">
   <div class="phase-box">
     <div class="phase-box-header">
-      <div>
-        <div class="phase-box-title" id="phase-overlay-title">Phase 1 — Energy / LNG</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div class="phase-box-title" id="phase-overlay-title">Phase 1 — Energy / LNG</div>
+          <span id="phase-overlay-status-badge" style="font-family:var(--mono);font-size:11px;padding:3px 12px;border-radius:20px;background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)">—</span>
+          <button onclick="openPhaseStatusEdit()" style="padding:3px 10px;background:none;border:1px solid var(--border2);border-radius:5px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--mono);">Edit status</button>
+        </div>
         <div class="phase-box-sub" id="phase-overlay-sub">Loading...</div>
+        <div id="phase-overlay-updated" style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:3px"></div>
       </div>
       <button class="modal-close" id="phase-overlay-close">Close ✕</button>
     </div>
@@ -699,6 +702,71 @@ var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 // Current user — default Steve, can be set from session context
 var CURRENT_USER = 'Steve';
+
+// ─── PHASE STATUS ───────────────────────────────────────────────
+var phaseStatusData = {};
+var activePhaseId = null;
+
+var STATUS_STYLES = {
+  'Active':    { bg:'var(--green-dim)',  color:'var(--green)',  border:'1px solid var(--green-mid)' },
+  'Deploying': { bg:'var(--blue-dim)',   color:'var(--blue)',   border:'1px solid rgba(26,61,143,0.2)' },
+  'Watching':  { bg:'rgba(0,0,0,0.04)', color:'var(--muted)',  border:'1px solid var(--border)' },
+  'Monitoring':{ bg:'var(--amber-dim)', color:'var(--amber)',  border:'1px solid rgba(122,74,8,0.2)' },
+  'Complete':  { bg:'var(--green-dim)', color:'var(--green)',  border:'1px solid var(--green-mid)' }
+};
+
+function loadPhaseStatus() {
+  fetch(SUPA_URL + '/rest/v1/phase_status?select=phase_id,phase_name,status,updated_by,updated_at&order=phase_id.asc', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data || !data.length) return;
+    data.forEach(function(row) {
+      phaseStatusData[row.phase_id] = row;
+      var badge = document.getElementById('phase-badge-' + row.phase_id);
+      if (badge) {
+        badge.textContent = row.status;
+        var s = STATUS_STYLES[row.status] || STATUS_STYLES['Watching'];
+        badge.style.background = s.bg; badge.style.color = s.color; badge.style.border = s.border;
+      }
+    });
+  }).catch(function() {});
+}
+loadPhaseStatus();
+
+function openPhaseStatusEdit() {
+  if (!activePhaseId || !phaseStatusData[activePhaseId]) return;
+  var row = phaseStatusData[activePhaseId];
+  document.getElementById('phase-edit-name').textContent = 'Phase ' + activePhaseId + ' - ' + row.phase_name;
+  document.getElementById('phase-status-select').value = row.status;
+  document.getElementById('phase-edit-user').textContent = CURRENT_USER;
+  document.getElementById('phase-status-save-msg').textContent = '';
+  document.getElementById('phase-status-modal').classList.add('open');
+}
+
+function savePhaseStatus() {
+  if (!activePhaseId) return;
+  var newStatus = document.getElementById('phase-status-select').value;
+  var now = new Date().toISOString();
+  document.getElementById('phase-status-save-msg').textContent = 'Saving...';
+  fetch(SUPA_URL + '/rest/v1/phase_status?phase_id=eq.' + activePhaseId, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ status: newStatus, updated_by: CURRENT_USER, updated_at: now })
+  }).then(function(r) {
+    if (!r.ok) { document.getElementById('phase-status-save-msg').textContent = 'Error saving'; return; }
+    phaseStatusData[activePhaseId].status = newStatus;
+    phaseStatusData[activePhaseId].updated_by = CURRENT_USER;
+    phaseStatusData[activePhaseId].updated_at = now;
+    var badge = document.getElementById('phase-badge-' + activePhaseId);
+    if (badge) { badge.textContent = newStatus; var s = STATUS_STYLES[newStatus] || STATUS_STYLES['Watching']; badge.style.background = s.bg; badge.style.color = s.color; badge.style.border = s.border; }
+    var ob = document.getElementById('phase-overlay-status-badge');
+    if (ob) { ob.textContent = newStatus; var s2 = STATUS_STYLES[newStatus] || STATUS_STYLES['Watching']; ob.style.background = s2.bg; ob.style.color = s2.color; ob.style.border = s2.border; }
+    var updLine = document.getElementById('phase-overlay-updated');
+    if (updLine) updLine.textContent = 'Updated by ' + CURRENT_USER + ' at ' + new Date(now).toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + new Date(now).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('phase-status-save-msg').textContent = 'Saved';
+    setTimeout(function() { document.getElementById('phase-status-modal').classList.remove('open'); }, 800);
+  }).catch(function() { document.getElementById('phase-status-save-msg').textContent = 'Error saving'; });
+}
 
 function supaFetch(table, params) {
   var parts = [];
@@ -1084,6 +1152,21 @@ document.getElementById('phase-overlay').addEventListener('click',function(e){if
 function openPhaseOverlay(phase){
   var cfg=PHASE_CONFIG[phase];if(!cfg)return;
   activePhaseSecTicker=null;
+  // Set activePhaseId from phase string
+  activePhaseId = parseInt(phase.replace('Phase ',''));
+  // Populate status badge and updated-by line
+  var pRow = phaseStatusData[activePhaseId];
+  var ob = document.getElementById('phase-overlay-status-badge');
+  var updLine = document.getElementById('phase-overlay-updated');
+  if (ob && pRow) {
+    ob.textContent = pRow.status;
+    var s = STATUS_STYLES[pRow.status] || STATUS_STYLES['Watching'];
+    ob.style.background = s.bg; ob.style.color = s.color; ob.style.border = s.border;
+  }
+  if (updLine && pRow && pRow.updated_by) {
+    var d = new Date(pRow.updated_at);
+    updLine.textContent = 'Updated by ' + pRow.updated_by + ' at ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  } else if (updLine) { updLine.textContent = ''; }
   document.getElementById('phase-overlay-title').textContent=cfg.title;
   document.getElementById('phase-overlay-sub').textContent=cfg.tickers.join(' · ');
   document.getElementById('phase-thesis-content').innerHTML='<p>'+cfg.summary+'</p><p style="color:var(--dim);font-style:italic;font-size:11px">Loading database synthesis...</p>';
@@ -1242,5 +1325,40 @@ function saveThreadRecord(role,content){if(!intakeParentSlug)return;fetch(SUPA_U
 function sendChatMessage(){var input=document.getElementById('intake-chat-input');var msg=input.value.trim();if(!msg)return;if(!intakeAnalysis){appendChatMsg('assistant','Please run an analysis first before asking follow-up questions.');return;}input.value='';appendChatMsg('user',msg);saveThreadRecord('user',msg);document.getElementById('intake-chat-send').disabled=true;document.getElementById('chat-progress').classList.add('visible');if(intakeChatHistory.length===0){intakeChatHistory.push({role:'user',content:'Here is the article I submitted:\n\n'+intakeArticle+'\n\n---\n\nHere is the KMWM analysis you produced:\n\n'+intakeAnalysis+'\n\n---\n\nNow I have a follow-up question: '+msg});}else{intakeChatHistory.push({role:'user',content:msg});}fetch(SUPA_URL+'/functions/v1/analyze-article',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},body:JSON.stringify({mode:'chat',conversation:intakeChatHistory})}).then(function(r){return r.json();}).then(function(data){if(data.error)throw new Error(data.error);var reply=data.analysis||data.reply||'No response received.';intakeChatHistory.push({role:'assistant',content:reply});appendChatMsg('assistant',reply);saveThreadRecord('assistant',reply);}).catch(function(e){appendChatMsg('assistant','Error: '+e.message);}).finally(function(){document.getElementById('intake-chat-send').disabled=false;document.getElementById('chat-progress').classList.remove('visible');});}
 function appendChatMsg(role,text){var output=document.getElementById('intake-output');var div=document.createElement('div');if(role==='user'){div.style.cssText='margin:14px 0 8px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:7px;font-size:13px;color:var(--text);font-style:italic;';div.innerHTML='<span style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Follow-up question</span>'+escHtml(text).replace(/\n/g,'<br>');}else{div.style.cssText='margin:8px 0 14px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;font-size:13px;line-height:1.7;color:var(--text);';div.innerHTML='<span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Response</span>'+escHtml(text).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}output.appendChild(div);div.scrollIntoView({behavior:'smooth',block:'nearest'});}
 </script>
+
+<!-- Phase Status Edit Modal -->
+<div class="wi-detail-overlay" id="phase-status-modal">
+  <div class="wi-detail-box" style="width:400px">
+    <div class="wi-detail-header">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase">Edit Phase Status</div>
+      <button class="modal-close" onclick="document.getElementById('phase-status-modal').classList.remove('open')">Close ✕</button>
+    </div>
+    <div class="wi-detail-body">
+      <div class="wi-detail-field">
+        <div class="wi-detail-label">Phase</div>
+        <div class="wi-detail-val" id="phase-edit-name">—</div>
+      </div>
+      <div class="wi-detail-field">
+        <div class="wi-detail-label">New Status</div>
+        <select id="phase-status-select" style="margin-top:4px">
+          <option value="Active">Active</option>
+          <option value="Deploying">Deploying</option>
+          <option value="Watching">Watching</option>
+          <option value="Monitoring">Monitoring</option>
+          <option value="Complete">Complete</option>
+        </select>
+      </div>
+      <div class="wi-detail-field" style="margin-top:8px">
+        <div class="wi-detail-label">Changing as</div>
+        <div class="wi-detail-val" style="font-family:var(--mono);font-size:13px;color:var(--green)" id="phase-edit-user">—</div>
+      </div>
+    </div>
+    <div class="wi-detail-footer">
+      <button class="btn-wi-complete" onclick="savePhaseStatus()">Save Status</button>
+      <button class="btn-wi-kill" onclick="document.getElementById('phase-status-modal').classList.remove('open')">Cancel</button>
+      <span id="phase-status-save-msg" style="font-family:var(--mono);font-size:10px;color:var(--green);margin-left:auto"></span>
+    </div>
+  </div>
+</div>
 </body>
 </html>
