@@ -1,4 +1,4 @@
-<!-- KMWM Dashboard v1.5 — 2026-06-02 — Session start: fetch https://raw.githubusercontent.com/spfahy/kmwm-dashboard/main/index.html to verify current version -->
+<!-- KMWM Dashboard v1.6 — 2026-06-03 — Session start: fetch https://raw.githubusercontent.com/spfahy/kmwm-dashboard/main/index.html to verify current version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -167,7 +167,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .modal-close:hover{background:var(--bg3)}
 .modal-body{display:flex;flex:1;overflow:hidden}
 .modal-left{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px;gap:10px;overflow-y:auto}
-.modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.modal-output-toolbar{display:none;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
+.modal-output-toolbar.visible{display:flex}
 .modal-output{flex:1;overflow-y:auto;padding:18px;font-size:13px;line-height:1.7;color:var(--text)}
 .modal-output.large-text{font-size:15px;line-height:1.8}
 .modal-output.large-text h3{font-size:16px}
@@ -184,6 +186,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 textarea,input[type=text],select{width:100%;border:1px solid var(--border2);border-radius:7px;background:var(--bg3);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;transition:border-color 0.12s}
 textarea{resize:none;line-height:1.5}
 textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);background:var(--bg2)}
+
+/* Drop zone */
+.drop-zone{border:2px dashed var(--border2);border-radius:7px;padding:10px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.06em;cursor:pointer;transition:all 0.15s;margin-top:2px}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.drop-zone input[type=file]{display:none}
+
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .btn-primary{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity 0.12s}
 .btn-primary:hover{opacity:0.88}
@@ -291,7 +299,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .chat-progress{height:3px;background:var(--border);overflow:hidden;flex-shrink:0;display:none}
 .chat-progress.visible{display:block}
 .chat-progress-bar{height:100%;width:40%;background:var(--green);animation:progress-slide 1.4s ease-in-out infinite}
-.modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
@@ -376,7 +383,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         </div>
       </div>
 
-      <!-- Cash Popup (outside metric row to avoid z-index issues) -->
+      <!-- Cash Popup -->
       <div class="cash-popup" id="cash-popup">
         <div class="cash-popup-header">
           <span class="cash-popup-title">Cash Sleeve Breakdown</span>
@@ -408,7 +415,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 
       <!-- Two Column -->
       <div class="two-col">
-
         <!-- Top Research Items -->
         <div class="panel">
           <div class="panel-header">
@@ -442,7 +448,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
           </div>
           <div id="wi-list"><div class="loading">Fetching from database...</div></div>
         </div>
-
       </div>
     </div>
   </div>
@@ -530,7 +535,15 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       <div class="modal-left">
         <div>
           <div class="field-label">Article Text</div>
-          <textarea id="intake-text" rows="11" placeholder="Paste full article text here..."></textarea>
+          <textarea id="intake-text" rows="9" placeholder="Paste full article text here..."></textarea>
+        </div>
+        <!-- PDF Drop Zone -->
+        <div>
+          <div class="field-label">Or drop a PDF</div>
+          <div class="drop-zone" id="pdf-drop-zone" onclick="document.getElementById('pdf-file-input').click()">
+            <input type="file" id="pdf-file-input" accept=".pdf">
+            <span id="pdf-drop-label">Drop PDF here or click to browse</span>
+          </div>
         </div>
         <div>
           <div class="field-label">Author</div>
@@ -544,6 +557,12 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         <div class="intake-progress" id="intake-progress"><div class="intake-progress-bar" id="intake-progress-bar"></div></div>
       </div>
       <div class="modal-right">
+        <!-- Output toolbar with Copy button -->
+        <div class="modal-output-toolbar" id="output-toolbar">
+          <span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-right:auto">Analysis Output</span>
+          <button class="btn-copy" id="intake-copy-btn">Copy</button>
+          <button class="btn-font-toggle" id="font-toggle-btn2">A+</button>
+        </div>
         <div class="modal-output" id="intake-output">
           <p class="placeholder">Analysis will appear here after you submit an article.</p>
         </div>
@@ -567,11 +586,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 </div>
 
 <script>
-// SESSION START PROTOCOL: At the start of each Claude session, fetch
-// https://api.github.com/repos/spfahy/kmwm-dashboard/commits/main
-// to get the latest commit hash and date, then fetch the raw file if
-// the local copy does not match. This ensures Claude always works from
-// the current deployed version.
 var SUPA_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
 
@@ -589,8 +603,7 @@ function tick() {
   var now = new Date();
   document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', timeZoneName:'short'});
 }
-tick();
-setInterval(tick, 1000);
+tick(); setInterval(tick, 1000);
 
 // Deploy time
 var dm = document.lastModified;
@@ -604,12 +617,10 @@ function fomcCountdown() {
   var target = new Date('2026-06-17');
   var today = new Date(); today.setHours(0,0,0,0);
   var days = Math.ceil((target - today) / 86400000);
-  var el = document.getElementById('fomc-days');
-  el.innerHTML = days + '<span>days</span>';
+  document.getElementById('fomc-days').innerHTML = days + '<span>days</span>';
 }
 fomcCountdown();
 
-// Format helpers
 function fmtDollar(v) {
   if (v == null || v === '' || v === '—') return '—';
   var n = parseFloat(String(v).replace(/,/g, ''));
@@ -636,28 +647,22 @@ function plColor(v) {
   return parseFloat(v) >= 0 ? 'var(--green)' : 'var(--red)';
 }
 
-// Load 30-year Treasury yield from Watch Item 28
+// 30-year Treasury
 supaFetch('watch_items', { select: 'current_value,last_checked_at', id: 'eq.28', limit: 1 }).then(function(data) {
   if (!data || !data.length || !data[0].current_value) return;
   var val = parseFloat(data[0].current_value);
   if (isNaN(val)) return;
-  var pct = val.toFixed(3) + '%';
+  document.getElementById('treasury-val').textContent = val.toFixed(3) + '%';
   var card = document.getElementById('treasury-val').closest('.metric-card');
-  document.getElementById('treasury-val').textContent = pct;
-  var trigger = 5.00;
   var sub = document.getElementById('treasury-sub');
   if (val >= 5.25) {
-    sub.textContent = 'ABOVE WI-75 threshold 5.25%';
-    sub.className = 'm-sub bad';
+    sub.textContent = 'ABOVE WI-75 threshold 5.25%'; sub.className = 'm-sub bad';
     card.className = card.className.replace(/\b(green|amber|red|blue)\b/, 'red');
   } else if (val >= 5.00) {
-    sub.textContent = 'Above 5.00% — WI-28 active';
-    sub.className = 'm-sub bad';
+    sub.textContent = 'Above 5.00% — WI-28 active'; sub.className = 'm-sub bad';
     card.className = card.className.replace(/\b(green|amber|red|blue)\b/, 'red');
   } else {
-    var bps = Math.round((trigger - val) * 100);
-    sub.textContent = bps + 'bps below 5.00% trigger';
-    sub.className = 'm-sub warn';
+    sub.textContent = Math.round((5.00 - val) * 100) + 'bps below 5.00% trigger'; sub.className = 'm-sub warn';
   }
   if (data[0].last_checked_at) {
     var checked = new Date(data[0].last_checked_at);
@@ -665,27 +670,24 @@ supaFetch('watch_items', { select: 'current_value,last_checked_at', id: 'eq.28',
   }
 }).catch(function() {});
 
-// Load record count
-supaFetch('research_chunks', { select: 'id', limit: 1 });
+// Record count
 fetch(SUPA_URL + '/rest/v1/research_chunks?select=id&limit=1', {
   headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
 }).then(function(r) {
   var cr = r.headers.get('content-range');
   if (cr) {
-    var total = cr.split('/')[1];
-    document.getElementById('rec-count').textContent = parseInt(total).toLocaleString();
+    document.getElementById('rec-count').textContent = parseInt(cr.split('/')[1]).toLocaleString();
     document.getElementById('rec-sub').textContent = 'records in database';
     document.getElementById('rec-sub').className = 'm-sub good';
   }
 }).catch(function() {});
 
-// Load cash sleeve
+// Cash sleeve
 var cashData = {};
 supaFetch('portfolio_metrics', { select: 'cash_sleeve_pct,sgov_pct,fduxx_pct,ftsm_pct,ptshx_pct,gld_total_pct,gld_excess_pct,sgov_value,fduxx_value,ftsm_value,ptshx_value,gld_excess_value,last_synced_at', order: 'metric_date.desc', limit: 1 }).then(function(data) {
   if (!data || !data.length) return;
   cashData = data[0];
-  var pct = (parseFloat(cashData.cash_sleeve_pct) * 100).toFixed(2);
-  document.getElementById('cash-val').textContent = pct + '%';
+  document.getElementById('cash-val').textContent = (parseFloat(cashData.cash_sleeve_pct) * 100).toFixed(2) + '%';
   var synced = new Date(cashData.last_synced_at);
   var syncStr = synced.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + synced.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('cash-sub').textContent = 'SGOV · FDUXX · GLD dry powder · ' + syncStr;
@@ -693,81 +695,52 @@ supaFetch('portfolio_metrics', { select: 'cash_sleeve_pct,sgov_pct,fduxx_pct,fts
   document.getElementById('sync-time').style.color = 'var(--green)';
 }).catch(function() {});
 
-// Cash popup
 document.getElementById('cash-card').addEventListener('click', function(e) {
   var popup = document.getElementById('cash-popup');
   if (popup.style.display === 'block') { popup.style.display = 'none'; return; }
-  var card = document.getElementById('cash-card');
-  var rect = card.getBoundingClientRect();
-  popup.style.top = (rect.bottom + 6) + 'px';
-  popup.style.left = rect.left + 'px';
-  popup.style.display = 'block';
+  var rect = document.getElementById('cash-card').getBoundingClientRect();
+  popup.style.top = (rect.bottom + 6) + 'px'; popup.style.left = rect.left + 'px'; popup.style.display = 'block';
   var rows = [
-    ['SGOV', 'iShares 0-3M Treasury', cashData.sgov_pct, cashData.sgov_value],
-    ['FDUXX', 'Fidelity Money Market', cashData.fduxx_pct, cashData.fduxx_value],
-    ['FTSM', 'First Trust Short Maturity', cashData.ftsm_pct, cashData.ftsm_value],
-    ['PTSHX', 'PIMCO Short-Term', cashData.ptshx_pct, cashData.ptshx_value],
-    ['GLD', 'SPDR Gold (above 9% core)', cashData.gld_excess_pct, cashData.gld_excess_value]
+    ['SGOV','iShares 0-3M Treasury',cashData.sgov_pct,cashData.sgov_value],
+    ['FDUXX','Fidelity Money Market',cashData.fduxx_pct,cashData.fduxx_value],
+    ['FTSM','First Trust Short Maturity',cashData.ftsm_pct,cashData.ftsm_value],
+    ['PTSHX','PIMCO Short-Term',cashData.ptshx_pct,cashData.ptshx_value],
+    ['GLD','SPDR Gold (above 9% core)',cashData.gld_excess_pct,cashData.gld_excess_value]
   ];
   var html = rows.map(function(r) {
-    return '<div class="cash-row"><div><div class="cash-row-ticker">' + r[0] + '</div><div class="cash-row-name">' + r[1] + '</div></div><div class="cash-row-right"><div class="cash-row-val">' + fmtDollar(r[3]) + '</div><div class="cash-row-pct">' + fmtPct(r[2]) + '</div></div></div>';
+    return '<div class="cash-row"><div><div class="cash-row-ticker">'+r[0]+'</div><div class="cash-row-name">'+r[1]+'</div></div><div class="cash-row-right"><div class="cash-row-val">'+fmtDollar(r[3])+'</div><div class="cash-row-pct">'+fmtPct(r[2])+'</div></div></div>';
   }).join('');
-  var total = cashData.cash_sleeve_pct ? (parseFloat(cashData.cash_sleeve_pct)*100).toFixed(2) + '%' : '—';
-  html += '<div class="cash-total"><span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--amber)">Total Cash Sleeve</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber)">' + total + '</span></div>';
+  html += '<div class="cash-total"><span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--amber)">Total Cash Sleeve</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber)">'+(cashData.cash_sleeve_pct?(parseFloat(cashData.cash_sleeve_pct)*100).toFixed(2)+'%':'—')+'</span></div>';
   document.getElementById('cash-popup-body').innerHTML = html;
 });
-document.getElementById('cash-popup-close').addEventListener('click', function() {
-  document.getElementById('cash-popup').style.display = 'none';
-});
+document.getElementById('cash-popup-close').addEventListener('click', function() { document.getElementById('cash-popup').style.display = 'none'; });
 document.addEventListener('click', function(e) {
   var popup = document.getElementById('cash-popup');
-  var card = document.getElementById('cash-card');
-  if (popup.style.display === 'block' && !popup.contains(e.target) && !card.contains(e.target)) {
-    popup.style.display = 'none';
-  }
+  if (popup.style.display === 'block' && !popup.contains(e.target) && !document.getElementById('cash-card').contains(e.target)) popup.style.display = 'none';
 });
 
-// Load phase tickers then holdings
-var PHASE1 = [];
-var holdingsData = {};
-var activeHoldingTicker = null;
-
+// Holdings
+var PHASE1 = []; var holdingsData = {}; var activeHoldingTicker = null;
 supaFetch('phase_tickers', { select: 'ticker,name,sort_order', phase: 'eq.Phase 1', status: 'eq.active', order: 'sort_order.asc' }).then(function(data) {
-  if (data && data.length) {
-    PHASE1 = data;
-  } else {
-    PHASE1 = [
-      {ticker:'LNG',name:'Cheniere Energy'},{ticker:'NEXT',name:'NextDecade'},
-      {ticker:'EOG',name:'EOG Resources'},{ticker:'WMB',name:'Williams Companies'},
-      {ticker:'EPD',name:'Enterprise Products'},{ticker:'CF',name:'CF Industries'},
-      {ticker:'INSW',name:'Intl Seaways'}
-    ];
-  }
-  return loadHoldings();
+  PHASE1 = (data && data.length) ? data : [{ticker:'LNG',name:'Cheniere Energy'},{ticker:'NEXT',name:'NextDecade'},{ticker:'EOG',name:'EOG Resources'},{ticker:'WMB',name:'Williams Companies'},{ticker:'EPD',name:'Enterprise Products'},{ticker:'CF',name:'CF Industries'},{ticker:'INSW',name:'Intl Seaways'}];
+  loadHoldings();
 }).catch(function() {
-  PHASE1 = [
-    {ticker:'LNG',name:'Cheniere Energy'},{ticker:'NEXT',name:'NextDecade'},
-    {ticker:'EOG',name:'EOG Resources'},{ticker:'WMB',name:'Williams Companies'},
-    {ticker:'EPD',name:'Enterprise Products'},{ticker:'CF',name:'CF Industries'},
-    {ticker:'INSW',name:'Intl Seaways'}
-  ];
+  PHASE1 = [{ticker:'LNG',name:'Cheniere Energy'},{ticker:'NEXT',name:'NextDecade'},{ticker:'EOG',name:'EOG Resources'},{ticker:'WMB',name:'Williams Companies'},{ticker:'EPD',name:'Enterprise Products'},{ticker:'CF',name:'CF Industries'},{ticker:'INSW',name:'Intl Seaways'}];
   loadHoldings();
 });
 
 function loadHoldings() {
   var today = new Date().toISOString().split('T')[0];
   return supaFetch('holdings_detail', { select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date', metric_date: 'eq.' + today, order: 'ticker.asc' }).then(function(data) {
-    if (data && data.length) {
-      data.forEach(function(row) { holdingsData[row.ticker] = row; });
-    }
+    if (data && data.length) data.forEach(function(row) { holdingsData[row.ticker] = row; });
     renderHoldings();
   }).catch(function() { renderHoldings(); });
 }
 
 function renderHoldings() {
   var list = document.getElementById('holdings-list');
-  if (!PHASE1.length) { list.innerHTML = '<div class="loading">No tickers configured</div>'; return; }
-  document.getElementById('holdings-count').textContent = PHASE1.length + ' positions';
+  if (!list || !PHASE1.length) { if(list) list.innerHTML = '<div class="loading">No tickers configured</div>'; return; }
+  if(document.getElementById('holdings-count')) document.getElementById('holdings-count').textContent = PHASE1.length + ' positions';
   var html = '';
   PHASE1.forEach(function(h) {
     var d = holdingsData[h.ticker] || {};
@@ -775,20 +748,15 @@ function renderHoldings() {
     var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
     var plTxt = pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—';
     var plClr = pl != null ? (pl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--muted)';
-    var dotCls = h.ticker === 'NEXT' ? 'dot-amber' : 'dot-green';
     var barW = d.alloc_pct ? Math.min(100, parseFloat(d.alloc_pct)*100/0.05) : 15;
     var barClr = h.ticker === 'NEXT' ? 'var(--amber)' : 'var(--green)';
     html += '<div id="hrow-' + h.ticker + '" class="holding-row" onclick="toggleHolding(\'' + h.ticker + '\')">';
-    html += '<div class="h-dot ' + dotCls + '"></div>';
-    html += '<span class="h-ticker">' + h.ticker + '</span>';
-    html += '<span class="h-name">' + h.name + '</span>';
+    html += '<div class="h-dot ' + (h.ticker === 'NEXT' ? 'dot-amber' : 'dot-green') + '"></div>';
+    html += '<span class="h-ticker">' + h.ticker + '</span><span class="h-name">' + h.name + '</span>';
     html += '<div class="h-bar-wrap"><div class="h-bar" style="width:' + barW + '%;background:' + barClr + '"></div></div>';
     html += '<span class="h-pl" style="color:' + plClr + '">' + plTxt + '</span>';
-    html += '<span class="h-alloc">' + alloc + '</span>';
-    html += '</div>';
-    html += '<div class="detail-panel" id="detail-' + h.ticker + '">';
-    html += '<div class="detail-grid" id="detail-grid-' + h.ticker + '"><div class="loading" style="grid-column:1/-1">Loading detail...</div></div>';
-    html += '</div>';
+    html += '<span class="h-alloc">' + alloc + '</span></div>';
+    html += '<div class="detail-panel" id="detail-' + h.ticker + '"><div class="detail-grid" id="detail-grid-' + h.ticker + '"><div class="loading" style="grid-column:1/-1">Loading detail...</div></div></div>';
   });
   list.innerHTML = html;
 }
@@ -796,53 +764,37 @@ function renderHoldings() {
 function toggleHolding(ticker) {
   var panel = document.getElementById('detail-' + ticker);
   var row = document.getElementById('hrow-' + ticker);
-  if (panel.style.display === 'block') {
-    panel.style.display = 'none';
-    row.classList.remove('active-row');
-    activeHoldingTicker = null;
-    return;
-  }
-  if (activeHoldingTicker) {
-    document.getElementById('detail-' + activeHoldingTicker).style.display = 'none';
-    document.getElementById('hrow-' + activeHoldingTicker).classList.remove('active-row');
-  }
-  activeHoldingTicker = ticker;
-  row.classList.add('active-row');
-  panel.style.display = 'block';
+  if (panel.style.display === 'block') { panel.style.display = 'none'; row.classList.remove('active-row'); activeHoldingTicker = null; return; }
+  if (activeHoldingTicker) { document.getElementById('detail-' + activeHoldingTicker).style.display = 'none'; document.getElementById('hrow-' + activeHoldingTicker).classList.remove('active-row'); }
+  activeHoldingTicker = ticker; row.classList.add('active-row'); panel.style.display = 'block';
   var d = holdingsData[ticker] || {};
   var daysHeld = '—';
-  if (d.purchase_date && d.purchase_date !== '—') {
-    var pd = new Date(d.purchase_date);
-    if (isNaN(pd.getTime())) {
-      // Try M/D format without year — assume most recent past occurrence
-      var parts = String(d.purchase_date).split('/');
-      if (parts.length >= 2) {
-        var yr = parts.length >= 3 ? parseInt(parts[2]) : new Date().getFullYear();
-        pd = new Date(yr, parseInt(parts[0])-1, parseInt(parts[1]));
-        if (pd > new Date()) pd.setFullYear(pd.getFullYear() - 1);
-      }
+  if (d.purchase_date) {
+    var parts = String(d.purchase_date).split('/');
+    if (parts.length >= 2) {
+      var yr = parts.length >= 3 ? parseInt(parts[2]) : new Date().getFullYear();
+      var pd = new Date(yr, parseInt(parts[0])-1, parseInt(parts[1]));
+      if (pd > new Date()) pd.setFullYear(pd.getFullYear()-1);
+      var diff = Math.floor((new Date() - pd) / 86400000);
+      if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
     }
-    var diff = Math.floor((new Date() - pd) / 86400000);
-    if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
   }
-  var unrealized = (d.current_value && d.cost_basis) ? parseFloat(d.current_value) - parseFloat(d.cost_basis) : null;
+  var cv = d.current_value ? parseFloat(d.current_value) : null;
+  var cb = d.cost_basis ? parseFloat(d.cost_basis) : null;
+  var unrealized = (cv && cb) ? cv - cb : null;
   var cells = [
-    ['Entry Price', fmtDollar(d.entry_price)],
-    ['Cost Basis', fmtDollar(d.cost_basis)],
+    ['Entry Price', fmtDollar(d.entry_price)], ['Cost Basis', fmtDollar(d.cost_basis)],
     ['Current Value', fmtDollar(d.current_value)],
     ['P / L', '<span style="color:' + plColor(d.pl_pct) + '">' + fmtPl(d.pl_pct) + '</span>'],
     ['Unrealized', unrealized != null ? '<span style="color:' + (unrealized>=0?'var(--green)':'var(--red)') + '">' + fmtDollar(unrealized) + '</span>' : '—'],
-    ['Weight', fmtPct(d.alloc_pct)],
-    ['Days Held', daysHeld],
-    ['Purchased', d.purchase_date || '—']
+    ['Weight', fmtPct(d.alloc_pct)], ['Days Held', daysHeld], ['Purchased', d.purchase_date || '—']
   ];
-  var ghtml = cells.map(function(c) {
+  document.getElementById('detail-grid-' + ticker).innerHTML = cells.map(function(c) {
     return '<div class="detail-cell"><div class="detail-cell-label">' + c[0] + '</div><div class="detail-cell-val">' + c[1] + '</div></div>';
   }).join('');
-  document.getElementById('detail-grid-' + ticker).innerHTML = ghtml;
 }
 
-// Load watch items
+// Watch items
 supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase_tag,status', status: 'eq.active', order: 'trigger_date.asc.nullslast', limit: 8 }).then(function(data) {
   var today = new Date(); today.setHours(0,0,0,0);
   document.getElementById('wi-count').textContent = (data && data.length) ? data.length + '+' : '—';
@@ -850,7 +802,7 @@ supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase
   document.getElementById('wi-nav-badge').textContent = (data && data.length) ? data.length : '—';
   document.getElementById('wi-panel-count').textContent = (data && data.length) ? data.length + ' shown' : '—';
   if (!data || !data.length) { document.getElementById('wi-list').innerHTML = '<div class="loading">No active watch items</div>'; return; }
-  var html = data.map(function(wi) {
+  document.getElementById('wi-list').innerHTML = data.map(function(wi) {
     var badgeCls = 'wi-pend', badgeTxt = 'Pending';
     if (wi.trigger_date) {
       var td = new Date(wi.trigger_date); td.setHours(0,0,0,0);
@@ -862,17 +814,12 @@ supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase
     } else if (wi.trigger_condition) { badgeCls = 'wi-watch'; badgeTxt = 'Condition'; }
     var meta = wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : (wi.trigger_condition ? wi.trigger_condition.substring(0,45) : 'No date set');
     if (wi.phase_tag) meta += ' · ' + wi.phase_tag;
-    var txt = wi.item.length > 70 ? wi.item.substring(0,70) + '…' : wi.item;
-    return '<div class="wi-row" id="wi-row-' + wi.id + '" onclick=\'openWiDetail(' + JSON.stringify({id:wi.id,item:wi.item,trigger_date:wi.trigger_date,trigger_condition:wi.trigger_condition,phase_tag:wi.phase_tag,owner:wi.owner,status:wi.status}) + ')\'><div class="wi-num">WI-' + wi.id + '</div><div class="wi-content"><div class="wi-text">' + txt + '</div><div class="wi-meta">' + meta + '</div></div><div class="wi-badge ' + badgeCls + '">' + badgeTxt + '</div></div>';
+    return '<div class="wi-row" id="wi-row-' + wi.id + '" onclick=\'openWiDetail(' + JSON.stringify({id:wi.id,item:wi.item,trigger_date:wi.trigger_date,trigger_condition:wi.trigger_condition,phase_tag:wi.phase_tag,owner:wi.owner,status:wi.status}) + ')\'><div class="wi-num">WI-' + wi.id + '</div><div class="wi-content"><div class="wi-text">' + (wi.item.length > 70 ? wi.item.substring(0,70)+'…' : wi.item) + '</div><div class="wi-meta">' + meta + '</div></div><div class="wi-badge ' + badgeCls + '">' + badgeTxt + '</div></div>';
   }).join('');
-  document.getElementById('wi-list').innerHTML = html;
-}).catch(function(e) {
-  document.getElementById('wi-list').innerHTML = '<div class="error-msg">Could not load: ' + e.message + '</div>';
-});
+}).catch(function(e) { document.getElementById('wi-list').innerHTML = '<div class="error-msg">Could not load: ' + e.message + '</div>'; });
 
-// Load Top Research Items — tickers default
+// Top Research Items
 var currentTopView = 'tickers';
-
 function switchTopView(view) {
   currentTopView = view;
   document.getElementById('toggle-tickers').classList.toggle('active', view === 'tickers');
@@ -880,349 +827,174 @@ function switchTopView(view) {
   document.getElementById('top-search-row').style.display = view === 'tickers' ? 'block' : 'none';
   document.getElementById('more-themes-row').style.display = 'none';
   document.getElementById('more-themes-list').style.display = 'none';
-  document.getElementById('ticker-search-input') && (document.getElementById('ticker-search-input').value = '');
+  if(document.getElementById('ticker-search-input')) document.getElementById('ticker-search-input').value = '';
   document.getElementById('top5-list').innerHTML = '<div class="loading">Loading...</div>';
   loadTopItems(view);
 }
-
 function loadTopItems(view) {
   var endpoint = view === 'tickers' ? 'top_research_tags' : 'top_theme_tags';
-  var limit = view === 'themes' ? 30 : 10;
   fetch(SUPA_URL + '/rest/v1/rpc/' + endpoint, {
     method: 'POST',
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tag_limit: limit })
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    renderTopItems(data, view);
-  }).catch(function() {
-    if (view === 'tickers') {
-      renderTopItems([
-        {tag:'LNG',frequency:186},{tag:'WMB',frequency:156},{tag:'EOG',frequency:156},
-        {tag:'CEG',frequency:145},{tag:'EPD',frequency:145},{tag:'VST',frequency:142},
-        {tag:'NEXT',frequency:134},{tag:'GLD',frequency:111},{tag:'INSW',frequency:89},{tag:'CF',frequency:82}
-      ], view);
-    } else {
-      renderTopItems([
-        {tag:'Hormuz',frequency:76},{tag:'macro',frequency:64},{tag:'stagflation',frequency:50},
-        {tag:'LNG export',frequency:44},{tag:'Phase 2',frequency:43}
-      ], view);
-    }
+    body: JSON.stringify({ tag_limit: view === 'themes' ? 30 : 10 })
+  }).then(function(r) { return r.json(); }).then(function(data) { renderTopItems(data, view); }).catch(function() {
+    renderTopItems(view === 'tickers' ? [{tag:'LNG',frequency:186},{tag:'WMB',frequency:156},{tag:'EOG',frequency:156},{tag:'CEG',frequency:145},{tag:'EPD',frequency:145},{tag:'VST',frequency:142},{tag:'NEXT',frequency:134},{tag:'GLD',frequency:111},{tag:'INSW',frequency:89},{tag:'CF',frequency:82}] : [{tag:'Hormuz',frequency:76},{tag:'macro',frequency:64},{tag:'stagflation',frequency:50},{tag:'LNG export',frequency:44},{tag:'Phase 2',frequency:43}], view);
   });
 }
-
 function renderTopItems(data, view) {
   if (!data || !data.length) { document.getElementById('top5-list').innerHTML = '<div class="loading">No data</div>'; return; }
-  var top = data.slice(0, 10);
-  var max = top[0].frequency;
-  var html = top.map(function(item, i) {
+  var top = data.slice(0, 10); var max = top[0].frequency;
+  document.getElementById('top5-list').innerHTML = top.map(function(item, i) {
     var pct = Math.round((item.frequency / max) * 100);
     var rawLabel = item.tag.replace(/_/g, ' ');
     var displayLabel = view === 'themes' ? rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1) : rawLabel;
-    var label = displayLabel.length > 22 ? displayLabel.substring(0,22) + '…' : displayLabel;
+    var label = displayLabel.length > 22 ? displayLabel.substring(0,22)+'…' : displayLabel;
     return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'' + view + '\')">' +
       '<div class="top5-rank">' + (i+1) + '</div>' +
-      '<div class="top5-ticker" style="width:' + (view === 'themes' ? '130px' : '46px') + ';font-size:' + (view === 'themes' ? '11px' : '13px') + '">' + label + '</div>' +
+      '<div class="top5-ticker" style="width:' + (view==='themes'?'130px':'46px') + ';font-size:' + (view==='themes'?'11px':'13px') + '">' + label + '</div>' +
       '<div class="top5-bar-wrap"><div class="top5-bar" style="width:' + pct + '%"></div></div>' +
-      '<div class="top5-count">' + item.frequency + '</div>' +
-      '</div>';
+      '<div class="top5-count">' + item.frequency + '</div></div>';
   }).join('');
-  document.getElementById('top5-list').innerHTML = html;
-
-  // Show more themes button if there are extras
   if (view === 'themes' && data.length > 10) {
-    var extras = data.slice(10);
-    document.getElementById('more-themes-row').style.display = 'block';
-    var extraHtml = extras.map(function(item, i) {
-      var rawLabel = item.tag.replace(/_/g, ' ');
-      var displayLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
-      var label = displayLabel.length > 22 ? displayLabel.substring(0,22) + '…' : displayLabel;
+    var extras = data.slice(10); var extraHtml = extras.map(function(item, i) {
+      var label = item.tag.replace(/_/g,' '); label = label.charAt(0).toUpperCase()+label.slice(1); if(label.length>22) label=label.substring(0,22)+'…';
       return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'themes\')">' +
-        '<div class="top5-rank">' + (i+11) + '</div>' +
-        '<div class="top5-ticker" style="width:130px;font-size:11px">' + label + '</div>' +
-        '<div class="top5-bar-wrap"><div class="top5-bar" style="width:' + Math.round((item.frequency / max) * 100) + '%"></div></div>' +
-        '<div class="top5-count">' + item.frequency + '</div>' +
-        '</div>';
+        '<div class="top5-rank">'+(i+11)+'</div><div class="top5-ticker" style="width:130px;font-size:11px">'+label+'</div>' +
+        '<div class="top5-bar-wrap"><div class="top5-bar" style="width:'+Math.round((item.frequency/max)*100)+'%"></div></div>' +
+        '<div class="top5-count">'+item.frequency+'</div></div>';
     }).join('');
+    document.getElementById('more-themes-row').style.display = 'block';
     document.getElementById('more-themes-list').innerHTML = extraHtml;
-  } else {
-    document.getElementById('more-themes-row').style.display = 'none';
-  }
+  } else { document.getElementById('more-themes-row').style.display = 'none'; }
 }
-
 function toggleMoreThemes() {
-  var list = document.getElementById('more-themes-list');
-  var arrow = document.getElementById('more-themes-arrow');
-  var isOpen = list.style.display !== 'none';
-  list.style.display = isOpen ? 'none' : 'block';
-  arrow.textContent = isOpen ? '▼' : '▲';
-  document.getElementById('more-themes-toggle').querySelector('span:last-child') &&
-    (document.getElementById('more-themes-toggle').lastChild.textContent = isOpen ? ' More themes' : ' Less themes');
+  var list = document.getElementById('more-themes-list'); var arrow = document.getElementById('more-themes-arrow');
+  var isOpen = list.style.display !== 'none'; list.style.display = isOpen ? 'none' : 'block'; arrow.textContent = isOpen ? '▼' : '▲';
 }
-
-function searchTicker() {
-  var input = document.getElementById('ticker-search-input').value.trim().toUpperCase();
-  if (!input) return;
-  openSummary(input, 'tickers');
-}
-
-function clearTickerSearch() {
-  document.getElementById('ticker-search-input').value = '';
-  loadTopItems('tickers');
-}
-
-// Initial load
+function searchTicker() { var input = document.getElementById('ticker-search-input').value.trim().toUpperCase(); if (!input) return; openSummary(input, 'tickers'); }
+function clearTickerSearch() { document.getElementById('ticker-search-input').value = ''; loadTopItems('tickers'); }
 document.getElementById('top-search-row').style.display = 'block';
 loadTopItems('tickers');
 
-// Phase definitions
+// Phase overlay
 var PHASE_CONFIG = {
-  'Phase 1': {
-    title: 'Phase 1 — Energy / LNG',
-    color: 'var(--green)',
-    tickers: ['LNG','NEXT','EOG','WMB','EPD','CF','INSW'],
-    thesisTag: 'Phase 1',
-    summary: 'Hormuz closure thesis: U.S. energy producers, midstream infrastructure, LNG exporters, and nitrogen fertilizer producers positioned to outperform through mine clearance timeline (6+ months) and Ras Laffan repair window (3–5 years).'
-  },
-  'Phase 2': {
-    title: 'Phase 2 — Power / Grid',
-    color: 'var(--blue)',
-    tickers: ['CEG','VST','ETN','VRT','ABBNY'],
-    thesisTag: 'Phase 2',
-    summary: 'AI compute demand driving structural power deficit. Positioned at the power infrastructure input layer — electricity generators and electrical equipment manufacturers. June 17 Warsh FOMC is the next deployment gate.'
-  },
-  'Phase 3': {
-    title: 'Phase 3 — Critical Metals',
-    color: 'var(--muted)',
-    tickers: ['FCX','SCCO','CCJ'],
-    thesisTag: 'Phase 3',
-    summary: 'Critical minerals thesis. Copper (FCX, SCCO) and uranium (CCJ). Crowding risk active. No adds pending Phase 3 confirmation triggers.'
-  },
-  'Phase 4': {
-    title: 'Phase 4 — Monetary / Gold',
-    color: 'var(--amber)',
-    tickers: ['GLD','PSLV'],
-    thesisTag: 'Phase 4',
-    summary: 'Monetary reset hedge. GLD ~10.01% total (9% core + ~1.01% dry powder). Mental accounting: 9% = core position, above 9% = dry powder deployed into better asset class than cash.'
-  }
+  'Phase 1': { title:'Phase 1 — Energy / LNG', color:'var(--green)', tickers:['LNG','NEXT','EOG','WMB','EPD','CF','INSW'], thesisTag:'Phase 1', summary:'Hormuz closure thesis: U.S. energy producers, midstream infrastructure, LNG exporters, and nitrogen fertilizer producers positioned to outperform through mine clearance timeline (6+ months) and Ras Laffan repair window (3–5 years).' },
+  'Phase 2': { title:'Phase 2 — Power / Grid', color:'var(--blue)', tickers:['CEG','VST','ETN','VRT','ABBNY'], thesisTag:'Phase 2', summary:'AI compute demand driving structural power deficit. Positioned at the power infrastructure input layer. June 17 Warsh FOMC is the next deployment gate.' },
+  'Phase 3': { title:'Phase 3 — Critical Metals', color:'var(--muted)', tickers:['FCX','SCCO','CCJ'], thesisTag:'Phase 3', summary:'Critical minerals thesis. Copper (FCX, SCCO) and uranium (CCJ). Crowding risk active. No adds pending Phase 3 confirmation triggers.' },
+  'Phase 4': { title:'Phase 4 — Monetary / Gold', color:'var(--amber)', tickers:['GLD','PSLV'], thesisTag:'Phase 4', summary:'Monetary reset hedge. GLD ~10.01% total (9% core + ~1.01% dry powder).' }
 };
-
-document.getElementById('phase-overlay-close').addEventListener('click', function() {
-  document.getElementById('phase-overlay').classList.remove('open');
-  activePhaseSecTicker = null;
-});
-document.getElementById('phase-overlay').addEventListener('click', function(e) {
-  if (e.target === this) { this.classList.remove('open'); activePhaseSecTicker = null; }
-});
+var activePhaseSecTicker = null;
+document.getElementById('phase-overlay-close').addEventListener('click', function() { document.getElementById('phase-overlay').classList.remove('open'); activePhaseSecTicker = null; });
+document.getElementById('phase-overlay').addEventListener('click', function(e) { if (e.target === this) { this.classList.remove('open'); activePhaseSecTicker = null; } });
 
 function openPhaseOverlay(phase) {
-  var cfg = PHASE_CONFIG[phase];
-  if (!cfg) return;
+  var cfg = PHASE_CONFIG[phase]; if (!cfg) return;
   activePhaseSecTicker = null;
   document.getElementById('phase-overlay-title').textContent = cfg.title;
   document.getElementById('phase-overlay-sub').textContent = cfg.tickers.join(' · ');
   document.getElementById('phase-thesis-content').innerHTML = '<p>' + cfg.summary + '</p><p style="color:var(--dim);font-style:italic;font-size:11px">Loading database synthesis...</p>';
   document.getElementById('phase-securities-list').innerHTML = '<div class="loading" style="padding:20px">Loading securities...</div>';
   document.getElementById('phase-overlay').classList.add('open');
-
-  // Load holdings data for this phase
   var today = new Date().toISOString().split('T')[0];
-  var tickerFilter = 'in.(' + cfg.tickers.join(',') + ')';
-  supaFetch('holdings_detail', {
-    select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date',
-    metric_date: 'eq.' + today,
-    ticker: tickerFilter,
-    order: 'ticker.asc'
-  }).then(function(data) {
-    var dataMap = {};
-    // Seed with known data first
-    cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
-    // Overlay live data where available
+  supaFetch('holdings_detail', { select:'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date', metric_date:'eq.'+today, ticker:'in.('+cfg.tickers.join(',')+')', order:'ticker.asc' }).then(function(data) {
+    var dataMap = {}; cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
     if (data && data.length) data.forEach(function(r) { dataMap[r.ticker] = r; });
     renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
   }).catch(function() {
-    var dataMap = {};
-    cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
+    var dataMap = {}; cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
     renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
   });
-
-  // Pull thesis synthesis from database
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"' + cfg.thesisTag + '"}&select=content&order=created_at.desc&limit=5', {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-  }).then(function(r) { return r.json(); }).then(function(records) {
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"'+cfg.thesisTag+'"}&select=content&order=created_at.desc&limit=5', { headers:{ 'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY } }).then(function(r){return r.json();}).then(function(records) {
     if (!records || !records.length) return;
-    var context = records.map(function(r,i) { return (i+1)+'. '+(r.content||'').substring(0,600); }).join('\n\n');
-    fetch(SUPA_URL + '/functions/v1/analyze-article', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
-      body: JSON.stringify({ mode: 'chat', conversation: [{
-        role: 'user',
-        content: 'Synthesize these recent KMWM analysis records for ' + phase + ':\n\n' + context + '\n\nProvide a concise 3-4 paragraph thesis summary covering: current thesis status, key drivers, active risks, and next catalyst. Bold KMWM conclusions. Be direct and terse.'
-      }]})
-    }).then(function(r) { return r.json(); }).then(function(data) {
+    var context = records.map(function(r,i){return (i+1)+'. '+(r.content||'').substring(0,600);}).join('\n\n');
+    fetch(SUPA_URL+'/functions/v1/analyze-article', { method:'POST', headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}, body:JSON.stringify({mode:'chat',conversation:[{role:'user',content:'Synthesize these recent KMWM analysis records for '+phase+':\n\n'+context+'\n\nProvide a concise 3-4 paragraph thesis summary. Bold KMWM conclusions. Be direct and terse.'}]}) }).then(function(r){return r.json();}).then(function(data) {
       var reply = data.analysis || cfg.summary;
-      document.getElementById('phase-thesis-content').innerHTML = '<p>' + reply
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
-        .replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>';
+      document.getElementById('phase-thesis-content').innerHTML = '<p>'+reply.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>';
     });
   });
 }
 
-// Known holdings data sourced from Google Sheets (updated from live spreadsheet)
 var KNOWN_HOLDINGS = {
-  'CEG': { name:'Constellation Energy', entry_price:'278.86', cost_basis:'2800856', current_value:'2666456', pl_pct:'-0.0480', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
-  'VST': { name:'Vistra Corp', entry_price:'160.90', cost_basis:'4159592', current_value:'4000815', pl_pct:'-0.0382', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
-  'ETN': { name:'Eaton', entry_price:'342.96', cost_basis:'4773033', current_value:'5567909', pl_pct:'0.1666', alloc_pct:'0.0300', purchase_date:'8/27/2024' },
-  'VRT': { name:'Vertiv Holdings', entry_price:'174.66', cost_basis:'1335222', current_value:'1726326', pl_pct:'0.0000', alloc_pct:'0.0213', purchase_date:'9/5/2024' },
-  'ABBNY': { name:'ABB Ltd', entry_price:'73.09', cost_basis:'2645331', current_value:'3867436', pl_pct:'0.4619', alloc_pct:'0.0150', purchase_date:'11/10/2024' },
-  'FCX': { name:'Freeport-McMoRan', entry_price:'49.19', cost_basis:'5369694', current_value:'7317993', pl_pct:'0.3629', alloc_pct:'0.0400', purchase_date:'10/30/2025' },
-  'SCCO': { name:'Southern Copper', entry_price:'142.62', cost_basis:'1504493', current_value:'1953403', pl_pct:'0.0000', alloc_pct:'0.0100', purchase_date:'10/30/2025' },
-  'CCJ': { name:'Cameco', entry_price:'88.46', cost_basis:'4112207', current_value:'5233810', pl_pct:'0.2728', alloc_pct:'0.0301', purchase_date:'8/27/2025' },
-  'GLD': { name:'SPDR Gold Shares', entry_price:'334.37', cost_basis:'12539804', current_value:'15423484', pl_pct:'0.2300', alloc_pct:'0.1001', purchase_date:'—' },
-  'PSLV': { name:'Sprott Physical Silver', entry_price:'21.91', cost_basis:'10063641', current_value:'10923509', pl_pct:'0.0853', alloc_pct:'0.0730', purchase_date:'12/9/2025' },
-  'CAT': { name:'Caterpillar', entry_price:'707.38', cost_basis:'3426984', current_value:'4192358', pl_pct:'0.2233', alloc_pct:'0.0200', purchase_date:'—' },
-  'RTX': { name:'RTX Corp', entry_price:'197.32', cost_basis:'3451940', current_value:'3051115', pl_pct:'-0.1161', alloc_pct:'0.0200', purchase_date:'3/17/2025' },
-  'WMT': { name:'Walmart', entry_price:'93.40', cost_basis:'4138688', current_value:'5078046', pl_pct:'0.2270', alloc_pct:'0.0275', purchase_date:'—' }
+  'CEG':{name:'Constellation Energy',entry_price:'278.86',cost_basis:'2800856',current_value:'2666456',pl_pct:'-0.0480',alloc_pct:'0.0275',purchase_date:'2/12/2026'},
+  'VST':{name:'Vistra Corp',entry_price:'160.90',cost_basis:'4159592',current_value:'4000815',pl_pct:'-0.0382',alloc_pct:'0.0275',purchase_date:'2/12/2026'},
+  'ETN':{name:'Eaton',entry_price:'342.96',cost_basis:'4773033',current_value:'5567909',pl_pct:'0.1666',alloc_pct:'0.0300',purchase_date:'8/27/2024'},
+  'VRT':{name:'Vertiv Holdings',entry_price:'174.66',cost_basis:'1335222',current_value:'1726326',pl_pct:'0.0000',alloc_pct:'0.0213',purchase_date:'9/5/2024'},
+  'ABBNY':{name:'ABB Ltd',entry_price:'73.09',cost_basis:'2645331',current_value:'3867436',pl_pct:'0.4619',alloc_pct:'0.0150',purchase_date:'11/10/2024'},
+  'FCX':{name:'Freeport-McMoRan',entry_price:'49.19',cost_basis:'5369694',current_value:'7317993',pl_pct:'0.3629',alloc_pct:'0.0400',purchase_date:'10/30/2025'},
+  'SCCO':{name:'Southern Copper',entry_price:'142.62',cost_basis:'1504493',current_value:'1953403',pl_pct:'0.0000',alloc_pct:'0.0100',purchase_date:'10/30/2025'},
+  'CCJ':{name:'Cameco',entry_price:'88.46',cost_basis:'4112207',current_value:'5233810',pl_pct:'0.2728',alloc_pct:'0.0301',purchase_date:'8/27/2025'},
+  'GLD':{name:'SPDR Gold Shares',entry_price:'334.37',cost_basis:'12539804',current_value:'15423484',pl_pct:'0.2300',alloc_pct:'0.1001',purchase_date:'—'},
+  'PSLV':{name:'Sprott Physical Silver',entry_price:'21.91',cost_basis:'10063641',current_value:'10923509',pl_pct:'0.0853',alloc_pct:'0.0730',purchase_date:'12/9/2025'},
+  'CAT':{name:'Caterpillar',entry_price:'707.38',cost_basis:'3426984',current_value:'4192358',pl_pct:'0.2233',alloc_pct:'0.0200',purchase_date:'—'},
+  'RTX':{name:'RTX Corp',entry_price:'197.32',cost_basis:'3451940',current_value:'3051115',pl_pct:'-0.1161',alloc_pct:'0.0200',purchase_date:'3/17/2025'},
+  'WMT':{name:'Walmart',entry_price:'93.40',cost_basis:'4138688',current_value:'5078046',pl_pct:'0.2270',alloc_pct:'0.0275',purchase_date:'—'}
 };
 
 function renderPhaseSecurities(tickers, dataMap, color) {
-  var html = tickers.map(function(ticker) {
+  document.getElementById('phase-securities-list').innerHTML = tickers.map(function(ticker) {
     var d = dataMap[ticker] || {};
     var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
-    var plTxt = pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—';
-    var plCls = pl != null ? (pl >= 0 ? 'pos' : 'neg') : '';
-    var alloc = d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—';
-    var val = fmtDollar(d.current_value);
-    var entry = fmtDollar(d.entry_price);
-    return '<div class="phase-sec-row" id="psrow-' + ticker + '" onclick="togglePhaseSec(\'' + ticker + '\')">' +
-      '<div><div class="phase-sec-dot" style="background:' + color + '"></div></div>' +
-      '<div class="phase-sec-ticker">' + ticker + '</div>' +
-      '<div class="phase-sec-name">' + (d.name || ticker) + '</div>' +
-      '<div class="phase-sec-val">' + entry + '</div>' +
-      '<div class="phase-sec-val">' + val + '</div>' +
-      '<div class="phase-sec-pl ' + plCls + '">' + plTxt + '</div>' +
-      '<div class="phase-sec-val">' + alloc + '</div>' +
-      '</div>' +
-      '<div class="phase-sec-detail" id="psdetail-' + ticker + '">' +
-        renderPhaseSecDetail(ticker, d) +
-      '</div>';
+    return '<div class="phase-sec-row" id="psrow-'+ticker+'" onclick="togglePhaseSec(\''+ticker+'\')">' +
+      '<div><div class="phase-sec-dot" style="background:'+color+'"></div></div>' +
+      '<div class="phase-sec-ticker">'+ticker+'</div><div class="phase-sec-name">'+(d.name||ticker)+'</div>' +
+      '<div class="phase-sec-val">'+fmtDollar(d.entry_price)+'</div><div class="phase-sec-val">'+fmtDollar(d.current_value)+'</div>' +
+      '<div class="phase-sec-pl '+(pl!=null?(pl>=0?'pos':'neg'):'')+'">'+(pl!=null?(pl>=0?'+':'')+(pl*100).toFixed(2)+'%':'—')+'</div>' +
+      '<div class="phase-sec-val">'+(d.alloc_pct?(parseFloat(d.alloc_pct)*100).toFixed(2)+'%':'—')+'</div></div>' +
+      '<div class="phase-sec-detail" id="psdetail-'+ticker+'">'+renderPhaseSecDetail(ticker, d)+'</div>';
   }).join('');
-  document.getElementById('phase-securities-list').innerHTML = html;
 }
-
 function renderPhaseSecDetail(ticker, d) {
   var daysHeld = '—';
-  if (d.purchase_date) {
+  if (d.purchase_date && d.purchase_date !== '—') {
     var parts = String(d.purchase_date).split('/');
-    if (parts.length >= 2) {
-      var pd = new Date(parseInt(parts[2]||2026), parseInt(parts[0])-1, parseInt(parts[1]));
-      var diff = Math.floor((new Date() - pd) / 86400000);
-      if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
-    }
+    if (parts.length >= 2) { var pd = new Date(parseInt(parts[2]||2026),parseInt(parts[0])-1,parseInt(parts[1])); var diff = Math.floor((new Date()-pd)/86400000); if(!isNaN(diff)&&diff>=0&&diff<3650) daysHeld=diff+' days'; }
   }
   var cv = d.current_value ? parseFloat(String(d.current_value).replace(/,/g,'')) : null;
   var cb = d.cost_basis ? parseFloat(String(d.cost_basis).replace(/,/g,'')) : null;
-  var unrealized = (cv && cb && !isNaN(cv) && !isNaN(cb)) ? cv - cb : null;
+  var unrealized = (cv&&cb&&!isNaN(cv)&&!isNaN(cb)) ? cv-cb : null;
   var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
-  var cells = [
-    ['Entry Price', fmtDollar(d.entry_price)],
-    ['Cost Basis', fmtDollar(d.cost_basis)],
-    ['Current Value', fmtDollar(d.current_value)],
-    ['Unrealized G/L', unrealized != null ? (unrealized >= 0 ? '+' : '') + fmtDollar(unrealized) : '—'],
-    ['P / L %', pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—'],
-    ['Weight', d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—'],
-    ['Purchase Date', d.purchase_date || '—'],
-    ['Holding Period', daysHeld]
-  ];
-  return '<div class="phase-detail-grid">' + cells.map(function(c) {
-    return '<div class="phase-detail-cell"><div class="phase-detail-label">' + c[0] + '</div><div class="phase-detail-val">' + c[1] + '</div></div>';
-  }).join('') + '</div>';
+  var cells = [['Entry Price',fmtDollar(d.entry_price)],['Cost Basis',fmtDollar(d.cost_basis)],['Current Value',fmtDollar(d.current_value)],['Unrealized G/L',unrealized!=null?(unrealized>=0?'+':'')+fmtDollar(unrealized):'—'],['P / L %',pl!=null?(pl>=0?'+':'')+(pl*100).toFixed(2)+'%':'—'],['Weight',d.alloc_pct?(parseFloat(d.alloc_pct)*100).toFixed(2)+'%':'—'],['Purchase Date',d.purchase_date||'—'],['Holding Period',daysHeld]];
+  return '<div class="phase-detail-grid">'+cells.map(function(c){return '<div class="phase-detail-cell"><div class="phase-detail-label">'+c[0]+'</div><div class="phase-detail-val">'+c[1]+'</div></div>';}).join('')+'</div>';
 }
-
 function togglePhaseSec(ticker) {
-  if (activePhaseSecTicker && activePhaseSecTicker !== ticker) {
-    document.getElementById('psdetail-' + activePhaseSecTicker).classList.remove('open');
-    document.getElementById('psrow-' + activePhaseSecTicker).classList.remove('expanded');
-  }
-  var detail = document.getElementById('psdetail-' + ticker);
-  var row = document.getElementById('psrow-' + ticker);
+  if (activePhaseSecTicker && activePhaseSecTicker !== ticker) { document.getElementById('psdetail-'+activePhaseSecTicker).classList.remove('open'); document.getElementById('psrow-'+activePhaseSecTicker).classList.remove('expanded'); }
+  var detail = document.getElementById('psdetail-'+ticker); var row = document.getElementById('psrow-'+ticker);
   var isOpen = detail.classList.contains('open');
-  detail.classList.toggle('open', !isOpen);
-  row.classList.toggle('expanded', !isOpen);
+  detail.classList.toggle('open', !isOpen); row.classList.toggle('expanded', !isOpen);
   activePhaseSecTicker = isOpen ? null : ticker;
 }
 
-// Summary modal controls
-document.getElementById('summary-close-btn').addEventListener('click', function() {
-  document.getElementById('summary-modal').classList.remove('open');
-});
-document.getElementById('summary-modal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-});
+// Summary modal
+document.getElementById('summary-close-btn').addEventListener('click', function() { document.getElementById('summary-modal').classList.remove('open'); });
+document.getElementById('summary-modal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
 document.getElementById('summary-font-btn').addEventListener('click', function() {
-  var body = document.getElementById('summary-body');
-  var isLarge = body.classList.contains('large-text');
-  body.classList.toggle('large-text', !isLarge);
-  this.textContent = isLarge ? 'A+' : 'A−';
-  this.classList.toggle('active', !isLarge);
+  var body = document.getElementById('summary-body'); var isLarge = body.classList.contains('large-text');
+  body.classList.toggle('large-text', !isLarge); this.textContent = isLarge ? 'A+' : 'A−'; this.classList.toggle('active', !isLarge);
 });
 document.getElementById('summary-copy-btn').addEventListener('click', function() {
-  var body = document.getElementById('summary-body');
-  var text = body.innerText || body.textContent;
+  var text = document.getElementById('summary-body').innerText;
   navigator.clipboard.writeText(text).then(function() {
-    var btn = document.getElementById('summary-copy-btn');
-    btn.textContent = 'Copied ✓';
-    btn.classList.add('copied');
+    var btn = document.getElementById('summary-copy-btn'); btn.textContent = 'Copied ✓'; btn.classList.add('copied');
     setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
   });
 });
 
-// Watch item detail modal
+// Watch item detail
 var activeWiId = null;
-document.getElementById('wi-detail-close').addEventListener('click', function() {
-  document.getElementById('wi-detail-modal').classList.remove('open');
-});
-document.getElementById('wi-detail-modal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-});
+document.getElementById('wi-detail-close').addEventListener('click', function() { document.getElementById('wi-detail-modal').classList.remove('open'); });
+document.getElementById('wi-detail-modal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
 document.getElementById('wi-complete-btn').addEventListener('click', function() {
   if (!activeWiId) return;
-  fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
-    method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ status: 'completed' })
-  }).then(function() {
-    document.getElementById('wi-detail-modal').classList.remove('open');
-    document.getElementById('wi-row-' + activeWiId) && document.getElementById('wi-row-' + activeWiId).remove();
-  });
+  fetch(SUPA_URL+'/rest/v1/watch_items?id=eq.'+activeWiId, { method:'PATCH', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}, body:JSON.stringify({status:'completed'}) }).then(function() { document.getElementById('wi-detail-modal').classList.remove('open'); var r=document.getElementById('wi-row-'+activeWiId); if(r) r.remove(); });
 });
 document.getElementById('wi-kill-btn').addEventListener('click', function() {
   if (!activeWiId) return;
-  if (!confirm('Kill watch item WI-' + activeWiId + '? This cannot be undone.')) return;
-  fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
-    method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ status: 'killed' })
-  }).then(function() {
-    document.getElementById('wi-detail-modal').classList.remove('open');
-    document.getElementById('wi-row-' + activeWiId) && document.getElementById('wi-row-' + activeWiId).remove();
-  });
+  if (!confirm('Kill watch item WI-'+activeWiId+'? This cannot be undone.')) return;
+  fetch(SUPA_URL+'/rest/v1/watch_items?id=eq.'+activeWiId, { method:'PATCH', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}, body:JSON.stringify({status:'killed'}) }).then(function() { document.getElementById('wi-detail-modal').classList.remove('open'); var r=document.getElementById('wi-row-'+activeWiId); if(r) r.remove(); });
 });
-
 function openWiDetail(wi) {
   activeWiId = wi.id;
-  var fields = [
-    ['ID', 'WI-' + wi.id],
-    ['Item', wi.item],
-    ['Trigger Date', wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—'],
-    ['Trigger Condition', wi.trigger_condition || '—'],
-    ['Phase', wi.phase_tag || '—'],
-    ['Owner', wi.owner || '—'],
-    ['Status', wi.status]
-  ];
-  document.getElementById('wi-detail-body').innerHTML = fields.map(function(f) {
-    return '<div class="wi-detail-field"><div class="wi-detail-label">' + f[0] + '</div><div class="wi-detail-val">' + (f[1] || '—') + '</div></div>';
-  }).join('');
+  document.getElementById('wi-detail-body').innerHTML = [['ID','WI-'+wi.id],['Item',wi.item],['Trigger Date',wi.trigger_date?new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—'],['Trigger Condition',wi.trigger_condition||'—'],['Phase',wi.phase_tag||'—'],['Owner',wi.owner||'—'],['Status',wi.status]].map(function(f){return '<div class="wi-detail-field"><div class="wi-detail-label">'+f[0]+'</div><div class="wi-detail-val">'+(f[1]||'—')+'</div></div>';}).join('');
   document.getElementById('wi-detail-modal').classList.add('open');
 }
 
@@ -1232,103 +1004,143 @@ function openSummary(tag, view) {
   document.getElementById('summary-sub').textContent = 'Synthesizing from database...';
   document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading analysis records...</p>';
   document.getElementById('summary-modal').classList.add('open');
-
-  // Build query — tickers use company_tags, themes use topic_tags
-  var filterParam = isTheme
-    ? 'topic_tags=cs.{"' + tag + '"}'
-    : 'company_tags=cs.{"' + tag + '"}';
-
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&' + filterParam + '&select=content,created_at&order=created_at.desc&limit=20', {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-  }).then(function(r) { return r.json(); }).then(function(records) {
-    if (!records || !records.length) {
-      document.getElementById('summary-body').innerHTML = '<p>No analysis records found for ' + tag + '.</p>';
-      return;
-    }
-    var totalRefs = document.querySelector('.top5-row[onclick*="' + tag.replace(/'/g,"\\'") + '"] .top5-count');
-    var totalCount = totalRefs ? totalRefs.textContent : '?';
-    document.getElementById('summary-sub').textContent = records.length + ' of ' + totalCount + ' records · Generating summary...';
-    var context = records.map(function(r, i) { return (i+1) + '. ' + (r.content || '').substring(0, 800); }).join('\n\n');
-    fetch(SUPA_URL + '/functions/v1/analyze-article', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
-      body: JSON.stringify({
-        mode: 'chat',
-        conversation: [{
-          role: 'user',
-          content: 'Here are the most recent KMWM analysis records mentioning "' + tag + '":\n\n' + context + '\n\nSynthesize these into a concise research summary for "' + tag + '". Cover: (1) what the collective research says about this ' + (isTheme ? 'theme' : 'company') + ', (2) key thesis points that recur, (3) any tensions or risks flagged, (4) current portfolio relevance. Be direct and terse. Use bold for KMWM conclusions.'
-        }]
-      })
-    }).then(function(r) { return r.json(); }).then(function(data) {
-      var reply = data.analysis || data.reply || 'No summary generated.';
+  var filterParam = isTheme ? 'topic_tags=cs.{"'+tag+'"}' : 'company_tags=cs.{"'+tag+'"}';
+  fetch(SUPA_URL+'/rest/v1/research_chunks?research_type=eq.kmwm_analysis&'+filterParam+'&select=content,created_at&order=created_at.desc&limit=20', { headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY} }).then(function(r){return r.json();}).then(function(records) {
+    if (!records || !records.length) { document.getElementById('summary-body').innerHTML = '<p>No analysis records found for '+tag+'.</p>'; return; }
+    document.getElementById('summary-sub').textContent = records.length + ' records · Generating summary...';
+    var context = records.map(function(r,i){return (i+1)+'. '+(r.content||'').substring(0,800);}).join('\n\n');
+    fetch(SUPA_URL+'/functions/v1/analyze-article', { method:'POST', headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}, body:JSON.stringify({mode:'chat',conversation:[{role:'user',content:'Here are the most recent KMWM analysis records mentioning "'+tag+'":\n\n'+context+'\n\nSynthesize into a concise research summary. Cover: (1) what the collective research says, (2) key thesis points that recur, (3) tensions or risks flagged, (4) current portfolio relevance. Be direct and terse. Bold KMWM conclusions.'}]}) }).then(function(r){return r.json();}).then(function(data) {
       document.getElementById('summary-sub').textContent = records.length + ' most recent records synthesized';
-      document.getElementById('summary-body').innerHTML = '<p>' + reply
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
-        .replace(/\n\n/g,'</p><p>')
-        .replace(/\n/g,'<br>') + '</p>';
+      document.getElementById('summary-body').innerHTML = '<p>'+(data.analysis||'No summary generated.').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>';
     });
-  }).catch(function(e) {
-    document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
-  });
+  }).catch(function(e) { document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: '+e.message+'</p>'; });
 }
 
-// Research Intake Modal
-var intakeAnalysis = '';
-var intakeArticle = '';
+// ============================================================
+// RESEARCH INTAKE MODAL
+// ============================================================
+var intakeAnalysis = ''; var intakeArticle = ''; var intakeChatHistory = []; var intakeThreadIndex = 0; var intakeParentSlug = '';
+
+function resetIntake() {
+  intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
+  document.getElementById('intake-text').value = '';
+  document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analysis will appear here after you submit an article.</p>';
+  document.getElementById('signal-badge').style.display = 'none';
+  document.getElementById('output-toolbar').classList.remove('visible');
+  document.getElementById('intake-footer').classList.remove('visible');
+  document.getElementById('intake-chat-messages').innerHTML = '';
+  document.getElementById('intake-chat-area').classList.remove('visible');
+  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
+  document.getElementById('pdf-drop-label').textContent = 'Drop PDF here or click to browse';
+  setIntakeStatus('Ready \u2014 paste article and analyze');
+}
 
 document.getElementById('intake-open-btn').addEventListener('click', function() {
   document.getElementById('intake-modal').classList.add('open');
 });
 document.getElementById('intake-close-btn').addEventListener('click', function() {
   document.getElementById('intake-modal').classList.remove('open');
+  // Clear textarea on close so it's empty next time
+  document.getElementById('intake-text').value = '';
+  document.getElementById('pdf-drop-label').textContent = 'Drop PDF here or click to browse';
 });
 document.getElementById('intake-modal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
+  if (e.target === this) {
+    this.classList.remove('open');
+    document.getElementById('intake-text').value = '';
+    document.getElementById('pdf-drop-label').textContent = 'Drop PDF here or click to browse';
+  }
 });
 
+// PDF drop zone
+var dropZone = document.getElementById('pdf-drop-zone');
+var fileInput = document.getElementById('pdf-file-input');
+
+dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('drag-over'); });
+dropZone.addEventListener('drop', function(e) {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  var file = e.dataTransfer.files[0];
+  if (file) handlePdfFile(file);
+});
+fileInput.addEventListener('change', function() {
+  if (fileInput.files[0]) handlePdfFile(fileInput.files[0]);
+});
+
+function handlePdfFile(file) {
+  if (file.type !== 'application/pdf') {
+    setIntakeStatus('Only PDF files are supported here. Paste text directly for other formats.', 'error');
+    return;
+  }
+  document.getElementById('pdf-drop-label').textContent = file.name + ' — extracting text...';
+  setIntakeStatus('Reading PDF...', 'active');
+  // Use FileReader to read as base64, then send to Edge Function for extraction
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var base64 = e.target.result.split(',')[1];
+    fetch(SUPA_URL + '/functions/v1/analyze-article', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
+      body: JSON.stringify({ mode: 'pdf_extract', pdf_base64: base64, filename: file.name })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var text = data.text || data.content || '';
+      if (text) {
+        document.getElementById('intake-text').value = text;
+        document.getElementById('pdf-drop-label').textContent = file.name + ' ✓ — text extracted';
+        setIntakeStatus('PDF extracted — review text and analyze', 'active');
+      } else {
+        // Fall back: set filename as hint, user pastes manually
+        document.getElementById('pdf-drop-label').textContent = file.name + ' — extraction unavailable, paste text manually';
+        setIntakeStatus('PDF extraction not supported by Edge Function — paste text manually.', 'error');
+      }
+    }).catch(function() {
+      document.getElementById('pdf-drop-label').textContent = file.name + ' — could not extract';
+      setIntakeStatus('PDF extraction failed — paste text manually.', 'error');
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+// Analyze button
 document.getElementById('intake-analyze-btn').addEventListener('click', function() {
   var article = document.getElementById('intake-text').value.trim();
   var author = document.getElementById('intake-author').value;
   if (!article) { setIntakeStatus('Please paste article text first.', 'error'); return; }
-  intakeArticle = article;
-  intakeAnalysis = '';
+  intakeArticle = article; intakeAnalysis = '';
   intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
   document.getElementById('intake-chat-messages').innerHTML = '';
   document.getElementById('intake-chat-area').classList.remove('visible');
   document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
   document.getElementById('intake-analyze-btn').disabled = true;
   document.getElementById('intake-footer').classList.remove('visible');
+  document.getElementById('output-toolbar').classList.remove('visible');
   document.getElementById('signal-badge').style.display = 'none';
   document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analyzing with Claude...</p>';
   setIntakeStatus('Sending to Claude...', 'active');
-  var prog = document.getElementById('intake-progress');
-  var progBar = document.getElementById('intake-progress-bar');
-  prog.classList.add('visible');
-  progBar.classList.add('indeterminate');
-  var sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management. Analyze research documents using the KMWM framework. Determine the source and phase yourself from the content. Format your response with these sections: SIGNAL RATING (include SIGNAL TIER: ACT or READ or FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT with phase and tickers), then Section 1 Article Summary, Section 2 Executive Overview, Section 3 Strong Points (KMWM conclusions in bold), Section 4 Weak Points, Section 5 Additional Thoughts, Section 6 KMWM Portfolio Verdict. Author: ' + author + '. Spell out all abbreviations on first use.';
+  var prog = document.getElementById('intake-progress'); var progBar = document.getElementById('intake-progress-bar');
+  prog.classList.add('visible'); progBar.classList.add('indeterminate');
+
   fetch(SUPA_URL + '/functions/v1/analyze-article', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
-    body: JSON.stringify({ article: article, author: author })
+    body: JSON.stringify({ article: article, author: author, max_tokens: 4000 })
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.error) throw new Error(data.error);
     var text = data.analysis || '';
     if (!text) throw new Error('No response from Claude');
     intakeAnalysis = text;
-    var html = renderMarkdown(text);
-    document.getElementById('intake-output').innerHTML = html;
+    document.getElementById('intake-output').innerHTML = renderMarkdown(text);
     var tierMatch = text.match(/SIGNAL TIER[:\s]+([A-Z]+)/i);
     if (tierMatch) {
       var tier = tierMatch[1].toUpperCase().trim();
       var badge = document.getElementById('signal-badge');
-      badge.textContent = tier;
-      badge.className = 'signal-badge';
+      badge.textContent = tier; badge.className = 'signal-badge';
       if (tier === 'ACT') badge.classList.add('signal-act');
       else if (tier === 'READ') badge.classList.add('signal-read');
       else badge.classList.add('signal-file');
       badge.style.display = 'inline-block';
     }
+    document.getElementById('output-toolbar').classList.add('visible');
     document.getElementById('intake-footer').classList.add('visible');
     setIntakeStatus('Analysis complete — review and save or kill', 'active');
   }).catch(function(e) {
@@ -1336,171 +1148,137 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
     setIntakeStatus('Error: ' + e.message, 'error');
   }).finally(function() {
     document.getElementById('intake-analyze-btn').disabled = false;
-    var prog = document.getElementById('intake-progress');
-    var progBar = document.getElementById('intake-progress-bar');
-    progBar.classList.remove('indeterminate');
-    prog.classList.remove('visible');
+    progBar.classList.remove('indeterminate'); prog.classList.remove('visible');
   });
 });
 
+// Copy button in output toolbar
+document.getElementById('intake-copy-btn').addEventListener('click', function() {
+  var text = document.getElementById('intake-output').innerText || document.getElementById('intake-output').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('intake-copy-btn'); btn.textContent = 'Copied ✓'; btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+});
+
+// Second font toggle (in toolbar)
+document.getElementById('font-toggle-btn2').addEventListener('click', function() {
+  var output = document.getElementById('intake-output'); var isLarge = output.classList.contains('large-text');
+  output.classList.toggle('large-text', !isLarge);
+  this.textContent = isLarge ? 'A+' : 'A−'; this.classList.toggle('active', !isLarge);
+  // Sync with header font toggle
+  document.getElementById('font-toggle-btn').textContent = isLarge ? 'A+' : 'A−';
+  document.getElementById('font-toggle-btn').classList.toggle('active', !isLarge);
+});
+
+// Header font toggle (kept for backward compat, syncs with toolbar)
+document.getElementById('font-toggle-btn').addEventListener('click', function() {
+  var output = document.getElementById('intake-output'); var isLarge = output.classList.contains('large-text');
+  output.classList.toggle('large-text', !isLarge);
+  this.textContent = isLarge ? 'A+' : 'A−'; this.classList.toggle('active', !isLarge);
+  document.getElementById('font-toggle-btn2').textContent = isLarge ? 'A+' : 'A−';
+  document.getElementById('font-toggle-btn2').classList.toggle('active', !isLarge);
+});
+
 function renderMarkdown(text) {
-  var lines = text.split('\n');
   var html = '';
-  lines.forEach(function(line) {
+  text.split('\n').forEach(function(line) {
     var trimmed = line.trim();
-    if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
-      var heading = trimmed.replace(/^#+\s*/, '');
-      html += '<h3>' + escHtml(heading) + '</h3>';
-    } else if (trimmed === '') {
-      html += '<br>';
-    } else {
-      var processed = escHtml(trimmed).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-      html += '<p>' + processed + '</p>';
-    }
+    if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) { html += '<h3>' + escHtml(trimmed.replace(/^#+\s*/,'')) + '</h3>'; }
+    else if (trimmed === '') { html += '<br>'; }
+    else { html += '<p>' + escHtml(trimmed).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>') + '</p>'; }
   });
   return html;
 }
+function escHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function setIntakeStatus(msg, type) { var el = document.getElementById('intake-status'); el.textContent = msg; el.className = 'intake-status' + (type ? ' ' + type : ''); }
 
-function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function setIntakeStatus(msg, type) {
-  var el = document.getElementById('intake-status');
-  el.textContent = msg;
-  el.className = 'intake-status' + (type ? ' ' + type : '');
-}
-
+// Save
 document.getElementById('intake-save-btn').addEventListener('click', function() {
   var author = document.getElementById('intake-author').value;
   var dateStr = new Date().toISOString().split('T')[0];
-  // Derive source from analysis text or fall back to 'research-intake'
   var sourceRaw = 'research-intake';
   var srcMatch = intakeAnalysis.match(/source[:\s]+([^\n]{3,40})/i);
-  if (srcMatch) sourceRaw = srcMatch[1].trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g,'').substring(0,30);
-  // Derive phase tag
+  if (srcMatch) sourceRaw = srcMatch[1].trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').substring(0,30);
   var phaseTag = 'phase-1';
   if (/phase 2/i.test(intakeAnalysis)) phaseTag = 'phase-2';
   else if (/phase 3/i.test(intakeAnalysis)) phaseTag = 'phase-3';
-  var ts = Date.now().toString().slice(-6); var slug = (sourceRaw + '-' + dateStr + '-' + ts).substring(0, 60);
-  var fileName = sourceRaw + ' \u2014 ' + new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+  var ts = Date.now().toString().slice(-6); var slug = (sourceRaw+'-'+dateStr+'-'+ts).substring(0,60);
+  var fileName = sourceRaw + ' \u2014 ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   document.getElementById('intake-save-note').textContent = 'Saving...';
-  var base = {
-    source_file_id: slug, source_file_name: fileName,
-    source_folder: 'Research Intake', company_tags: '{}',
-    topic_tags: '{"author: ' + author + '","source: ' + sourceRaw + '","' + phaseTag + '"}',
-    portfolio_impact_tags: '{"' + phaseTag + '"}',
-    portfolio_status: '{"research"}', research_stage: 'analyzed',
-    is_analyzed: true, read_by_steve: author === 'Steve', read_by_michael: author === 'Michael'
-  };
+  var base = { source_file_id:slug, source_file_name:fileName, source_folder:'Research Intake', company_tags:'{}', topic_tags:'{"author: '+author+'","source: '+sourceRaw+'","'+phaseTag+'"}', portfolio_impact_tags:'{"'+phaseTag+'"}', portfolio_status:'{"research"}', research_stage:'analyzed', is_analyzed:true, read_by_steve:author==='Steve', read_by_michael:author==='Michael' };
   var records = [
-    Object.assign({}, base, { chunk_index: 0, research_type: 'research', content: intakeArticle, content_summary: intakeArticle.substring(0,200) }),
-    Object.assign({}, base, { chunk_index: 1, research_type: 'kmwm_analysis', content: intakeAnalysis, content_summary: intakeAnalysis.substring(0,200) })
+    Object.assign({},base,{chunk_index:0,research_type:'research',content:intakeArticle,content_summary:intakeArticle.substring(0,200)}),
+    Object.assign({},base,{chunk_index:1,research_type:'kmwm_analysis',content:intakeAnalysis,content_summary:intakeAnalysis.substring(0,200)})
   ];
   var saveNext = function(i) {
     if (i >= records.length) {
+      intakeParentSlug = slug;
       document.getElementById('intake-footer').classList.remove('visible');
       document.getElementById('intake-output').innerHTML += '<div class="success-banner">\u2713 Records committed to database</div>';
       setIntakeStatus('Saved to database', 'active');
-      document.getElementById('intake-text').value = '';
-      intakeParentSlug = slug; // set parent so any pending thread records link correctly
-      intakeArticle = ''; intakeAnalysis = '';
-      // Auto-close modal after 2 seconds
       setTimeout(function() {
         document.getElementById('intake-modal').classList.remove('open');
-        document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analysis will appear here after you submit an article.</p>';
-        document.getElementById('signal-badge').style.display = 'none';
-        document.getElementById('intake-chat-messages').innerHTML = '';
-        document.getElementById('intake-chat-area').classList.remove('visible');
-        document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
-        setIntakeStatus('Ready \u2014 paste article and analyze');
-        intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
+        resetIntake();
       }, 2000);
       return;
     }
-    fetch(SUPA_URL + '/rest/v1/research_chunks', {
-      method: 'POST',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify(records[i])
-    }).then(function(r) {
-      if (!r.ok) { r.text().then(function(t) { document.getElementById('intake-save-note').textContent = 'Error: ' + t.substring(0,80); }); return; }
-      saveNext(i + 1);
-    }).catch(function(e) { document.getElementById('intake-save-note').textContent = 'Error: ' + e.message; });
+    fetch(SUPA_URL+'/rest/v1/research_chunks', { method:'POST', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}, body:JSON.stringify(records[i]) }).then(function(r) {
+      if (!r.ok) { r.text().then(function(t){ document.getElementById('intake-save-note').textContent='Error: '+t.substring(0,80); }); return; }
+      saveNext(i+1);
+    }).catch(function(e){ document.getElementById('intake-save-note').textContent='Error: '+e.message; });
   };
   saveNext(0);
 });
 
-// Font size toggle
-document.getElementById('font-toggle-btn').addEventListener('click', function() {
-  var output = document.getElementById('intake-output');
-  var isLarge = output.classList.contains('large-text');
-  output.classList.toggle('large-text', !isLarge);
-  this.textContent = isLarge ? 'A+' : 'A−';
-  this.classList.toggle('active', !isLarge);
+// Kill — clears textarea
+document.getElementById('intake-kill-btn').addEventListener('click', function() {
+  document.getElementById('intake-footer').classList.remove('visible');
+  document.getElementById('output-toolbar').classList.remove('visible');
+  document.getElementById('intake-output').innerHTML = '<p class="placeholder">Killed \u2014 not saved. Ready for next article.</p>';
+  document.getElementById('signal-badge').style.display = 'none';
+  document.getElementById('intake-text').value = '';
+  document.getElementById('pdf-drop-label').textContent = 'Drop PDF here or click to browse';
+  setIntakeStatus('Killed \u2014 not saved');
+  intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
+  document.getElementById('intake-chat-messages').innerHTML = '';
+  document.getElementById('intake-chat-area').classList.remove('visible');
+  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
 });
 
 // Chat toggle
 document.getElementById('intake-chat-toggle').addEventListener('click', function() {
-  var area = document.getElementById('intake-chat-area');
-  var isOpen = area.classList.contains('visible');
-  area.classList.toggle('visible', !isOpen);
-  this.textContent = isOpen ? 'Ask follow-up \u2191' : 'Ask follow-up \u2193';
+  var area = document.getElementById('intake-chat-area'); var isOpen = area.classList.contains('visible');
+  area.classList.toggle('visible', !isOpen); this.textContent = isOpen ? 'Ask follow-up \u2191' : 'Ask follow-up \u2193';
 });
 
 // Chat send
-var intakeChatHistory = [];
-var intakeThreadIndex = 0;
-var intakeParentSlug = '';
-
 document.getElementById('intake-chat-send').addEventListener('click', sendChatMessage);
-document.getElementById('intake-chat-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
-});
+document.getElementById('intake-chat-input').addEventListener('keydown', function(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage();} });
 
 function saveThreadRecord(role, content) {
-  if (!intakeParentSlug) return; // no parent yet — will save when user clicks Save
-  fetch(SUPA_URL + '/rest/v1/research_threads', {
-    method: 'POST',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ parent_source_file_id: intakeParentSlug, thread_index: intakeThreadIndex++, role: role, content: content })
-  }).catch(function() {}); // silent — don't interrupt the UI on thread save failure
+  if (!intakeParentSlug) return;
+  fetch(SUPA_URL+'/rest/v1/research_threads', { method:'POST', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}, body:JSON.stringify({parent_source_file_id:intakeParentSlug,thread_index:intakeThreadIndex++,role:role,content:content}) }).catch(function(){});
 }
 
 function sendChatMessage() {
-  var input = document.getElementById('intake-chat-input');
-  var msg = input.value.trim();
+  var input = document.getElementById('intake-chat-input'); var msg = input.value.trim();
   if (!msg) return;
-  if (!intakeAnalysis) { appendChatMsg('assistant', 'Please run an analysis first before asking follow-up questions.'); return; }
-  input.value = '';
-  appendChatMsg('user', msg);
-  saveThreadRecord('user', msg);
+  if (!intakeAnalysis) { appendChatMsg('assistant','Please run an analysis first before asking follow-up questions.'); return; }
+  input.value = ''; appendChatMsg('user', msg); saveThreadRecord('user', msg);
   document.getElementById('intake-chat-send').disabled = true;
   document.getElementById('chat-progress').classList.add('visible');
-
-  // Build message history — first message injects full article + analysis as context
   if (intakeChatHistory.length === 0) {
-    intakeChatHistory.push({
-      role: 'user',
-      content: 'Here is the article I submitted:\n\n' + intakeArticle + '\n\n---\n\nHere is the KMWM analysis you produced:\n\n' + intakeAnalysis + '\n\n---\n\nNow I have a follow-up question: ' + msg
-    });
+    intakeChatHistory.push({ role:'user', content:'Here is the article I submitted:\n\n'+intakeArticle+'\n\n---\n\nHere is the KMWM analysis you produced:\n\n'+intakeAnalysis+'\n\n---\n\nNow I have a follow-up question: '+msg });
   } else {
-    intakeChatHistory.push({ role: 'user', content: msg });
+    intakeChatHistory.push({ role:'user', content:msg });
   }
-
-  // Route through Edge Function to avoid CORS
-  fetch(SUPA_URL + '/functions/v1/analyze-article', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
-    body: JSON.stringify({ mode: 'chat', conversation: intakeChatHistory })
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  fetch(SUPA_URL+'/functions/v1/analyze-article', { method:'POST', headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}, body:JSON.stringify({mode:'chat',conversation:intakeChatHistory}) }).then(function(r){return r.json();}).then(function(data) {
     if (data.error) throw new Error(data.error);
     var reply = data.analysis || data.reply || 'No response received.';
-    intakeChatHistory.push({ role: 'assistant', content: reply });
-    appendChatMsg('assistant', reply);
-    saveThreadRecord('assistant', reply);
-  }).catch(function(e) {
-    appendChatMsg('assistant', 'Error: ' + e.message);
-  }).finally(function() {
+    intakeChatHistory.push({role:'assistant',content:reply});
+    appendChatMsg('assistant', reply); saveThreadRecord('assistant', reply);
+  }).catch(function(e){ appendChatMsg('assistant','Error: '+e.message); }).finally(function() {
     document.getElementById('intake-chat-send').disabled = false;
     document.getElementById('chat-progress').classList.remove('visible');
   });
@@ -1508,31 +1286,13 @@ function sendChatMessage() {
 
 function appendChatMsg(role, text) {
   var container = document.getElementById('intake-chat-messages');
-  var div = document.createElement('div');
-  div.className = 'chat-msg ' + role;
-  // Simple markdown: bold
+  var div = document.createElement('div'); div.className = 'chat-msg '+role;
   div.innerHTML = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
   container.appendChild(div);
-  if (role === 'assistant') {
-    div.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
-    container.scrollTop = container.scrollHeight;
-  }
-  // Auto-open chat area if not already open
+  role === 'assistant' ? div.scrollIntoView({behavior:'smooth',block:'start'}) : (container.scrollTop = container.scrollHeight);
   document.getElementById('intake-chat-area').classList.add('visible');
   document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2193';
 }
-
-document.getElementById('intake-kill-btn').addEventListener('click', function() {
-  document.getElementById('intake-footer').classList.remove('visible');
-  document.getElementById('intake-output').innerHTML = '<p class="placeholder">Killed \u2014 not saved. Ready for next article.</p>';
-  document.getElementById('signal-badge').style.display = 'none';
-  setIntakeStatus('Killed \u2014 not saved');
-  intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
-  document.getElementById('intake-chat-messages').innerHTML = '';
-  document.getElementById('intake-chat-area').classList.remove('visible');
-  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
-});
 </script>
 </body>
 </html>
