@@ -567,19 +567,15 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         <div class="modal-output" id="intake-output">
           <p class="placeholder">Analysis will appear here after you submit an article.</p>
         </div>
-        <div class="chat-area" id="intake-chat-area">
-          <div class="chat-messages" id="intake-chat-messages"></div>
-          <div class="chat-progress" id="chat-progress"><div class="chat-progress-bar"></div></div>
-          <div class="chat-input-row">
-            <textarea id="intake-chat-input" placeholder="Ask a follow-up question about this analysis..." rows="1"></textarea>
-            <button class="btn-chat-send" id="intake-chat-send">Send</button>
-          </div>
-        </div>
+        <div class="chat-progress" id="chat-progress"><div class="chat-progress-bar"></div></div>
         <div class="modal-footer" id="intake-footer">
           <button class="btn-save" id="intake-save-btn">Save to Database</button>
           <button class="btn-kill" id="intake-kill-btn">Kill</button>
-          <button class="chat-toggle" id="intake-chat-toggle">Ask follow-up ↑</button>
           <span class="save-note" id="intake-save-note">Review before saving</span>
+        </div>
+        <div class="chat-input-row" id="intake-chat-input-row" style="display:none;">
+          <textarea id="intake-chat-input" placeholder="Ask a follow-up question..." rows="1"></textarea>
+          <button class="btn-chat-send" id="intake-chat-send">Send</button>
         </div>
       </div>
     </div>
@@ -1029,9 +1025,7 @@ function resetIntake() {
   document.getElementById('signal-badge').style.display = 'none';
   document.getElementById('output-toolbar').classList.remove('visible');
   document.getElementById('intake-footer').classList.remove('visible');
-  document.getElementById('intake-chat-messages').innerHTML = '';
-  document.getElementById('intake-chat-area').classList.remove('visible');
-  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
+  document.getElementById('intake-chat-input-row').style.display = 'none';
   document.getElementById('pdf-drop-label').textContent = 'Drop PDF here or click to browse';
   setIntakeStatus('Ready \u2014 paste article and analyze');
 }
@@ -1126,9 +1120,7 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
   if (!article) { setIntakeStatus('Please paste article text first.', 'error'); return; }
   intakeArticle = article; intakeAnalysis = '';
   intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
-  document.getElementById('intake-chat-messages').innerHTML = '';
-  document.getElementById('intake-chat-area').classList.remove('visible');
-  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
+  document.getElementById('intake-chat-input-row').style.display = 'none';
   document.getElementById('intake-analyze-btn').disabled = true;
   document.getElementById('intake-footer').classList.remove('visible');
   document.getElementById('output-toolbar').classList.remove('visible');
@@ -1160,6 +1152,7 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
     }
     document.getElementById('output-toolbar').classList.add('visible');
     document.getElementById('intake-footer').classList.add('visible');
+    document.getElementById('intake-chat-input-row').style.display = 'flex';
     setIntakeStatus('Analysis complete — review and save or kill', 'active');
   }).catch(function(e) {
     document.getElementById('intake-output').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
@@ -1259,16 +1252,11 @@ document.getElementById('intake-kill-btn').addEventListener('click', function() 
   document.getElementById('pdf-drop-label').textContent = 'Drop PDF here or click to browse';
   setIntakeStatus('Killed \u2014 not saved');
   intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
-  document.getElementById('intake-chat-messages').innerHTML = '';
-  document.getElementById('intake-chat-area').classList.remove('visible');
-  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
+  document.getElementById('intake-chat-input-row').style.display = 'none';
 });
 
 // Chat toggle
-document.getElementById('intake-chat-toggle').addEventListener('click', function() {
-  var area = document.getElementById('intake-chat-area'); var isOpen = area.classList.contains('visible');
-  area.classList.toggle('visible', !isOpen); this.textContent = isOpen ? 'Ask follow-up \u2191' : 'Ask follow-up \u2193';
-});
+// chat-toggle now handled inline — input always visible after analysis
 
 // Chat send
 document.getElementById('intake-chat-send').addEventListener('click', sendChatMessage);
@@ -1303,13 +1291,17 @@ function sendChatMessage() {
 }
 
 function appendChatMsg(role, text) {
-  var container = document.getElementById('intake-chat-messages');
-  var div = document.createElement('div'); div.className = 'chat-msg '+role;
-  div.innerHTML = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-  container.appendChild(div);
-  role === 'assistant' ? div.scrollIntoView({behavior:'smooth',block:'start'}) : (container.scrollTop = container.scrollHeight);
-  document.getElementById('intake-chat-area').classList.add('visible');
-  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2193';
+  var output = document.getElementById('intake-output');
+  var div = document.createElement('div');
+  if (role === 'user') {
+    div.style.cssText = 'margin:14px 0 8px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:7px;font-size:13px;color:var(--text);font-style:italic;';
+    div.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Follow-up question</span>' + escHtml(text).replace(/\n/g,'<br>');
+  } else {
+    div.style.cssText = 'margin:8px 0 14px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;font-size:13px;line-height:1.7;color:var(--text);';
+    div.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Response</span>' + escHtml(text).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  }
+  output.appendChild(div);
+  div.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 </script>
 </body>
