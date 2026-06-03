@@ -663,8 +663,8 @@ supaFetch('watch_items', { select: 'current_value,last_checked_at', id: 'eq.28',
   }
   if (data[0].last_checked_at) {
     var checked = new Date(data[0].last_checked_at);
-    sub.textContent += ' · ' + checked.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  }
+    sub.textContent += ' · ' + checked.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + checked.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
 }).catch(function() {});
 
 // Record count
