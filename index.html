@@ -350,12 +350,19 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .btn-chat-send{padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0}
 .btn-chat-send:hover{opacity:0.88}
 .btn-chat-send:disabled{opacity:0.45;cursor:not-allowed}
+
+/* View-only mode */
+.view-only-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:var(--blue);color:#fff;font-family:var(--mono);font-size:11px;text-align:center;padding:6px;letter-spacing:0.06em;display:none}
+.view-only-banner.active{display:block}
+.view-only-hide{display:none !important}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
+
+<div class="view-only-banner" id="view-only-banner">VIEW ONLY — Kelley &amp; Mullis Research Dashboard · Read-only access</div>
 <div class="shell">
 
   <!-- Sidebar -->
@@ -698,6 +705,50 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 
 <script>
 var SUPA_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
+
+// ─── VIEW-ONLY MODE ────────────────────────────────────────────
+var VIEW_ONLY = typeof window !== 'undefined' && window.location && window.location.search.indexOf('mode=view') !== -1;
+if (VIEW_ONLY) {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('view-only-banner').classList.add('active');
+    // Push content down to make room for banner
+    document.querySelector('.shell').style.marginTop = '32px';
+    document.querySelector('.shell').style.height = 'calc(100vh - 32px)';
+  });
+}
+function applyViewOnly() {
+  if (!VIEW_ONLY) return;
+  // Hide edit controls
+  var hideIds = [
+    'intake-open-btn',        // Research Intake button
+    'intake-save-btn',        // Save to Database
+    'intake-kill-btn',        // Kill (intake)
+    'intake-chat-send',       // Chat send
+    'wi-complete-btn',        // Mark Complete
+    'wi-kill-btn'             // Kill watch item
+  ];
+  hideIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.add('view-only-hide');
+  });
+  // Hide Edit Status button in phase overlay
+  document.querySelectorAll('[onclick="openPhaseStatusEdit()"]').forEach(function(el) {
+    el.classList.add('view-only-hide');
+  });
+  // Hide all mark-as-read buttons (dynamically added — use MutationObserver)
+  var observer = new MutationObserver(function() {
+    document.querySelectorAll('.mark-read-btn').forEach(function(el) {
+      el.classList.add('view-only-hide');
+    });
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  // Also hide immediately for any already rendered
+  document.querySelectorAll('.mark-read-btn').forEach(function(el) {
+    el.classList.add('view-only-hide');
+  });
+}
+
+
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
 
 // Current user — default Steve, can be set from session context
@@ -732,6 +783,7 @@ function loadPhaseStatus() {
   }).catch(function() {});
 }
 loadPhaseStatus();
+applyViewOnly();
 
 function openPhaseStatusEdit() {
   if (!activePhaseId || !phaseStatusData[activePhaseId]) return;
@@ -1323,6 +1375,8 @@ document.getElementById('intake-chat-send').addEventListener('click',sendChatMes
 document.getElementById('intake-chat-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage();}});
 function saveThreadRecord(role,content){if(!intakeParentSlug)return;fetch(SUPA_URL+'/rest/v1/research_threads',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({parent_source_file_id:intakeParentSlug,thread_index:intakeThreadIndex++,role:role,content:content})}).catch(function(){});}
 function sendChatMessage(){var input=document.getElementById('intake-chat-input');var msg=input.value.trim();if(!msg)return;if(!intakeAnalysis){appendChatMsg('assistant','Please run an analysis first before asking follow-up questions.');return;}input.value='';appendChatMsg('user',msg);saveThreadRecord('user',msg);document.getElementById('intake-chat-send').disabled=true;document.getElementById('chat-progress').classList.add('visible');if(intakeChatHistory.length===0){intakeChatHistory.push({role:'user',content:'Here is the article I submitted:\n\n'+intakeArticle+'\n\n---\n\nHere is the KMWM analysis you produced:\n\n'+intakeAnalysis+'\n\n---\n\nNow I have a follow-up question: '+msg});}else{intakeChatHistory.push({role:'user',content:msg});}fetch(SUPA_URL+'/functions/v1/analyze-article',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},body:JSON.stringify({mode:'chat',conversation:intakeChatHistory})}).then(function(r){return r.json();}).then(function(data){if(data.error)throw new Error(data.error);var reply=data.analysis||data.reply||'No response received.';intakeChatHistory.push({role:'assistant',content:reply});appendChatMsg('assistant',reply);saveThreadRecord('assistant',reply);}).catch(function(e){appendChatMsg('assistant','Error: '+e.message);}).finally(function(){document.getElementById('intake-chat-send').disabled=false;document.getElementById('chat-progress').classList.remove('visible');});}
+document.addEventListener("DOMContentLoaded", applyViewOnly);
+
 function appendChatMsg(role,text){var output=document.getElementById('intake-output');var div=document.createElement('div');if(role==='user'){div.style.cssText='margin:14px 0 8px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:7px;font-size:13px;color:var(--text);font-style:italic;';div.innerHTML='<span style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Follow-up question</span>'+escHtml(text).replace(/\n/g,'<br>');}else{div.style.cssText='margin:8px 0 14px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;font-size:13px;line-height:1.7;color:var(--text);';div.innerHTML='<span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Response</span>'+escHtml(text).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}output.appendChild(div);div.scrollIntoView({behavior:'smooth',block:'nearest'});}
 </script>
 
