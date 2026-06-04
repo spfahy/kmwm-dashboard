@@ -1597,7 +1597,26 @@ function showAllWatchItems() {
     document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
   });
 }
+// Load article counts for nav badges on startup
+fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"important"}&select=id&limit=1', {
+  headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+}).then(function(r) {
+  var cr = r.headers.get('content-range');
+  if (cr) {
+    var total = parseInt(cr.split('/')[1]);
+    document.getElementById('important-badge').textContent = total > 0 ? total : '—';
+  }
+}).catch(function() {});
 
+fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&select=id&limit=1', {
+  headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+}).then(function(r) {
+  var cr = r.headers.get('content-range');
+  if (cr) {
+    var total = parseInt(cr.split('/')[1]);
+    document.getElementById('unread-badge').textContent = total > 0 ? total : '—';
+  }
+}).catch(function() {});
 </script>
 </body>
 </html>
