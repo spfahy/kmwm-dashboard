@@ -1531,67 +1531,157 @@ document.getElementById('intake-kill-btn').addEventListener('click', function() 
 });
 
 // Articles nav — show recent analyses in summary overlay
-  function showImportantArticles() {
+// ─── IMPORTANT ARTICLES ───────────────────────────────────────────────────────
+function showImportantArticles() {
   var identity = localStorage.getItem('kmwm_identity') || 'Steve';
-  var readByMe = identity === 'Steve' ? 'read_by_steve=eq.false' : 'read_by_michael=eq.false';
+  var readByField = identity === 'Steve' ? 'read_by_steve' : 'read_by_michael';
+
   document.getElementById('summary-title').textContent = 'Important Articles';
   document.getElementById('summary-sub').textContent = 'Loading important articles...';
   document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading...</p>';
   document.getElementById('summary-modal').classList.add('open');
 
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&is_important=eq.true&' + readByMe + '&select=id,source_file_name,content_summary,created_at,topic_tags&order=created_at.desc&limit=20', {
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&is_important=eq.true&select=id,source_file_name,content,content_summary,created_at,topic_tags,' + readByField + '&order=created_at.desc&limit=50', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (!data || !data.length) {
-      document.getElementById('summary-body').innerHTML = '<p>No unread important articles found.</p>';
-      document.getElementById('summary-sub').textContent = 'All caught up';
+      document.getElementById('summary-body').innerHTML = '<p>No important articles found.</p>';
+      document.getElementById('summary-sub').textContent = 'Nothing flagged yet';
       return;
     }
-    document.getElementById('summary-sub').textContent = data.length + ' unread important articles';
-    var html = data.map(function(r) {
-      var date = new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-      var summary = (r.content_summary || '').substring(0, 180);
-      var tags = (r.topic_tags || []).filter(function(t) { return t.indexOf('author:') === -1 && t.indexOf('source:') === -1; }).slice(0,3).join(' · ');
-      return '<div style="padding:12px 0;border-bottom:1px solid var(--border);">' +
-        '<div style="font-family:var(--mono);font-size:9px;color:var(--red);margin-bottom:3px">⚑ IMPORTANT · ' + date + (tags ? ' · ' + tags : '') + '</div>' +
-        '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px">' + (r.source_file_name || 'Untitled') + '</div>' +
-        '<div style="font-size:12px;color:var(--muted);line-height:1.5">' + summary + '</div>' +
-        '</div>';
-    }).join('');
-    document.getElementById('summary-body').innerHTML = html;
+    document.getElementById('summary-sub').textContent = data.length + ' important article' + (data.length !== 1 ? 's' : '');
+    document.getElementById('summary-body').innerHTML = renderArticleList(data, readByField, identity);
   }).catch(function(e) {
     document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
   });
 }
+
+// ─── RECENT ARTICLES ──────────────────────────────────────────────────────────
 function showRecentArticles() {
+  var identity = localStorage.getItem('kmwm_identity') || 'Steve';
+  var readByField = identity === 'Steve' ? 'read_by_steve' : 'read_by_michael';
+  var otherAuthor = identity === 'Steve' ? 'Michael' : 'Steve';
+  var sixtyDaysAgo = new Date();
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+  var cutoff = sixtyDaysAgo.toISOString();
+
   document.getElementById('summary-title').textContent = 'Recent Articles';
   document.getElementById('summary-sub').textContent = 'Loading recent analyses...';
   document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading...</p>';
   document.getElementById('summary-modal').classList.add('open');
 
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&select=id,source_file_name,content_summary,created_at,topic_tags&order=created_at.desc&limit=20', {
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"author: ' + otherAuthor + '"}&created_at=gte.' + cutoff + '&select=id,source_file_name,content,content_summary,created_at,topic_tags,' + readByField + '&order=created_at.desc&limit=50', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (!data || !data.length) {
-      document.getElementById('summary-body').innerHTML = '<p>No articles found.</p>';
+      document.getElementById('summary-body').innerHTML = '<p>No recent articles found.</p>';
+      document.getElementById('summary-sub').textContent = 'Nothing in the last 60 days';
       return;
     }
-    document.getElementById('summary-sub').textContent = data.length + ' most recent analyses';
-    var html = data.map(function(r) {
-      var date = new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-      var summary = (r.content_summary || '').substring(0, 180);
-      var tags = (r.topic_tags || []).filter(function(t) { return t.indexOf('author:') === -1 && t.indexOf('source:') === -1; }).slice(0,3).join(' · ');
-      return '<div style="padding:12px 0;border-bottom:1px solid var(--border);">' +
-        '<div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px">' + date + (tags ? ' · ' + tags : '') + '</div>' +
-        '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px">' + (r.source_file_name || 'Untitled') + '</div>' +
-        '<div style="font-size:12px;color:var(--muted);line-height:1.5">' + summary + '</div>' +
-        '</div>';
-    }).join('');
-    document.getElementById('summary-body').innerHTML = html;
+    document.getElementById('summary-sub').textContent = data.length + ' article' + (data.length !== 1 ? 's' : '') + ' from ' + otherAuthor + ' (last 60 days)';
+    document.getElementById('summary-body').innerHTML = renderArticleList(data, readByField, identity);
   }).catch(function(e) {
     document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
   });
 }
+
+// ─── SHARED RENDERER ──────────────────────────────────────────────────────────
+function renderArticleList(data, readByField, identity) {
+  return data.map(function(r) {
+    var date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    var tags = (r.topic_tags || [])
+      .filter(function(t) { return t.indexOf('author:') === -1 && t.indexOf('source:') === -1; })
+      .slice(0, 4).join(' · ');
+    var isRead = r[readByField];
+    var readLabel = isRead ? '<span style="color:var(--green);font-family:var(--mono);font-size:9px">✓ Read</span>' : '<span style="color:var(--amber);font-family:var(--mono);font-size:9px">Unread</span>';
+    var importantFlag = r.is_important ? '<span style="color:var(--red);font-family:var(--mono);font-size:9px;margin-right:6px">⚑ IMPORTANT</span>' : '';
+
+    return '<div id="art-' + r.id + '" style="border-bottom:1px solid var(--border);padding-bottom:0;">' +
+      // Header row — always visible
+      '<div onclick="toggleArticle(' + r.id + ')" style="padding:12px 0;cursor:pointer;display:flex;align-items:flex-start;gap:10px;">' +
+        '<div style="flex:1;">' +
+          '<div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px">' + importantFlag + date + (tags ? ' · ' + tags : '') + '</div>' +
+          '<div style="font-size:13px;font-weight:500;color:var(--text);line-height:1.4">' + (r.source_file_name || 'Untitled') + '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;padding-top:2px">' +
+          readLabel +
+          '<span style="font-family:var(--mono);font-size:10px;color:var(--dim)" id="art-arrow-' + r.id + '">▼</span>' +
+        '</div>' +
+      '</div>' +
+      // Expandable full content
+      '<div id="art-body-' + r.id + '" style="display:none;padding:0 0 16px 0;">' +
+        '<div style="background:var(--bg3);border-radius:8px;padding:16px 18px;font-size:13px;line-height:1.75;color:var(--text);margin-bottom:10px;" id="art-content-' + r.id + '">' +
+          formatArticleContent(r.content || r.content_summary || '') +
+        '</div>' +
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<button onclick="copyArticle(' + r.id + ')" id="art-copy-' + r.id + '" style="padding:5px 14px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--mono);">Copy</button>' +
+          (isRead
+            ? '<span style="font-family:var(--mono);font-size:10px;color:var(--green);padding:5px 10px;">✓ Marked as read</span>'
+            : '<button onclick="markArticleRead(' + r.id + ',\'' + readByField + '\')" id="art-read-btn-' + r.id + '" style="padding:5px 14px;background:var(--amber-dim);border:1px solid rgba(122,74,8,0.2);border-radius:6px;font-size:11px;color:var(--amber);cursor:pointer;font-family:var(--sans);font-weight:500;">Mark as Read</button>'
+          ) +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function formatArticleContent(text) {
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/^(SIGNAL TIER|ONE-LINE VERDICT|THESIS IMPACT)[:\s]+(.+)$/gm, '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:2px">$1</div><div style="font-size:13px;font-weight:500;margin-bottom:8px">$2</div>')
+    .replace(/^\d+\.\s+(Article Summary|Executive Overview|Strong Points|Weak Points|Additional Thoughts|KMWM Portfolio Verdict|Portfolio Verdict)/gm, '<h3 style="font-family:var(--serif);font-size:14px;font-weight:600;margin:16px 0 6px;color:var(--text)">$&</h3>')
+    .replace(/\n\n/g, '</p><p style="margin-bottom:6px">')
+    .replace(/\n/g, '<br>');
+}
+
+function toggleArticle(id) {
+  var body = document.getElementById('art-body-' + id);
+  var arrow = document.getElementById('art-arrow-' + id);
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  arrow.textContent = isOpen ? '▼' : '▲';
+}
+
+function copyArticle(id) {
+  var el = document.getElementById('art-content-' + id);
+  var text = el ? (el.innerText || el.textContent) : '';
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('art-copy-' + id);
+    if (btn) { btn.textContent = 'Copied ✓'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'var(--green-mid)'; }
+    setTimeout(function() {
+      var b = document.getElementById('art-copy-' + id);
+      if (b) { b.textContent = 'Copy'; b.style.color = ''; b.style.borderColor = ''; }
+    }, 2000);
+  });
+}
+
+function markArticleRead(id, readByField) {
+  var patch = {};
+  patch[readByField] = true;
+  fetch(SUPA_URL + '/rest/v1/research_chunks?id=eq.' + id, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(patch)
+  }).then(function() {
+    // Swap button to confirmation label
+    var btn = document.getElementById('art-read-btn-' + id);
+    if (btn) {
+      btn.outerHTML = '<span style="font-family:var(--mono);font-size:10px;color:var(--green);padding:5px 10px;">✓ Marked as read</span>';
+    }
+    // Update the unread indicator in the header row
+    var arrow = document.getElementById('art-arrow-' + id);
+    var headerReadLabel = arrow ? arrow.previousElementSibling : null;
+    if (headerReadLabel) headerReadLabel.outerHTML = '<span style="color:var(--green);font-family:var(--mono);font-size:9px">✓ Read</span>';
+    // Refresh nav badges
+    var identity = localStorage.getItem('kmwm_identity') || 'Steve';
+    loadBadges(identity);
+  }).catch(function(e) {
+    var btn = document.getElementById('art-read-btn-' + id);
+    if (btn) btn.textContent = 'Error — retry';
+  });
+}
+
 
 // Watch items nav — show all active watch items in summary overlay
 function showAllWatchItems() {
