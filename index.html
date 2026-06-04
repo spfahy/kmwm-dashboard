@@ -1530,7 +1530,6 @@ document.getElementById('intake-kill-btn').addEventListener('click', function() 
   document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
 });
 
-// Articles nav — show recent analyses in summary overlay
 // ─── IMPORTANT ARTICLES ───────────────────────────────────────────────────────
 function showImportantArticles() {
   var identity = localStorage.getItem('kmwm_identity') || 'Steve';
@@ -1541,16 +1540,17 @@ function showImportantArticles() {
   document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading...</p>';
   document.getElementById('summary-modal').classList.add('open');
 
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&is_important=eq.true&select=id,source_file_name,content,content_summary,created_at,topic_tags,' + readByField + '&order=created_at.desc&limit=50', {
+  // Only show unread important articles — read = done, disappears from list
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&is_important=eq.true&' + readByField + '=eq.false&select=id,source_file_name,content,content_summary,created_at,topic_tags,' + readByField + '&order=created_at.desc&limit=50', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (!data || !data.length) {
-      document.getElementById('summary-body').innerHTML = '<p>No important articles found.</p>';
-      document.getElementById('summary-sub').textContent = 'Nothing flagged yet';
+      document.getElementById('summary-body').innerHTML = '<p style="color:var(--green);font-family:var(--mono);font-size:12px;">✓ All caught up — no unread important articles.</p>';
+      document.getElementById('summary-sub').textContent = 'All read';
       return;
     }
-    document.getElementById('summary-sub').textContent = data.length + ' important article' + (data.length !== 1 ? 's' : '');
-    document.getElementById('summary-body').innerHTML = renderArticleList(data, readByField, identity);
+    document.getElementById('summary-sub').textContent = data.length + ' unread important article' + (data.length !== 1 ? 's' : '');
+    document.getElementById('summary-body').innerHTML = renderArticleList(data, readByField);
   }).catch(function(e) {
     document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
   });
@@ -1570,20 +1570,120 @@ function showRecentArticles() {
   document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading...</p>';
   document.getElementById('summary-modal').classList.add('open');
 
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"author: ' + otherAuthor + '"}&created_at=gte.' + cutoff + '&select=id,source_file_name,content,content_summary,created_at,topic_tags,' + readByField + '&order=created_at.desc&limit=50', {
+  // Only show unread articles — read = done, disappears from list
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"author: ' + otherAuthor + '"}&' + readByField + '=eq.false&created_at=gte.' + cutoff + '&select=id,source_file_name,content,content_summary,created_at,topic_tags,' + readByField + '&order=created_at.desc&limit=50', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (!data || !data.length) {
-      document.getElementById('summary-body').innerHTML = '<p>No recent articles found.</p>';
-      document.getElementById('summary-sub').textContent = 'Nothing in the last 60 days';
+      document.getElementById('summary-body').innerHTML = '<p style="color:var(--green);font-family:var(--mono);font-size:12px;">✓ All caught up — no unread articles.</p>';
+      document.getElementById('summary-sub').textContent = 'All read';
       return;
     }
-    document.getElementById('summary-sub').textContent = data.length + ' article' + (data.length !== 1 ? 's' : '') + ' from ' + otherAuthor + ' (last 60 days)';
-    document.getElementById('summary-body').innerHTML = renderArticleList(data, readByField, identity);
+    document.getElementById('summary-sub').textContent = data.length + ' unread article' + (data.length !== 1 ? 's' : '') + ' from ' + otherAuthor;
+    document.getElementById('summary-body').innerHTML = renderArticleList(data, readByField);
   }).catch(function(e) {
     document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
   });
 }
+
+// ─── SHARED RENDERER ──────────────────────────────────────────────────────────
+function renderArticleList(data, readByField) {
+  return data.map(function(r) {
+    var date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    var tags = (r.topic_tags || [])
+      .filter(function(t) { return t.indexOf('author:') === -1 && t.indexOf('source:') === -1 && t.indexOf('important') === -1; })
+      .slice(0, 4).join(' · ');
+    var importantFlag = r.is_important ? '<span style="color:var(--red);font-family:var(--mono);font-size:9px;margin-right:6px">⚑</span>' : '';
+
+    return '<div id="art-' + r.id + '" style="border-bottom:1px solid var(--border);padding-bottom:0;">' +
+      // Header row — always visible, click to expand
+      '<div onclick="toggleArticle(' + r.id + ')" style="padding:12px 0;cursor:pointer;display:flex;align-items:flex-start;gap:10px;">' +
+        '<div style="flex:1;">' +
+          '<div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px">' + importantFlag + date + (tags ? ' · ' + tags : '') + '</div>' +
+          '<div style="font-size:13px;font-weight:500;color:var(--text);line-height:1.4">' + (r.source_file_name || 'Untitled') + '</div>' +
+        '</div>' +
+        '<span style="font-family:var(--mono);font-size:10px;color:var(--dim);flex-shrink:0;padding-top:2px" id="art-arrow-' + r.id + '">▼</span>' +
+      '</div>' +
+      // Expandable full content
+      '<div id="art-body-' + r.id + '" style="display:none;padding:0 0 16px 0;">' +
+        '<div style="background:var(--bg3);border-radius:8px;padding:16px 18px;font-size:13px;line-height:1.75;color:var(--text);margin-bottom:10px;" id="art-content-' + r.id + '">' +
+          formatArticleContent(r.content || r.content_summary || '') +
+        '</div>' +
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<button onclick="copyArticle(' + r.id + ')" id="art-copy-' + r.id + '" style="padding:5px 14px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--mono);">Copy</button>' +
+          '<button onclick="markArticleRead(' + r.id + ',\'' + readByField + '\')" id="art-read-btn-' + r.id + '" style="padding:5px 14px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:6px;font-size:11px;color:var(--green);cursor:pointer;font-family:var(--sans);font-weight:500;">Mark as Read — Remove</button>' +
+          '<span style="font-family:var(--mono);font-size:9px;color:var(--dim)">or close to read later</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function formatArticleContent(text) {
+  return '<p>' + text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/^(SIGNAL TIER|ONE-LINE VERDICT|THESIS IMPACT)[:\s]+(.+)$/gm,
+      '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:2px">$1</div><div style="font-size:13px;font-weight:500;margin-bottom:8px">$2</div>')
+    .replace(/^\d+\.\s+(Article Summary|Executive Overview|Strong Points|Weak Points|Additional Thoughts|KMWM Portfolio Verdict|Portfolio Verdict)/gm,
+      '<h3 style="font-family:var(--serif);font-size:14px;font-weight:600;margin:16px 0 6px;color:var(--text)">$&</h3>')
+    .replace(/\n\n/g, '</p><p style="margin-bottom:6px">')
+    .replace(/\n/g, '<br>') + '</p>';
+}
+
+function toggleArticle(id) {
+  var body = document.getElementById('art-body-' + id);
+  var arrow = document.getElementById('art-arrow-' + id);
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  arrow.textContent = isOpen ? '▼' : '▲';
+}
+
+function copyArticle(id) {
+  var el = document.getElementById('art-content-' + id);
+  var text = el ? (el.innerText || el.textContent) : '';
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('art-copy-' + id);
+    if (btn) { btn.textContent = 'Copied ✓'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'var(--green-mid)'; }
+    setTimeout(function() {
+      var b = document.getElementById('art-copy-' + id);
+      if (b) { b.textContent = 'Copy'; b.style.color = ''; b.style.borderColor = ''; }
+    }, 2000);
+  });
+}
+
+function markArticleRead(id, readByField) {
+  var patch = {};
+  patch[readByField] = true;
+  fetch(SUPA_URL + '/rest/v1/research_chunks?id=eq.' + id, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(patch)
+  }).then(function() {
+    // Remove the article row from the list entirely
+    var row = document.getElementById('art-' + id);
+    if (row) {
+      row.style.transition = 'opacity 0.3s';
+      row.style.opacity = '0';
+      setTimeout(function() { if (row.parentNode) row.parentNode.removeChild(row); }, 300);
+    }
+    // Refresh nav badges
+    var identity = localStorage.getItem('kmwm_identity') || 'Steve';
+    loadBadges(identity);
+    // If list is now empty, show all-caught-up message
+    setTimeout(function() {
+      var body = document.getElementById('summary-body');
+      if (body && body.children.length === 0) {
+        body.innerHTML = '<p style="color:var(--green);font-family:var(--mono);font-size:12px;">✓ All caught up.</p>';
+        document.getElementById('summary-sub').textContent = 'All read';
+      }
+    }, 400);
+  }).catch(function() {
+    var btn = document.getElementById('art-read-btn-' + id);
+    if (btn) btn.textContent = 'Error — retry';
+  });
+}
+
 
 // ─── SHARED RENDERER ──────────────────────────────────────────────────────────
 function renderArticleList(data, readByField, identity) {
