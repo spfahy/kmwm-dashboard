@@ -1,4 +1,3 @@
-<!-- KMWM Dashboard v1.5 — 2026-06-02 — Session start: fetch https://raw.githubusercontent.com/spfahy/kmwm-dashboard/main/index.html to verify current version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -322,9 +321,8 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
     </div>
     <div class="nav-group">
       <div class="nav-label">Research</div>
-      <div class="nav-item" onclick="showImportantArticles()" style="cursor:pointer"><span class="nav-dot" style="background:var(--amber)"></span> Important Articles <span class="nav-badge" id="important-badge" style="background:var(--amber-dim);color:var(--amber)">—</span></div>
-      <div class="nav-item"><span class="nav-dot"></span> Articles <span class="nav-badge red" id="unread-badge">—</span></div>
-      <div class="nav-item"><span class="nav-dot"></span> Watch items <span class="nav-badge" id="wi-nav-badge">—</span></div>
+      <div class="nav-item" onclick="showRecentArticles()" style="cursor:pointer"><span class="nav-dot"></span> Articles <span class="nav-badge red" id="unread-badge">—</span></div>
+      <div class="nav-item" onclick="showAllWatchItems()" style="cursor:pointer"><span class="nav-dot"></span> Watch items <span class="nav-badge" id="wi-nav-badge">—</span></div>
       <div class="nav-item"><span class="nav-dot"></span> Alerts</div>
     </div>
     <div class="nav-group">
@@ -513,23 +511,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
   </div>
 </div>
 
-
-<!-- Important Articles Modal -->
-<div class="summary-overlay" id="important-modal">
-  <div class="summary-box" style="width:800px;">
-    <div class="summary-header">
-      <div>
-        <div class="summary-title">Important Articles</div>
-        <div class="summary-sub" id="important-sub">Articles flagged for your attention</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button class="modal-close" id="important-close-btn">Close ✕</button>
-      </div>
-    </div>
-    <div class="summary-body" id="important-body"><p style="color:var(--dim);font-style:italic">Loading...</p></div>
-  </div>
-</div>
-
 <!-- Research Intake Modal -->
 <div class="modal-overlay" id="intake-modal">
   <div class="modal-box">
@@ -576,7 +557,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         <div class="modal-footer" id="intake-footer">
           <button class="btn-save" id="intake-save-btn">Save to Database</button>
           <button class="btn-kill" id="intake-kill-btn">Kill</button>
-          <button class="btn-important" id="intake-important-btn" style="padding:7px 16px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.25);border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--sans);display:none;">★ Mark Important</button>
           <button class="chat-toggle" id="intake-chat-toggle">Ask follow-up ↑</button>
           <span class="save-note" id="intake-save-note">Review before saving</span>
         </div>
@@ -586,11 +566,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 </div>
 
 <script>
-// SESSION START PROTOCOL: At the start of each Claude session, fetch
-// https://api.github.com/repos/spfahy/kmwm-dashboard/commits/main
-// to get the latest commit hash and date, then fetch the raw file if
-// the local copy does not match. This ensures Claude always works from
-// the current deployed version.
 var SUPA_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
 
@@ -1349,7 +1324,6 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
       badge.style.display = 'inline-block';
     }
     document.getElementById('intake-footer').classList.add('visible');
-    document.getElementById('intake-important-btn').style.display = 'none';
     setIntakeStatus('Analysis complete — review and save or kill', 'active');
   }).catch(function(e) {
     document.getElementById('intake-output').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
@@ -1423,8 +1397,7 @@ document.getElementById('intake-save-btn').addEventListener('click', function() 
       document.getElementById('intake-output').innerHTML += '<div class="success-banner">\u2713 Records committed to database</div>';
       setIntakeStatus('Saved to database', 'active');
       document.getElementById('intake-text').value = '';
-      intakeParentSlug = slug; currentImportantSlug = slug;
-      document.getElementById('intake-important-btn').style.display = 'inline-block';
+      intakeParentSlug = slug; // set parent so any pending thread records link correctly
       intakeArticle = ''; intakeAnalysis = '';
       // Auto-close modal after 2 seconds
       setTimeout(function() {
@@ -1549,109 +1522,82 @@ document.getElementById('intake-kill-btn').addEventListener('click', function() 
   document.getElementById('intake-output').innerHTML = '<p class="placeholder">Killed \u2014 not saved. Ready for next article.</p>';
   document.getElementById('signal-badge').style.display = 'none';
   setIntakeStatus('Killed \u2014 not saved');
-  intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = ''; currentImportantSlug = '';
-  document.getElementById('intake-important-btn').style.display = 'none';
-  document.getElementById('intake-important-btn').textContent = '★ Mark Important';
-  document.getElementById('intake-important-btn').disabled = false;
-  document.getElementById('intake-important-btn').style.background = 'var(--amber-dim)';
-  document.getElementById('intake-important-btn').style.color = 'var(--amber)';
+  intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
   document.getElementById('intake-chat-messages').innerHTML = '';
   document.getElementById('intake-chat-area').classList.remove('visible');
   document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
 });
 
-// Important Articles
-var currentImportantSlug = '';
+// Articles nav — show recent analyses in summary overlay
+function showRecentArticles() {
+  document.getElementById('summary-title').textContent = 'Recent Articles';
+  document.getElementById('summary-sub').textContent = 'Loading recent analyses...';
+  document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading...</p>';
+  document.getElementById('summary-modal').classList.add('open');
 
-document.getElementById('important-close-btn').addEventListener('click', function() {
-  document.getElementById('important-modal').classList.remove('open');
-});
-document.getElementById('important-modal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-});
-
-function loadImportantBadge() {
-  var author = 'Steve'; // current user — shows articles flagged BY the other user
-  var otherAuthor = 'Michael';
-  fetch(SUPA_URL + '/rest/v1/research_chunks?is_important=eq.true&research_type=eq.kmwm_analysis&topic_tags=cs.{"author: ' + otherAuthor + '"}&select=id&limit=1', {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
-  }).then(function(r) {
-    var cr = r.headers.get('content-range');
-    if (cr) {
-      var total = parseInt(cr.split('/')[1]);
-      var badge = document.getElementById('important-badge');
-      if (total > 0) {
-        badge.textContent = total;
-        badge.style.background = 'var(--amber-dim)';
-        badge.style.color = 'var(--amber)';
-      } else {
-        badge.textContent = '0';
-      }
-    }
-  }).catch(function() {});
-}
-loadImportantBadge();
-
-function showImportantArticles() {
-  document.getElementById('important-modal').classList.add('open');
-  document.getElementById('important-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading important articles...</p>';
-  // Steve sees articles flagged by Michael, Michael sees articles flagged by Steve
-  var otherAuthor = 'Michael';
-  fetch(SUPA_URL + '/rest/v1/research_chunks?is_important=eq.true&research_type=eq.kmwm_analysis&topic_tags=cs.{"author: ' + otherAuthor + '"}&select=id,source_file_name,content_summary,created_at,topic_tags&order=created_at.desc&limit=20', {
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&select=id,source_file_name,content_summary,created_at,topic_tags&order=created_at.desc&limit=20', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (!data || !data.length) {
-      document.getElementById('important-sub').textContent = 'No important articles flagged yet';
-      document.getElementById('important-body').innerHTML = '<p style="color:var(--dim);font-style:italic">No articles have been marked as important.</p>';
+      document.getElementById('summary-body').innerHTML = '<p>No articles found.</p>';
       return;
     }
-    document.getElementById('important-sub').textContent = data.length + ' important article' + (data.length > 1 ? 's' : '') + ' flagged by Michael';
+    document.getElementById('summary-sub').textContent = data.length + ' most recent analyses';
     var html = data.map(function(r) {
       var date = new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-      var summary = (r.content_summary || '').substring(0, 200);
-      return '<div style="padding:14px 0;border-bottom:1px solid var(--border);">' +
-        '<div style="font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px">★ Important · ' + date + '</div>' +
-        '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + (r.source_file_name || 'Untitled') + '</div>' +
+      var summary = (r.content_summary || '').substring(0, 180);
+      var tags = (r.topic_tags || []).filter(function(t) { return t.indexOf('author:') === -1 && t.indexOf('source:') === -1; }).slice(0,3).join(' · ');
+      return '<div style="padding:12px 0;border-bottom:1px solid var(--border);">' +
+        '<div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px">' + date + (tags ? ' · ' + tags : '') + '</div>' +
+        '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px">' + (r.source_file_name || 'Untitled') + '</div>' +
         '<div style="font-size:12px;color:var(--muted);line-height:1.5">' + summary + '</div>' +
         '</div>';
     }).join('');
-    document.getElementById('important-body').innerHTML = html;
+    document.getElementById('summary-body').innerHTML = html;
   }).catch(function(e) {
-    document.getElementById('important-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
+    document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
   });
 }
 
-// Show Mark as Important button after analysis completes — wire into save flow
-// The button appears after analysis is generated alongside Save/Kill
-document.getElementById('intake-important-btn').addEventListener('click', function() {
-  if (!currentImportantSlug) {
-    // Article not saved yet — save first then mark important
-    alert('Please save the article to the database first, then mark as important.');
-    return;
-  }
-  var btn = document.getElementById('intake-important-btn');
-  btn.textContent = 'Saving...';
-  btn.disabled = true;
-  fetch(SUPA_URL + '/rest/v1/research_chunks?source_file_id=eq.' + currentImportantSlug + '&research_type=eq.kmwm_analysis', {
-    method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ is_important: true })
-  }).then(function(r) {
-    if (r.ok) {
-      btn.textContent = '★ Marked Important';
-      btn.style.background = 'var(--amber)';
-      btn.style.color = '#fff';
-      btn.disabled = true;
-      loadImportantBadge();
-    } else {
-      btn.textContent = '★ Mark Important';
-      btn.disabled = false;
+// Watch items nav — show all active watch items in summary overlay
+function showAllWatchItems() {
+  document.getElementById('summary-title').textContent = 'All Active Watch Items';
+  document.getElementById('summary-sub').textContent = 'Loading...';
+  document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading...</p>';
+  document.getElementById('summary-modal').classList.add('open');
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  fetch(SUPA_URL + '/rest/v1/watch_items?status=eq.active&select=id,item,trigger_date,trigger_condition,phase_tag,owner&order=trigger_date.asc.nullslast&limit=50', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data || !data.length) {
+      document.getElementById('summary-body').innerHTML = '<p>No active watch items.</p>';
+      return;
     }
-  }).catch(function() {
-    btn.textContent = '★ Mark Important';
-    btn.disabled = false;
+    document.getElementById('summary-sub').textContent = data.length + ' active watch items';
+    var html = data.map(function(wi) {
+      var dateStr = wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : (wi.trigger_condition ? wi.trigger_condition.substring(0,40) : 'No date');
+      var urgency = '';
+      if (wi.trigger_date) {
+        var td = new Date(wi.trigger_date); td.setHours(0,0,0,0);
+        var diff = Math.ceil((td - today) / 86400000);
+        if (diff <= 0) urgency = 'color:var(--red)';
+        else if (diff <= 7) urgency = 'color:var(--red)';
+        else if (diff <= 30) urgency = 'color:var(--amber)';
+      }
+      return '<div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;">' +
+        '<div style="font-family:var(--mono);font-size:9px;color:var(--dim);width:34px;flex-shrink:0;padding-top:2px">WI-' + wi.id + '</div>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:12px;color:var(--text);line-height:1.4;margin-bottom:2px">' + wi.item.substring(0,100) + (wi.item.length > 100 ? '…' : '') + '</div>' +
+          '<div style="font-family:var(--mono);font-size:9px;' + urgency + '">' + dateStr + (wi.phase_tag ? ' · ' + wi.phase_tag : '') + '</div>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+    document.getElementById('summary-body').innerHTML = html;
+  }).catch(function(e) {
+    document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
   });
-});
+}
 
 </script>
 </body>
