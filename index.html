@@ -1608,7 +1608,11 @@ fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_
   }
 }).catch(function() {});
 
-fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&select=id&limit=1', {
+var sixtyDaysAgo = new Date();
+sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+var cutoff = sixtyDaysAgo.toISOString();
+
+fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"author: Michael"}&read_by_steve=eq.false&created_at=gte.' + cutoff + '&select=id&limit=1', {
   headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
 }).then(function(r) {
   var cr = r.headers.get('content-range');
