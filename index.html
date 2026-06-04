@@ -309,8 +309,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
     <div class="nav-group">
       <div class="nav-label">Overview</div>
       <div class="nav-item active"><span class="nav-dot"></span> Dashboard</div>
-      <div class="nav-item"><span class="nav-dot"></span> Phase tracker</div>
-      <div class="nav-item"><span class="nav-dot"></span> Portfolio</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Phases</div>
@@ -321,6 +319,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
     </div>
     <div class="nav-group">
       <div class="nav-label">Research</div>
+      <div class="nav-item" onclick="showImportantArticles()" style="cursor:pointer"><span class="nav-dot" style="background:var(--amber)"></span> Important Articles <span class="nav-badge" id="important-badge" style="background:var(--amber-dim);color:var(--amber)">—</span></div>
       <div class="nav-item" onclick="showRecentArticles()" style="cursor:pointer"><span class="nav-dot"></span> Articles <span class="nav-badge red" id="unread-badge">—</span></div>
       <div class="nav-item" onclick="showAllWatchItems()" style="cursor:pointer"><span class="nav-dot"></span> Watch items <span class="nav-badge" id="wi-nav-badge">—</span></div>
       <div class="nav-item"><span class="nav-dot"></span> Alerts</div>
