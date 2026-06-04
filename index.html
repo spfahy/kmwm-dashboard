@@ -1155,10 +1155,22 @@ document.getElementById('summary-close-btn').addEventListener('click', function(
 document.getElementById('summary-modal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
+// Replace the existing summary font button event listener with this:
 document.getElementById('summary-font-btn').addEventListener('click', function() {
   var body = document.getElementById('summary-body');
   var isLarge = body.classList.contains('large-text');
   body.classList.toggle('large-text', !isLarge);
+  // Also toggle font size on all dynamically rendered article content divs
+  var contentDivs = body.querySelectorAll('[id^="art-content-"]');
+  contentDivs.forEach(function(div) {
+    div.style.fontSize = isLarge ? '13px' : '15px';
+    div.style.lineHeight = isLarge ? '1.75' : '1.9';
+  });
+  // Also toggle on article header titles
+  var titles = body.querySelectorAll('[id^="art-"] div[style*="font-size:13px;font-weight:500"]');
+  titles.forEach(function(el) {
+    el.style.fontSize = isLarge ? '13px' : '15px';
+  });
   this.textContent = isLarge ? 'A+' : 'A−';
   this.classList.toggle('active', !isLarge);
 });
@@ -1653,14 +1665,30 @@ function copyArticle(id) {
 }
 
 function markArticleRead(id, readByField) {
+  // Build patch object with correct field name
   var patch = {};
   patch[readByField] = true;
+ 
   fetch(SUPA_URL + '/rest/v1/research_chunks?id=eq.' + id, {
     method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'   // return=representation so we can confirm the update
+    },
     body: JSON.stringify(patch)
-  }).then(function() {
-    // Remove the article row from the list entirely
+  }).then(function(r) {
+    if (!r.ok) {
+      return r.text().then(function(t) { throw new Error(t); });
+    }
+    return r.json();
+  }).then(function(data) {
+    // Confirm the field was actually updated
+    if (!data || !data.length || !data[0][readByField]) {
+      throw new Error('Update did not persist — field: ' + readByField);
+    }
+    // Fade out and remove the article row
     var row = document.getElementById('art-' + id);
     if (row) {
       row.style.transition = 'opacity 0.3s';
@@ -1670,17 +1698,17 @@ function markArticleRead(id, readByField) {
     // Refresh nav badges
     var identity = localStorage.getItem('kmwm_identity') || 'Steve';
     loadBadges(identity);
-    // If list is now empty, show all-caught-up message
+    // Show all-caught-up if list is now empty
     setTimeout(function() {
       var body = document.getElementById('summary-body');
-      if (body && body.children.length === 0) {
+      if (body && body.querySelectorAll('[id^="art-"]').length === 0) {
         body.innerHTML = '<p style="color:var(--green);font-family:var(--mono);font-size:12px;">✓ All caught up.</p>';
         document.getElementById('summary-sub').textContent = 'All read';
       }
     }, 400);
-  }).catch(function() {
+  }).catch(function(e) {
     var btn = document.getElementById('art-read-btn-' + id);
-    if (btn) btn.textContent = 'Error — retry';
+    if (btn) { btn.textContent = 'Error — ' + e.message.substring(0, 40); btn.style.color = 'var(--red)'; }
   });
 }
 
