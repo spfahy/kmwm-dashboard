@@ -1246,7 +1246,7 @@ function openSummary(tag, view) {
     ? 'topic_tags=cs.{"' + tag + '"}'
     : 'company_tags=cs.{"' + tag + '"}';
 
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&' + filterParam + '&select=content,created_at&order=created_at.desc&limit=20', {
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&' + filterParam + '&select=content,created_at&order=created_at.desc&limit=30', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r) { return r.json(); }).then(function(records) {
     if (!records || !records.length) {
@@ -1256,7 +1256,7 @@ function openSummary(tag, view) {
     var totalRefs = document.querySelector('.top5-row[onclick*="' + tag.replace(/'/g,"\\'") + '"] .top5-count');
     var totalCount = totalRefs ? totalRefs.textContent : '?';
     document.getElementById('summary-sub').textContent = records.length + ' of ' + totalCount + ' records · Generating summary...';
-    var context = records.map(function(r, i) { return (i+1) + '. ' + (r.content || '').substring(0, 800); }).join('\n\n');
+    var context = records.map(function(r, i) { return (i+1) + '. ' + (r.content || '').substring(0, 1200); }).join('\n\n');
     fetch(SUPA_URL + '/functions/v1/analyze-article', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
