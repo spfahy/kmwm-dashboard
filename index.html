@@ -1,4 +1,4 @@
-<!-- KMWM Dashboard v1.7 — 2026-06-03 — Articles / Watch Items / Alerts views added -->
+<!-- KMWM Dashboard v1.5 — 2026-06-02 — Session start: fetch https://raw.githubusercontent.com/spfahy/kmwm-dashboard/main/index.html to verify current version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +22,11 @@
   --sans:'DM Sans',sans-serif;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5}
+
+/* Layout */
 .shell{display:flex;height:100vh;overflow:hidden}
+
+/* Sidebar */
 .sidebar{width:216px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
 .sidebar-logo{padding:22px 20px 16px;border-bottom:1px solid var(--border)}
 .sidebar-logo-name{font-family:var(--serif);font-size:17px;color:var(--text);line-height:1.2}
@@ -36,12 +40,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .nav-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
 .nav-badge{margin-left:auto;font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:8px;background:var(--amber-dim);color:var(--amber)}
 .nav-badge.red{background:var(--red-dim);color:var(--red)}
-.nav-badge.blue{background:var(--blue-dim);color:var(--blue)}
 .sidebar-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border)}
 .intake-btn{width:100%;padding:9px 12px;background:var(--red-dim);border:1px solid rgba(160,24,24,0.25);border-radius:7px;font-size:12px;font-weight:500;color:var(--red);cursor:pointer;font-family:var(--sans);margin-bottom:12px;transition:all 0.12s}
 .intake-btn:hover{background:rgba(160,24,24,0.14)}
 .ts-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:2px}
 .ts-val{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px}
+
+/* Main */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{height:52px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:10px}
 .topbar-title{font-family:var(--serif);font-size:16px;color:var(--text);flex:1}
@@ -52,77 +57,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .topbar-clock{font-family:var(--mono);font-size:11px;color:var(--muted)}
 .live-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);margin-right:5px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
 .content{flex:1;overflow-y:auto;padding:22px 24px}
-
-/* Views */
-.view{display:none}
-.view.active{display:block}
-
-/* View header */
-.view-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.view-title{font-family:var(--serif);font-size:20px;color:var(--text)}
-.view-sub{font-size:12px;color:var(--muted);margin-top:2px}
-.view-count{font-family:var(--mono);font-size:11px;color:var(--dim);background:var(--bg3);padding:4px 12px;border-radius:20px;border:1px solid var(--border)}
-
-/* Full-width panel */
-.full-panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.full-panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg3)}
-.full-panel-title{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
-
-/* Articles view */
-.article-row{padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
-.article-row:last-child{border-bottom:none}
-.article-row:hover{background:var(--bg3)}
-.article-row-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.article-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;flex:1}
-.article-date{font-family:var(--mono);font-size:10px;color:var(--dim);flex-shrink:0;margin-top:2px}
-.article-meta{display:flex;align-items:center;gap:8px;margin-top:5px}
-.article-author{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:8px;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.15)}
-.article-phase{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:8px;background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
-.article-preview{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
-.article-signal{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:8px}
-.signal-act{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.2)}
-.signal-read{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.2)}
-.signal-file{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
-.mark-read-btn{margin-top:8px;padding:4px 12px;background:none;border:1px solid var(--border2);border-radius:5px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--mono);transition:all 0.12s}
-.mark-read-btn:hover{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
-.mark-read-btn.done{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
-
-/* Watch items full view */
-.wi-full-row{display:flex;align-items:flex-start;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);transition:background 0.1s;cursor:pointer}
-.wi-full-row:last-child{border-bottom:none}
-.wi-full-row:hover{background:var(--bg3)}
-.wi-full-num{font-family:var(--mono);font-size:10px;color:var(--dim);width:40px;flex-shrink:0;padding-top:2px}
-.wi-full-content{flex:1}
-.wi-full-text{font-size:12px;color:var(--text);line-height:1.5}
-.wi-full-meta{display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap}
-.wi-full-date{font-family:var(--mono);font-size:9px;color:var(--dim)}
-.wi-full-phase{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:8px;background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
-.wi-full-owner{font-family:var(--mono);font-size:9px;color:var(--dim)}
-.wi-full-badge{font-family:var(--mono);font-size:9px;padding:3px 9px;border-radius:8px;flex-shrink:0;margin-top:1px}
-
-/* Filter bar */
-.filter-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2);flex-wrap:wrap}
-.filter-btn{padding:4px 12px;background:none;border:1px solid var(--border2);border-radius:20px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--mono);transition:all 0.12s;letter-spacing:0.02em}
-.filter-btn:hover{background:var(--bg3);color:var(--text)}
-.filter-btn.active{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
-.filter-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;margin-right:4px}
-
-/* Alerts view */
-.alert-row{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);transition:background 0.1s}
-.alert-row:last-child{border-bottom:none}
-.alert-row:hover{background:var(--bg3)}
-.alert-ticker{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text);width:60px;flex-shrink:0}
-.alert-desc{flex:1;font-size:12px;color:var(--muted);line-height:1.4}
-.alert-desc-empty{font-style:italic;color:var(--dim)}
-.alert-trigger{font-family:var(--mono);font-size:12px;color:var(--text);width:90px;text-align:right;flex-shrink:0}
-.alert-current{font-family:var(--mono);font-size:12px;width:80px;text-align:right;flex-shrink:0}
-.alert-owner{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:8px;background:var(--bg3);color:var(--muted);border:1px solid var(--border);flex-shrink:0}
-.alert-status{font-family:var(--mono);font-size:9px;padding:3px 9px;border-radius:8px;flex-shrink:0}
-.alert-active{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
-.alert-fired{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.2)}
-.alert-col-header{display:flex;align-items:center;gap:12px;padding:8px 18px;border-bottom:1px solid var(--border2);background:var(--bg3)}
-.alert-col-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase}
 
 /* Metric cards */
 .metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;position:relative;z-index:50}
@@ -141,7 +77,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .m-sub.good{color:var(--green)}
 .m-sub.bad{color:var(--red)}
 
-/* Cash popup */
+/* Cash detail popup */
 .cash-popup{display:none;position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:20px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,0.14)}
 .cash-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .cash-popup-title{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
@@ -194,14 +130,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .h-bar{height:3px;border-radius:2px}
 .h-pl{font-family:var(--mono);font-size:11px;min-width:52px;text-align:right}
 .h-alloc{font-family:var(--mono);font-size:11px;color:var(--muted);width:36px;text-align:right}
+
+/* Inline detail panel */
 .detail-panel{display:none;background:var(--bg3);border-bottom:1px solid var(--border2);padding:12px 16px}
 .detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .detail-cell{background:var(--bg2);border-radius:6px;padding:7px 10px}
 .detail-cell-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:2px}
 .detail-cell-val{font-family:var(--mono);font-size:11px;color:var(--text)}
 
-/* Watch items panel */
-.wi-row{display:flex;align-items:flex-start;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);transition:background 0.1s;cursor:pointer}
+/* Watch items */
+.wi-row{display:flex;align-items:flex-start;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);transition:background 0.1s}
 .wi-row:last-child{border-bottom:none}
 .wi-row:hover{background:var(--bg3)}
 .wi-num{font-family:var(--mono);font-size:9px;color:var(--dim);width:34px;flex-shrink:0;padding-top:2px}
@@ -212,26 +150,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .wi-act{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.15)}
 .wi-watch{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.15)}
 .wi-pend{background:rgba(0,0,0,0.04);color:var(--muted);border:1px solid var(--border)}
-
-/* Top research */
-.top-toggle{padding:3px 10px;background:none;border:1px solid var(--border2);border-radius:5px;font-size:10px;font-family:var(--mono);color:var(--muted);cursor:pointer;transition:all 0.12s}
-.top-toggle:hover{background:var(--bg3);color:var(--text)}
-.top-toggle.active{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
-.top5-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
-.top5-row:last-child{border-bottom:none}
-.top5-row:hover{background:var(--bg3)}
-.top5-rank{font-family:var(--mono);font-size:11px;color:var(--dim);width:18px;flex-shrink:0}
-.top5-ticker{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);width:46px;flex-shrink:0}
-.top5-bar-wrap{flex:1;height:4px;background:var(--bg3);border-radius:2px}
-.top5-bar{height:4px;border-radius:2px;background:var(--green)}
-.top5-count{font-family:var(--mono);font-size:10px;color:var(--muted);width:52px;text-align:right}
+.wi-gate{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.15)}
 
 /* Loading / error */
 .loading{padding:16px;font-family:var(--mono);font-size:10px;color:var(--dim)}
 .error-msg{padding:12px 16px;font-size:11px;color:var(--red)}
-.empty-state{padding:32px 18px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--dim)}
 
-/* Modals */
+/* Intake Modal */
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal-box{background:var(--bg2);border-radius:12px;width:900px;max-width:94vw;height:84vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
@@ -242,11 +167,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .modal-close:hover{background:var(--bg3)}
 .modal-body{display:flex;flex:1;overflow:hidden}
 .modal-left{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px;gap:10px;overflow-y:auto}
-.modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
-.modal-output-toolbar{display:none;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
-.modal-output-toolbar.visible{display:flex}
+.modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .modal-output{flex:1;overflow-y:auto;padding:18px;font-size:13px;line-height:1.7;color:var(--text)}
 .modal-output.large-text{font-size:15px;line-height:1.8}
+.modal-output.large-text h3{font-size:16px}
 .modal-output p{margin-bottom:8px}
 .modal-output h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px;color:var(--text)}
 .modal-output strong{font-weight:500;color:var(--text)}
@@ -260,9 +184,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 textarea,input[type=text],select{width:100%;border:1px solid var(--border2);border-radius:7px;background:var(--bg3);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;transition:border-color 0.12s}
 textarea{resize:none;line-height:1.5}
 textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);background:var(--bg2)}
-.drop-zone{border:2px dashed var(--border2);border-radius:7px;padding:10px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.06em;cursor:pointer;transition:all 0.15s;margin-top:2px}
-.drop-zone:hover,.drop-zone.drag-over{border-color:var(--green);background:var(--green-dim);color:var(--green)}
-.drop-zone input[type=file]{display:none}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .btn-primary{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity 0.12s}
 .btn-primary:hover{opacity:0.88}
@@ -285,6 +206,17 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .signal-file{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)}
 .save-note{font-size:11px;color:var(--muted);margin-left:auto}
 .success-banner{margin-top:14px;padding:9px 12px;background:var(--green-dim);border-radius:7px;color:var(--green);font-family:var(--mono);font-size:11px;border:1px solid var(--green-mid)}
+.top-toggle{padding:3px 10px;background:none;border:1px solid var(--border2);border-radius:5px;font-size:10px;font-family:var(--mono);color:var(--muted);cursor:pointer;transition:all 0.12s}
+.top-toggle:hover{background:var(--bg3);color:var(--text)}
+.top-toggle.active{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
+.top5-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
+.top5-row:last-child{border-bottom:none}
+.top5-row:hover{background:var(--bg3)}
+.top5-rank{font-family:var(--mono);font-size:11px;color:var(--dim);width:18px;flex-shrink:0}
+.top5-ticker{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);width:46px;flex-shrink:0}
+.top5-bar-wrap{flex:1;height:4px;background:var(--bg3);border-radius:2px}
+.top5-bar{height:4px;border-radius:2px;background:var(--green)}
+.top5-count{font-family:var(--mono);font-size:10px;color:var(--muted);width:52px;text-align:right}
 .summary-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:2000;align-items:center;justify-content:center}
 .summary-overlay.open{display:flex}
 .summary-box{background:var(--bg2);border-radius:12px;width:720px;max-width:94vw;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
@@ -303,7 +235,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .wi-detail-overlay.open{display:flex}
 .wi-detail-box{background:var(--bg2);border-radius:12px;width:580px;max-width:94vw;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
 .wi-detail-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
-.wi-detail-body{padding:18px 20px;font-size:13px;line-height:1.6;color:var(--text);max-height:60vh;overflow-y:auto}
+.wi-detail-body{padding:18px 20px;font-size:13px;line-height:1.6;color:var(--text)}
 .wi-detail-field{margin-bottom:10px}
 .wi-detail-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px}
 .wi-detail-val{font-size:13px;color:var(--text)}
@@ -342,27 +274,30 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .phase-detail-cell{background:var(--bg2);border-radius:8px;padding:14px 16px}
 .phase-detail-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
 .phase-detail-val{font-family:var(--mono);font-size:15px;color:var(--text)}
-.chat-progress{height:3px;background:var(--border);overflow:hidden;flex-shrink:0;display:none}
-.chat-progress.visible{display:block}
-.chat-progress-bar{height:100%;width:40%;background:var(--green);animation:progress-slide 1.4s ease-in-out infinite}
+.chat-area{display:none;flex-direction:column;flex:1;overflow:hidden;background:var(--bg2)}
+.chat-area.visible{display:flex}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.chat-msg{font-size:13px;line-height:1.7;padding:10px 14px;border-radius:8px;max-width:92%}
+.chat-msg.user{background:var(--green-dim);color:var(--text);border:1px solid var(--green-mid);align-self:flex-end}
+.chat-msg.assistant{background:var(--bg3);color:var(--text);border:1px solid var(--border2);align-self:flex-start;width:100%}
+.chat-msg.assistant strong{font-weight:500}
 .chat-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
 .chat-input-row textarea{flex:1;resize:none;height:36px;padding:8px 10px;font-size:12px;line-height:1.4;border-radius:6px}
 .btn-chat-send{padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0}
 .btn-chat-send:hover{opacity:0.88}
 .btn-chat-send:disabled{opacity:0.45;cursor:not-allowed}
+.chat-toggle{padding:6px 14px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans)}
+.chat-toggle:hover{background:var(--bg3);color:var(--text)}
+.chat-progress{height:3px;background:var(--border);overflow:hidden;flex-shrink:0;display:none}
+.chat-progress.visible{display:block}
+.chat-progress-bar{height:100%;width:40%;background:var(--green);animation:progress-slide 1.4s ease-in-out infinite}
+.modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 
-/* View-only mode */
-.view-only-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:var(--blue);color:#fff;font-family:var(--mono);font-size:11px;text-align:center;padding:6px;letter-spacing:0.06em;display:none}
-.view-only-banner.active{display:block}
-.view-only-hide{display:none !important}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
-
-<div class="view-only-banner" id="view-only-banner">VIEW ONLY — Kelley &amp; Mullis Research Dashboard · Read-only access</div>
 <div class="shell">
 
   <!-- Sidebar -->
@@ -374,20 +309,23 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
     </div>
     <div class="nav-group">
       <div class="nav-label">Overview</div>
-      <div class="nav-item active" onclick="showView('dashboard')"><span class="nav-dot"></span> Dashboard</div>
+      <div class="nav-item active"><span class="nav-dot"></span> Dashboard</div>
+      <div class="nav-item"><span class="nav-dot"></span> Phase tracker</div>
+      <div class="nav-item"><span class="nav-dot"></span> Portfolio</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Phases</div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 1')" style="cursor:pointer"><span class="nav-dot" style="background:var(--green)"></span> Phase 1 · Energy <span class="nav-badge" id="phase-badge-1">—</span></div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 2')" style="cursor:pointer"><span class="nav-dot" style="background:var(--blue)"></span> Phase 2 · Power <span class="nav-badge" id="phase-badge-2">—</span></div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 3')" style="cursor:pointer"><span class="nav-dot" style="background:var(--muted)"></span> Phase 3 · Metals <span class="nav-badge" id="phase-badge-3">—</span></div>
-      <div class="nav-item" onclick="openPhaseOverlay('Phase 4')" style="cursor:pointer"><span class="nav-dot" style="background:var(--amber)"></span> Phase 4 · Gold <span class="nav-badge" id="phase-badge-4">—</span></div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 1')" style="cursor:pointer"><span class="nav-dot" style="background:var(--green)"></span> Phase 1 · Energy <span class="nav-badge" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)">Active</span></div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 2')" style="cursor:pointer"><span class="nav-dot" style="background:var(--blue)"></span> Phase 2 · Power <span class="nav-badge" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.2)">Deploy</span></div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 3')" style="cursor:pointer"><span class="nav-dot" style="background:var(--muted)"></span> Phase 3 · Metals</div>
+      <div class="nav-item" onclick="openPhaseOverlay('Phase 4')" style="cursor:pointer"><span class="nav-dot" style="background:var(--amber)"></span> Phase 4 · Gold</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Research</div>
-      <div class="nav-item" id="nav-articles" onclick="showView('articles')"><span class="nav-dot"></span> Articles <span class="nav-badge red" id="unread-badge">—</span></div>
-      <div class="nav-item" id="nav-watchitems" onclick="showView('watchitems')"><span class="nav-dot"></span> Watch items <span class="nav-badge" id="wi-nav-badge">—</span></div>
-      <div class="nav-item" id="nav-alerts" onclick="showView('alerts')"><span class="nav-dot"></span> Alerts <span class="nav-badge blue" id="alerts-nav-badge">—</span></div>
+      <div class="nav-item" onclick="showImportantArticles()" style="cursor:pointer"><span class="nav-dot" style="background:var(--amber)"></span> Important Articles <span class="nav-badge" id="important-badge" style="background:var(--amber-dim);color:var(--amber)">—</span></div>
+      <div class="nav-item"><span class="nav-dot"></span> Articles <span class="nav-badge red" id="unread-badge">—</span></div>
+      <div class="nav-item"><span class="nav-dot"></span> Watch items <span class="nav-badge" id="wi-nav-badge">—</span></div>
+      <div class="nav-item"><span class="nav-dot"></span> Alerts</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">System</div>
@@ -406,7 +344,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
   <!-- Main -->
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-title">Dashboard</div>
       <span class="phase-tag tag-green">Phase 1 · Active</span>
       <span class="phase-tag tag-blue">Phase 2 · Deploying</span>
       <span class="phase-tag tag-dim">Phase 3 · Watching</span>
@@ -415,175 +353,109 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 
     <div class="content">
 
-      <!-- ═══════════════ DASHBOARD VIEW ═══════════════ -->
-      <div id="view-dashboard" class="view active">
-        <div class="metric-row">
-          <div class="metric-card green">
-            <div class="m-label">Research Records</div>
-            <div class="m-val" id="rec-count">—</div>
-            <div class="m-sub" id="rec-sub">Loading...</div>
-          </div>
-          <div class="metric-card amber clickable" id="cash-card">
-            <div class="m-label">Cash Sleeve ▾</div>
-            <div class="m-val" id="cash-val">—</div>
-            <div class="m-sub warn" id="cash-sub">Loading...</div>
-          </div>
-          <div class="metric-card red">
-            <div class="m-label">30-Yr Treasury</div>
-            <div class="m-val" id="treasury-val">—</div>
-            <div class="m-sub warn" id="treasury-sub">Loading...</div>
-          </div>
-          <div class="metric-card blue">
-            <div class="m-label">Active Watch Items</div>
-            <div class="m-val" id="wi-count">—</div>
-            <div class="m-sub" id="wi-count-sub">Loading...</div>
-          </div>
+      <!-- Metric Row -->
+      <div class="metric-row">
+        <div class="metric-card green">
+          <div class="m-label">Research Records</div>
+          <div class="m-val" id="rec-count">—</div>
+          <div class="m-sub" id="rec-sub">Loading...</div>
         </div>
-
-        <div class="cash-popup" id="cash-popup">
-          <div class="cash-popup-header">
-            <span class="cash-popup-title">Cash Sleeve Breakdown</span>
-            <button class="cash-popup-close" id="cash-popup-close">✕</button>
-          </div>
-          <div id="cash-popup-body"><div class="loading">Loading...</div></div>
+        <div class="metric-card amber clickable" id="cash-card">
+          <div class="m-label">Cash Sleeve ▾</div>
+          <div class="m-val" id="cash-val">—</div>
+          <div class="m-sub warn" id="cash-sub">Loading...</div>
         </div>
-
-        <div class="fomc-gate">
-          <div class="fomc-gate::before"></div>
-          <div class="fomc-header">
-            <div class="fomc-days" id="fomc-days">—<span>days</span></div>
-            <div>
-              <div class="fomc-title">Warsh FOMC — June 17, 2026 · Primary Phase 2 Gate</div>
-              <div class="fomc-sub">Pre-committed rule: dovish → deploy CEG/VST · hawkish → full stop · ambiguous → hold</div>
-            </div>
-          </div>
-          <div class="fomc-grid">
-            <div class="fomc-cell"><div class="fomc-cell-label">CEG Add Zone</div><div class="fomc-cell-val">$284 – $297</div></div>
-            <div class="fomc-cell"><div class="fomc-cell-label">VST Add Zone</div><div class="fomc-cell-val">$140 – $146</div></div>
-            <div class="fomc-cell"><div class="fomc-cell-label">Core PCE (Apr)</div><div class="fomc-cell-val">3.3% YoY</div></div>
-          </div>
-          <div class="scenario-row">
-            <div class="scenario-btn s-green">Dovish → Deploy CEG / VST</div>
-            <div class="scenario-btn s-red">Hawkish → Hold Cash</div>
-            <div class="scenario-btn s-amber">Ambiguous → Default Hold</div>
-          </div>
+        <div class="metric-card red">
+          <div class="m-label">30-Yr Treasury</div>
+          <div class="m-val" id="treasury-val">—</div>
+          <div class="m-sub warn" id="treasury-sub">Loading...</div>
         </div>
-
-        <div class="two-col">
-          <div class="panel">
-            <div class="panel-header">
-              <div class="panel-title">Top Research Items</div>
-              <div style="display:flex;gap:5px;">
-                <button class="top-toggle active" id="toggle-tickers" onclick="switchTopView('tickers')">Tickers</button>
-                <button class="top-toggle" id="toggle-themes" onclick="switchTopView('themes')">Themes</button>
-              </div>
-            </div>
-            <div id="top-search-row" style="padding:8px 12px;border-bottom:1px solid var(--border);">
-              <div style="display:flex;gap:6px;">
-                <input type="text" id="ticker-search-input" placeholder="Enter ticker (e.g. CEG)" style="flex:1;height:30px;font-size:12px;padding:4px 8px;" onkeydown="if(event.key==='Enter')searchTicker()">
-                <button onclick="searchTicker()" style="padding:4px 12px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--sans);">Search</button>
-                <button onclick="clearTickerSearch()" style="padding:4px 10px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Clear</button>
-              </div>
-            </div>
-            <div id="top5-list"><div class="loading">Loading...</div></div>
-            <div id="more-themes-row" style="display:none;border-top:1px solid var(--border);">
-              <div id="more-themes-toggle" onclick="toggleMoreThemes()" style="padding:9px 16px;font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;">
-                <span id="more-themes-arrow">▼</span> More themes
-              </div>
-              <div id="more-themes-list" style="display:none;"></div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-header">
-              <div class="panel-title">Active Watch Items</div>
-              <div class="panel-count" id="wi-panel-count">Loading...</div>
-            </div>
-            <div id="wi-list"><div class="loading">Fetching from database...</div></div>
-          </div>
+        <div class="metric-card blue">
+          <div class="m-label">Active Watch Items</div>
+          <div class="m-val" id="wi-count">—</div>
+          <div class="m-sub" id="wi-count-sub">Loading...</div>
         </div>
       </div>
 
-      <!-- ═══════════════ ARTICLES VIEW ═══════════════ -->
-      <div id="view-articles" class="view">
-        <div class="view-header">
+      <!-- Cash Popup (outside metric row to avoid z-index issues) -->
+      <div class="cash-popup" id="cash-popup">
+        <div class="cash-popup-header">
+          <span class="cash-popup-title">Cash Sleeve Breakdown</span>
+          <button class="cash-popup-close" id="cash-popup-close">✕</button>
+        </div>
+        <div id="cash-popup-body"><div class="loading">Loading...</div></div>
+      </div>
+
+      <!-- FOMC Gate -->
+      <div class="fomc-gate">
+        <div class="fomc-header">
+          <div class="fomc-days" id="fomc-days">—<span>days</span></div>
           <div>
-            <div class="view-title">Unread Articles</div>
-            <div class="view-sub" id="articles-view-sub">Loading your unread queue...</div>
+            <div class="fomc-title">Warsh FOMC — June 17, 2026 · Primary Phase 2 Gate</div>
+            <div class="fomc-sub">Pre-committed rule: dovish → deploy CEG/VST · hawkish → full stop · ambiguous → hold</div>
           </div>
-          <div class="view-count" id="articles-view-count">—</div>
         </div>
-        <div class="full-panel">
-          <div class="full-panel-header">
-            <div class="full-panel-title" id="articles-panel-title">Articles authored by the other principal — not yet read by you</div>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--dim)" id="articles-user-tag">—</div>
-          </div>
-          <div id="articles-list"><div class="loading">Loading articles...</div></div>
+        <div class="fomc-grid">
+          <div class="fomc-cell"><div class="fomc-cell-label">CEG Add Zone</div><div class="fomc-cell-val">$284 – $297</div></div>
+          <div class="fomc-cell"><div class="fomc-cell-label">VST Add Zone</div><div class="fomc-cell-val">$140 – $146</div></div>
+          <div class="fomc-cell"><div class="fomc-cell-label">Core PCE (Apr)</div><div class="fomc-cell-val">3.3% YoY</div></div>
         </div>
-      </div>
-
-      <!-- ═══════════════ WATCH ITEMS VIEW ═══════════════ -->
-      <div id="view-watchitems" class="view">
-        <div class="view-header">
-          <div>
-            <div class="view-title">All Active Watch Items</div>
-            <div class="view-sub">System-level · sorted by trigger date ascending</div>
-          </div>
-          <div class="view-count" id="wi-full-count">—</div>
-        </div>
-        <div class="full-panel">
-          <div class="filter-bar">
-            <span class="filter-label">Phase</span>
-            <button class="filter-btn active" onclick="filterWI('all',this)">All</button>
-            <button class="filter-btn" onclick="filterWI('Phase 1',this)">Phase 1</button>
-            <button class="filter-btn" onclick="filterWI('Phase 2',this)">Phase 2</button>
-            <button class="filter-btn" onclick="filterWI('Phase 3',this)">Phase 3</button>
-            <button class="filter-btn" onclick="filterWI('Phase 4',this)">Phase 4</button>
-            <button class="filter-btn" onclick="filterWI('macro',this)">Macro</button>
-            <button class="filter-btn" onclick="filterWI('operational',this)">Operational</button>
-          </div>
-          <div id="wi-full-list"><div class="loading">Loading watch items...</div></div>
+        <div class="scenario-row">
+          <div class="scenario-btn s-green">Dovish → Deploy CEG / VST</div>
+          <div class="scenario-btn s-red">Hawkish → Hold Cash</div>
+          <div class="scenario-btn s-amber">Ambiguous → Default Hold</div>
         </div>
       </div>
 
-      <!-- ═══════════════ ALERTS VIEW ═══════════════ -->
-      <div id="view-alerts" class="view">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Stock Price Alerts</div>
-            <div class="view-sub">System-level · all active price triggers</div>
-          </div>
-          <div class="view-count" id="alerts-view-count">—</div>
-        </div>
-        <div class="full-panel">
-          <div class="alert-col-header">
-            <div class="alert-col-label" style="width:60px">Ticker</div>
-            <div class="alert-col-label" style="flex:1">Description</div>
-            <div class="alert-col-label" style="width:90px;text-align:right">Trigger</div>
-            <div class="alert-col-label" style="width:80px;text-align:right">Last Price</div>
-            <div class="alert-col-label" style="width:60px;text-align:right">Owner</div>
-            <div class="alert-col-label" style="width:70px;text-align:right">Status</div>
-          </div>
-          <div id="alerts-list"><div class="loading">Loading alerts...</div></div>
-        </div>
-      </div>
+      <!-- Two Column -->
+      <div class="two-col">
 
-    </div><!-- end .content -->
-  </div><!-- end .main -->
-</div><!-- end .shell -->
+        <!-- Top Research Items -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Top Research Items</div>
+            <div style="display:flex;gap:5px;">
+              <button class="top-toggle active" id="toggle-tickers" onclick="switchTopView('tickers')">Tickers</button>
+              <button class="top-toggle" id="toggle-themes" onclick="switchTopView('themes')">Themes</button>
+            </div>
+          </div>
+          <div id="top-search-row" style="display:none;padding:8px 12px;border-bottom:1px solid var(--border);">
+            <div style="display:flex;gap:6px;">
+              <input type="text" id="ticker-search-input" placeholder="Enter ticker (e.g. CEG)" style="flex:1;height:30px;font-size:12px;padding:4px 8px;" onkeydown="if(event.key==='Enter')searchTicker()">
+              <button onclick="searchTicker()" style="padding:4px 12px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--sans);">Search</button>
+              <button onclick="clearTickerSearch()" style="padding:4px 10px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Clear</button>
+            </div>
+          </div>
+          <div id="top5-list"><div class="loading">Loading...</div></div>
+          <div id="more-themes-row" style="display:none;border-top:1px solid var(--border);">
+            <div id="more-themes-toggle" onclick="toggleMoreThemes()" style="padding:9px 16px;font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <span id="more-themes-arrow">▼</span> More themes
+            </div>
+            <div id="more-themes-list" style="display:none;"></div>
+          </div>
+        </div>
+
+        <!-- Watch Items -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Active Watch Items</div>
+            <div class="panel-count" id="wi-panel-count">Loading...</div>
+          </div>
+          <div id="wi-list"><div class="loading">Fetching from database...</div></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Phase Overlay -->
 <div class="phase-overlay" id="phase-overlay">
   <div class="phase-box">
     <div class="phase-box-header">
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-          <div class="phase-box-title" id="phase-overlay-title">Phase 1 — Energy / LNG</div>
-          <span id="phase-overlay-status-badge" style="font-family:var(--mono);font-size:11px;padding:3px 12px;border-radius:20px;background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid)">—</span>
-          <button onclick="openPhaseStatusEdit()" style="padding:3px 10px;background:none;border:1px solid var(--border2);border-radius:5px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--mono);">Edit status</button>
-        </div>
+      <div>
+        <div class="phase-box-title" id="phase-overlay-title">Phase 1 — Energy / LNG</div>
         <div class="phase-box-sub" id="phase-overlay-sub">Loading...</div>
-        <div id="phase-overlay-updated" style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:3px"></div>
       </div>
       <button class="modal-close" id="phase-overlay-close">Close ✕</button>
     </div>
@@ -641,6 +513,23 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
   </div>
 </div>
 
+
+<!-- Important Articles Modal -->
+<div class="summary-overlay" id="important-modal">
+  <div class="summary-box" style="width:800px;">
+    <div class="summary-header">
+      <div>
+        <div class="summary-title">Important Articles</div>
+        <div class="summary-sub" id="important-sub">Articles flagged for your attention</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="modal-close" id="important-close-btn">Close ✕</button>
+      </div>
+    </div>
+    <div class="summary-body" id="important-body"><p style="color:var(--dim);font-style:italic">Loading...</p></div>
+  </div>
+</div>
+
 <!-- Research Intake Modal -->
 <div class="modal-overlay" id="intake-modal">
   <div class="modal-box">
@@ -651,7 +540,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <span class="signal-badge" id="signal-badge"></span>
-        <button class="btn-copy" id="intake-copy-btn">Copy</button>
         <button class="btn-font-toggle" id="font-toggle-btn">A+</button>
         <button class="modal-close" id="intake-close-btn">Close ✕</button>
       </div>
@@ -660,14 +548,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
       <div class="modal-left">
         <div>
           <div class="field-label">Article Text</div>
-          <textarea id="intake-text" rows="9" placeholder="Paste full article text here..."></textarea>
-        </div>
-        <div>
-          <div class="field-label">Or drop a PDF</div>
-          <div class="drop-zone" id="pdf-drop-zone" onclick="document.getElementById('pdf-file-input').click()">
-            <input type="file" id="pdf-file-input" accept=".pdf">
-            <span id="pdf-drop-label">Drop PDF here or click to browse</span>
-          </div>
+          <textarea id="intake-text" rows="11" placeholder="Paste full article text here..."></textarea>
         </div>
         <div>
           <div class="field-label">Author</div>
@@ -681,22 +562,23 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         <div class="intake-progress" id="intake-progress"><div class="intake-progress-bar" id="intake-progress-bar"></div></div>
       </div>
       <div class="modal-right">
-        <div class="modal-output-toolbar" id="output-toolbar">
-          <span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-right:auto">Analysis Output</span>
-          <button class="btn-font-toggle" id="font-toggle-btn2">A+</button>
-        </div>
         <div class="modal-output" id="intake-output">
           <p class="placeholder">Analysis will appear here after you submit an article.</p>
         </div>
-        <div class="chat-progress" id="chat-progress"><div class="chat-progress-bar"></div></div>
+        <div class="chat-area" id="intake-chat-area">
+          <div class="chat-messages" id="intake-chat-messages"></div>
+          <div class="chat-progress" id="chat-progress"><div class="chat-progress-bar"></div></div>
+          <div class="chat-input-row">
+            <textarea id="intake-chat-input" placeholder="Ask a follow-up question about this analysis..." rows="1"></textarea>
+            <button class="btn-chat-send" id="intake-chat-send">Send</button>
+          </div>
+        </div>
         <div class="modal-footer" id="intake-footer">
           <button class="btn-save" id="intake-save-btn">Save to Database</button>
           <button class="btn-kill" id="intake-kill-btn">Kill</button>
+          <button class="btn-important" id="intake-important-btn" style="padding:7px 16px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.25);border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--sans);display:none;">★ Mark Important</button>
+          <button class="chat-toggle" id="intake-chat-toggle">Ask follow-up ↑</button>
           <span class="save-note" id="intake-save-note">Review before saving</span>
-        </div>
-        <div class="chat-input-row" id="intake-chat-input-row" style="display:none;">
-          <textarea id="intake-chat-input" placeholder="Ask a follow-up question..." rows="1"></textarea>
-          <button class="btn-chat-send" id="intake-chat-send">Send</button>
         </div>
       </div>
     </div>
@@ -704,121 +586,13 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 </div>
 
 <script>
+// SESSION START PROTOCOL: At the start of each Claude session, fetch
+// https://api.github.com/repos/spfahy/kmwm-dashboard/commits/main
+// to get the latest commit hash and date, then fetch the raw file if
+// the local copy does not match. This ensures Claude always works from
+// the current deployed version.
 var SUPA_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
-
-// ─── VIEW-ONLY MODE ────────────────────────────────────────────
-var VIEW_ONLY = typeof window !== 'undefined' && window.location && window.location.search.indexOf('mode=view') !== -1;
-if (VIEW_ONLY) {
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('view-only-banner').classList.add('active');
-    // Push content down to make room for banner
-    document.querySelector('.shell').style.marginTop = '32px';
-    document.querySelector('.shell').style.height = 'calc(100vh - 32px)';
-  });
-}
-function applyViewOnly() {
-  if (!VIEW_ONLY) return;
-  // Hide edit controls
-  var hideIds = [
-    'intake-open-btn',        // Research Intake button
-    'intake-save-btn',        // Save to Database
-    'intake-kill-btn',        // Kill (intake)
-    'intake-chat-send',       // Chat send
-    'wi-complete-btn',        // Mark Complete
-    'wi-kill-btn'             // Kill watch item
-  ];
-  hideIds.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.classList.add('view-only-hide');
-  });
-  // Hide Edit Status button in phase overlay
-  document.querySelectorAll('[onclick="openPhaseStatusEdit()"]').forEach(function(el) {
-    el.classList.add('view-only-hide');
-  });
-  // Hide all mark-as-read buttons (dynamically added — use MutationObserver)
-  var observer = new MutationObserver(function() {
-    document.querySelectorAll('.mark-read-btn').forEach(function(el) {
-      el.classList.add('view-only-hide');
-    });
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-  // Also hide immediately for any already rendered
-  document.querySelectorAll('.mark-read-btn').forEach(function(el) {
-    el.classList.add('view-only-hide');
-  });
-}
-
-
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
-
-// Current user — default Steve, can be set from session context
-var CURRENT_USER = 'Steve';
-
-// ─── PHASE STATUS ───────────────────────────────────────────────
-var phaseStatusData = {};
-var activePhaseId = null;
-
-var STATUS_STYLES = {
-  'Active':    { bg:'var(--green-dim)',  color:'var(--green)',  border:'1px solid var(--green-mid)' },
-  'Deploying': { bg:'var(--blue-dim)',   color:'var(--blue)',   border:'1px solid rgba(26,61,143,0.2)' },
-  'Watching':  { bg:'rgba(0,0,0,0.04)', color:'var(--muted)',  border:'1px solid var(--border)' },
-  'Monitoring':{ bg:'var(--amber-dim)', color:'var(--amber)',  border:'1px solid rgba(122,74,8,0.2)' },
-  'Complete':  { bg:'var(--green-dim)', color:'var(--green)',  border:'1px solid var(--green-mid)' }
-};
-
-function loadPhaseStatus() {
-  fetch(SUPA_URL + '/rest/v1/phase_status?select=phase_id,phase_name,status,updated_by,updated_at&order=phase_id.asc', {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    if (!data || !data.length) return;
-    data.forEach(function(row) {
-      phaseStatusData[row.phase_id] = row;
-      var badge = document.getElementById('phase-badge-' + row.phase_id);
-      if (badge) {
-        badge.textContent = row.status;
-        var s = STATUS_STYLES[row.status] || STATUS_STYLES['Watching'];
-        badge.style.background = s.bg; badge.style.color = s.color; badge.style.border = s.border;
-      }
-    });
-  }).catch(function() {});
-}
-loadPhaseStatus();
-applyViewOnly();
-
-function openPhaseStatusEdit() {
-  if (!activePhaseId || !phaseStatusData[activePhaseId]) return;
-  var row = phaseStatusData[activePhaseId];
-  document.getElementById('phase-edit-name').textContent = 'Phase ' + activePhaseId + ' - ' + row.phase_name;
-  document.getElementById('phase-status-select').value = row.status;
-  document.getElementById('phase-edit-user').textContent = CURRENT_USER;
-  document.getElementById('phase-status-save-msg').textContent = '';
-  document.getElementById('phase-status-modal').classList.add('open');
-}
-
-function savePhaseStatus() {
-  if (!activePhaseId) return;
-  var newStatus = document.getElementById('phase-status-select').value;
-  var now = new Date().toISOString();
-  document.getElementById('phase-status-save-msg').textContent = 'Saving...';
-  fetch(SUPA_URL + '/rest/v1/phase_status?phase_id=eq.' + activePhaseId, {
-    method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ status: newStatus, updated_by: CURRENT_USER, updated_at: now })
-  }).then(function(r) {
-    if (!r.ok) { document.getElementById('phase-status-save-msg').textContent = 'Error saving'; return; }
-    phaseStatusData[activePhaseId].status = newStatus;
-    phaseStatusData[activePhaseId].updated_by = CURRENT_USER;
-    phaseStatusData[activePhaseId].updated_at = now;
-    var badge = document.getElementById('phase-badge-' + activePhaseId);
-    if (badge) { badge.textContent = newStatus; var s = STATUS_STYLES[newStatus] || STATUS_STYLES['Watching']; badge.style.background = s.bg; badge.style.color = s.color; badge.style.border = s.border; }
-    var ob = document.getElementById('phase-overlay-status-badge');
-    if (ob) { ob.textContent = newStatus; var s2 = STATUS_STYLES[newStatus] || STATUS_STYLES['Watching']; ob.style.background = s2.bg; ob.style.color = s2.color; ob.style.border = s2.border; }
-    var updLine = document.getElementById('phase-overlay-updated');
-    if (updLine) updLine.textContent = 'Updated by ' + CURRENT_USER + ' at ' + new Date(now).toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + new Date(now).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('phase-status-save-msg').textContent = 'Saved';
-    setTimeout(function() { document.getElementById('phase-status-modal').classList.remove('open'); }, 800);
-  }).catch(function() { document.getElementById('phase-status-save-msg').textContent = 'Error saving'; });
-}
 
 function supaFetch(table, params) {
   var parts = [];
@@ -829,209 +603,13 @@ function supaFetch(table, params) {
   }).then(function(r) { return r.json(); });
 }
 
-// ─── VIEW NAVIGATION ───────────────────────────────────────────
-var ALL_VIEWS = ['dashboard','articles','watchitems','alerts'];
-var VIEW_TITLES = { dashboard:'Dashboard', articles:'Unread Articles', watchitems:'Watch Items', alerts:'Stock Alerts' };
-
-function showView(view) {
-  ALL_VIEWS.forEach(function(v) {
-    var el = document.getElementById('view-' + v);
-    var nav = document.getElementById('nav-' + v);
-    if (el) el.classList.toggle('active', v === view);
-    if (nav) nav.classList.toggle('active', v === view);
-  });
-  // Dashboard nav item has no id prefix — handle separately
-  document.querySelectorAll('.nav-item').forEach(function(el) {
-    if (el.getAttribute('onclick') === "showView('dashboard')") el.classList.toggle('active', view === 'dashboard');
-  });
-  document.getElementById('topbar-title').textContent = VIEW_TITLES[view] || 'Dashboard';
-
-  // Lazy-load view data on first visit
-  if (view === 'articles' && !articlesLoaded) loadArticlesView();
-  if (view === 'watchitems' && !watchitemsLoaded) loadWatchItemsView();
-  if (view === 'alerts' && !alertsLoaded) loadAlertsView();
-}
-
-var articlesLoaded = false;
-var watchitemsLoaded = false;
-var alertsLoaded = false;
-var allWIData = [];
-
-// ─── ARTICLES VIEW ─────────────────────────────────────────────
-function loadArticlesView() {
-  articlesLoaded = true;
-  var otherAuthor = CURRENT_USER === 'Steve' ? 'Michael' : 'Steve';
-  var readCol = 'read_by_' + CURRENT_USER.toLowerCase();
-  document.getElementById('articles-user-tag').textContent = 'Viewing as: ' + CURRENT_USER;
-  document.getElementById('articles-panel-title').textContent = 'Authored by ' + otherAuthor + ' — not yet read by ' + CURRENT_USER;
-
-  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"author: ' + otherAuthor + '"}&' + readCol + '=eq.false&select=id,source_file_name,content,topic_tags,created_at&order=created_at.desc&limit=50', {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    if (!data || !data.length) {
-      document.getElementById('articles-list').innerHTML = '<div class="empty-state">No unread articles from ' + otherAuthor + ' — you are current.</div>';
-      document.getElementById('articles-view-count').textContent = '0 unread';
-      document.getElementById('articles-view-sub').textContent = 'All caught up';
-      document.getElementById('unread-badge').textContent = '0';
-      return;
-    }
-    document.getElementById('articles-view-count').textContent = data.length + ' unread';
-    document.getElementById('articles-view-sub').textContent = data.length + ' articles from ' + otherAuthor + ' awaiting your review';
-    document.getElementById('unread-badge').textContent = data.length;
-
-    document.getElementById('articles-list').innerHTML = data.map(function(rec) {
-      var title = rec.source_file_name || 'Untitled';
-      var date = rec.created_at ? new Date(rec.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
-      var preview = (rec.content || '').replace(/[#*]/g,'').substring(0,160).trim();
-      var tags = rec.topic_tags || [];
-      var phase = tags.find(function(t){ return t && t.toLowerCase().startsWith('phase'); }) || '';
-      var tierMatch = (rec.content || '').match(/SIGNAL TIER[:\s]+([A-Z]+)/i);
-      var tier = tierMatch ? tierMatch[1].toUpperCase() : '';
-      var tierHtml = '';
-      if (tier === 'ACT') tierHtml = '<span class="article-signal signal-act">ACT</span>';
-      else if (tier === 'READ') tierHtml = '<span class="article-signal signal-read">READ</span>';
-      else if (tier === 'FILE') tierHtml = '<span class="article-signal signal-file">FILE</span>';
-      return '<div class="article-row" id="article-row-' + rec.id + '">' +
-        '<div class="article-row-top"><div class="article-title">' + escHtml(title) + '</div><div class="article-date">' + date + '</div></div>' +
-        '<div class="article-meta">' +
-        '<span class="article-author">' + otherAuthor + '</span>' +
-        (phase ? '<span class="article-phase">' + escHtml(phase) + '</span>' : '') +
-        tierHtml +
-        '</div>' +
-        '<div class="article-preview">' + escHtml(preview) + (preview.length >= 160 ? '…' : '') + '</div>' +
-        '<button class="mark-read-btn" id="mrb-' + rec.id + '" onclick="markRead(' + rec.id + ',event)">Mark as read</button>' +
-        '</div>';
-    }).join('');
-  }).catch(function(e) {
-    document.getElementById('articles-list').innerHTML = '<div class="error-msg">Error loading articles: ' + e.message + '</div>';
-  });
-}
-
-function markRead(id, e) {
-  e.stopPropagation();
-  var readCol = 'read_by_' + CURRENT_USER.toLowerCase();
-  var payload = {}; payload[readCol] = true;
-  fetch(SUPA_URL + '/rest/v1/research_chunks?id=eq.' + id, {
-    method: 'PATCH',
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify(payload)
-  }).then(function() {
-    var btn = document.getElementById('mrb-' + id);
-    if (btn) { btn.textContent = 'Read ✓'; btn.classList.add('done'); btn.disabled = true; }
-    var row = document.getElementById('article-row-' + id);
-    if (row) { row.style.opacity = '0.45'; }
-    // Update badge count
-    var badge = document.getElementById('unread-badge');
-    var current = parseInt(badge.textContent) || 0;
-    if (current > 0) badge.textContent = current - 1;
-  }).catch(function() {});
-}
-
-// ─── WATCH ITEMS FULL VIEW ─────────────────────────────────────
-function loadWatchItemsView() {
-  watchitemsLoaded = true;
-  fetch(SUPA_URL + '/rest/v1/watch_items?status=eq.active&select=id,item,trigger_date,trigger_condition,phase_tag,owner,status&order=trigger_date.asc.nullslast&limit=200', {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    allWIData = data || [];
-    document.getElementById('wi-full-count').textContent = allWIData.length + ' active';
-    renderWIFull(allWIData);
-  }).catch(function(e) {
-    document.getElementById('wi-full-list').innerHTML = '<div class="error-msg">Error: ' + e.message + '</div>';
-  });
-}
-
-function renderWIFull(data) {
-  var today = new Date(); today.setHours(0,0,0,0);
-  if (!data.length) { document.getElementById('wi-full-list').innerHTML = '<div class="empty-state">No watch items match this filter.</div>'; return; }
-  document.getElementById('wi-full-list').innerHTML = data.map(function(wi) {
-    var badgeCls = 'wi-pend', badgeTxt = 'Pending';
-    if (wi.trigger_date) {
-      var td = new Date(wi.trigger_date); td.setHours(0,0,0,0);
-      var diff = Math.ceil((td - today) / 86400000);
-      if (diff <= 0) { badgeCls = 'wi-act'; badgeTxt = 'Overdue'; }
-      else if (diff <= 7) { badgeCls = 'wi-act'; badgeTxt = diff + 'd'; }
-      else if (diff <= 30) { badgeCls = 'wi-watch'; badgeTxt = diff + 'd'; }
-      else { badgeCls = 'wi-pend'; badgeTxt = new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
-    } else if (wi.trigger_condition) { badgeCls = 'wi-watch'; badgeTxt = 'Condition'; }
-    var dateStr = wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'No date';
-    var condStr = wi.trigger_condition ? wi.trigger_condition.substring(0,60) + (wi.trigger_condition.length > 60 ? '…' : '') : '';
-    return '<div class="wi-full-row" onclick=\'openWiDetail(' + JSON.stringify({id:wi.id,item:wi.item,trigger_date:wi.trigger_date,trigger_condition:wi.trigger_condition,phase_tag:wi.phase_tag,owner:wi.owner,status:wi.status}) + ')\'>' +
-      '<div class="wi-full-num">WI-' + wi.id + '</div>' +
-      '<div class="wi-full-content">' +
-        '<div class="wi-full-text">' + escHtml(wi.item.length > 120 ? wi.item.substring(0,120)+'…' : wi.item) + '</div>' +
-        '<div class="wi-full-meta">' +
-          '<span class="wi-full-date">' + dateStr + '</span>' +
-          (wi.phase_tag ? '<span class="wi-full-phase">' + wi.phase_tag + '</span>' : '') +
-          '<span class="wi-full-owner">' + (wi.owner||'—') + '</span>' +
-          (condStr ? '<span class="wi-full-date" style="font-style:italic">' + escHtml(condStr) + '</span>' : '') +
-        '</div>' +
-      '</div>' +
-      '<div class="wi-full-badge ' + badgeCls + '">' + badgeTxt + '</div>' +
-      '</div>';
-  }).join('');
-}
-
-function filterWI(phase, btn) {
-  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  if (phase === 'all') { renderWIFull(allWIData); return; }
-  var filtered = allWIData.filter(function(wi){ return wi.phase_tag && wi.phase_tag.toLowerCase() === phase.toLowerCase(); });
-  renderWIFull(filtered);
-}
-
-// ─── ALERTS VIEW ───────────────────────────────────────────────
-function loadAlertsView() {
-  alertsLoaded = true;
-  fetch(SUPA_URL + '/rest/v1/stock_alerts?select=id,ticker,trigger_price,trigger_operator,current_value,owner,status,description,alerted_at&order=ticker.asc', {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    if (!data || !data.length) {
-      document.getElementById('alerts-list').innerHTML = '<div class="empty-state">No stock alerts configured.</div>';
-      document.getElementById('alerts-view-count').textContent = '0 alerts';
-      document.getElementById('alerts-nav-badge').textContent = '0';
-      return;
-    }
-    var active = data.filter(function(a){ return a.status === 'active'; });
-    document.getElementById('alerts-view-count').textContent = data.length + ' alerts';
-    document.getElementById('alerts-nav-badge').textContent = active.length;
-
-    document.getElementById('alerts-list').innerHTML = data.map(function(alert) {
-      var op = alert.trigger_operator || '>=';
-      var triggerDisplay = op + ' $' + parseFloat(alert.trigger_price).toFixed(2);
-      var currentDisplay = alert.current_value ? '$' + parseFloat(alert.current_value).toFixed(2) : '—';
-      var statusCls = alert.status === 'active' ? 'alert-active' : 'alert-fired';
-      var statusTxt = alert.status === 'active' ? 'Active' : 'Fired';
-      var descHtml = alert.description
-        ? escHtml(alert.description)
-        : '<span class="alert-desc-empty">No description</span>';
-      // Color current vs trigger
-      var currentColor = 'var(--text)';
-      if (alert.current_value && alert.trigger_price) {
-        var cv = parseFloat(alert.current_value); var tp = parseFloat(alert.trigger_price);
-        if (op === '>=' || op === '>') currentColor = cv >= tp ? 'var(--red)' : 'var(--green)';
-        if (op === '<=' || op === '<') currentColor = cv <= tp ? 'var(--red)' : 'var(--green)';
-      }
-      return '<div class="alert-row">' +
-        '<div class="alert-ticker">' + escHtml(alert.ticker) + '</div>' +
-        '<div class="alert-desc">' + descHtml + '</div>' +
-        '<div class="alert-trigger" style="color:var(--muted)">' + triggerDisplay + '</div>' +
-        '<div class="alert-current" style="color:' + currentColor + '">' + currentDisplay + '</div>' +
-        '<div class="alert-owner">' + (alert.owner||'—') + '</div>' +
-        '<div class="alert-status ' + statusCls + '">' + statusTxt + '</div>' +
-        '</div>';
-    }).join('');
-  }).catch(function(e) {
-    document.getElementById('alerts-list').innerHTML = '<div class="error-msg">Error: ' + e.message + '</div>';
-  });
-}
-
-// ─── CLOCK ─────────────────────────────────────────────────────
+// Clock
 function tick() {
   var now = new Date();
   document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', timeZoneName:'short'});
 }
-tick(); setInterval(tick, 1000);
+tick();
+setInterval(tick, 1000);
 
 // Deploy time
 var dm = document.lastModified;
@@ -1042,12 +620,15 @@ if (dm) {
 
 // FOMC countdown
 function fomcCountdown() {
-  var target = new Date('2026-06-17'); var today = new Date(); today.setHours(0,0,0,0);
+  var target = new Date('2026-06-17');
+  var today = new Date(); today.setHours(0,0,0,0);
   var days = Math.ceil((target - today) / 86400000);
-  document.getElementById('fomc-days').innerHTML = days + '<span>days</span>';
+  var el = document.getElementById('fomc-days');
+  el.innerHTML = days + '<span>days</span>';
 }
 fomcCountdown();
 
+// Format helpers
 function fmtDollar(v) {
   if (v == null || v === '' || v === '—') return '—';
   var n = parseFloat(String(v).replace(/,/g, ''));
@@ -1057,41 +638,73 @@ function fmtDollar(v) {
   if (n >= 1000) return '$' + (n/1000).toFixed(0) + 'K';
   return '$' + n.toFixed(2);
 }
-function fmtPct(v) { if (v == null || v === '') return '—'; var n = parseFloat(v); if (isNaN(n)) return '—'; return (n * 100).toFixed(2) + '%'; }
-function fmtPl(v) { if (v == null || v === '') return '—'; var n = parseFloat(v) * 100; if (isNaN(n)) return '—'; return (n >= 0 ? '+' : '') + n.toFixed(2) + '%'; }
-function plColor(v) { if (v == null) return 'var(--muted)'; return parseFloat(v) >= 0 ? 'var(--green)' : 'var(--red)'; }
-function escHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtPct(v) {
+  if (v == null || v === '') return '—';
+  var n = parseFloat(v);
+  if (isNaN(n)) return '—';
+  return (n * 100).toFixed(2) + '%';
+}
+function fmtPl(v) {
+  if (v == null || v === '') return '—';
+  var n = parseFloat(v) * 100;
+  if (isNaN(n)) return '—';
+  return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+function plColor(v) {
+  if (v == null) return 'var(--muted)';
+  return parseFloat(v) >= 0 ? 'var(--green)' : 'var(--red)';
+}
 
-// ─── 30-YEAR TREASURY ──────────────────────────────────────────
+// Load 30-year Treasury yield from Watch Item 28
 supaFetch('watch_items', { select: 'current_value,last_checked_at', id: 'eq.28', limit: 1 }).then(function(data) {
   if (!data || !data.length || !data[0].current_value) return;
   var val = parseFloat(data[0].current_value);
   if (isNaN(val)) return;
-  document.getElementById('treasury-val').textContent = val.toFixed(3) + '%';
+  var pct = val.toFixed(3) + '%';
+  var card = document.getElementById('treasury-val').closest('.metric-card');
+  document.getElementById('treasury-val').textContent = pct;
+  var trigger = 5.00;
   var sub = document.getElementById('treasury-sub');
-  if (val >= 5.25) { sub.textContent = 'ABOVE WI-75 threshold 5.25%'; sub.className = 'm-sub bad'; }
-  else if (val >= 5.00) { sub.textContent = 'Above 5.00% — WI-28 active'; sub.className = 'm-sub bad'; }
-  else { sub.textContent = Math.round((5.00 - val) * 100) + 'bps below 5.00% trigger'; sub.className = 'm-sub warn'; }
+  if (val >= 5.25) {
+    sub.textContent = 'ABOVE WI-75 threshold 5.25%';
+    sub.className = 'm-sub bad';
+    card.className = card.className.replace(/\b(green|amber|red|blue)\b/, 'red');
+  } else if (val >= 5.00) {
+    sub.textContent = 'Above 5.00% — WI-28 active';
+    sub.className = 'm-sub bad';
+    card.className = card.className.replace(/\b(green|amber|red|blue)\b/, 'red');
+  } else {
+    var bps = Math.round((trigger - val) * 100);
+    sub.textContent = bps + 'bps below 5.00% trigger';
+    sub.className = 'm-sub warn';
+  }
   if (data[0].last_checked_at) {
     var checked = new Date(data[0].last_checked_at);
-    sub.textContent += ' · ' + checked.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + checked.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    sub.textContent += ' · ' + checked.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   }
 }).catch(function() {});
 
-// ─── RECORD COUNT ──────────────────────────────────────────────
+// Load record count
+supaFetch('research_chunks', { select: 'id', limit: 1 });
 fetch(SUPA_URL + '/rest/v1/research_chunks?select=id&limit=1', {
   headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
 }).then(function(r) {
   var cr = r.headers.get('content-range');
-  if (cr) { document.getElementById('rec-count').textContent = parseInt(cr.split('/')[1]).toLocaleString(); document.getElementById('rec-sub').textContent = 'records in database'; document.getElementById('rec-sub').className = 'm-sub good'; }
+  if (cr) {
+    var total = cr.split('/')[1];
+    document.getElementById('rec-count').textContent = parseInt(total).toLocaleString();
+    document.getElementById('rec-sub').textContent = 'records in database';
+    document.getElementById('rec-sub').className = 'm-sub good';
+  }
 }).catch(function() {});
 
-// ─── CASH SLEEVE ───────────────────────────────────────────────
+// Load cash sleeve
 var cashData = {};
 supaFetch('portfolio_metrics', { select: 'cash_sleeve_pct,sgov_pct,fduxx_pct,ftsm_pct,ptshx_pct,gld_total_pct,gld_excess_pct,sgov_value,fduxx_value,ftsm_value,ptshx_value,gld_excess_value,last_synced_at', order: 'metric_date.desc', limit: 1 }).then(function(data) {
   if (!data || !data.length) return;
   cashData = data[0];
-  document.getElementById('cash-val').textContent = (parseFloat(cashData.cash_sleeve_pct) * 100).toFixed(2) + '%';
+  var pct = (parseFloat(cashData.cash_sleeve_pct) * 100).toFixed(2);
+  document.getElementById('cash-val').textContent = pct + '%';
   var synced = new Date(cashData.last_synced_at);
   var syncStr = synced.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + synced.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('cash-sub').textContent = 'SGOV · FDUXX · GLD dry powder · ' + syncStr;
@@ -1099,23 +712,156 @@ supaFetch('portfolio_metrics', { select: 'cash_sleeve_pct,sgov_pct,fduxx_pct,fts
   document.getElementById('sync-time').style.color = 'var(--green)';
 }).catch(function() {});
 
+// Cash popup
 document.getElementById('cash-card').addEventListener('click', function(e) {
   var popup = document.getElementById('cash-popup');
   if (popup.style.display === 'block') { popup.style.display = 'none'; return; }
-  var rect = document.getElementById('cash-card').getBoundingClientRect();
-  popup.style.top = (rect.bottom + 6) + 'px'; popup.style.left = rect.left + 'px'; popup.style.display = 'block';
-  var rows = [['SGOV','iShares 0-3M Treasury',cashData.sgov_pct,cashData.sgov_value],['FDUXX','Fidelity Money Market',cashData.fduxx_pct,cashData.fduxx_value],['FTSM','First Trust Short Maturity',cashData.ftsm_pct,cashData.ftsm_value],['PTSHX','PIMCO Short-Term',cashData.ptshx_pct,cashData.ptshx_value],['GLD','SPDR Gold (above 9% core)',cashData.gld_excess_pct,cashData.gld_excess_value]];
-  var html = rows.map(function(r){ return '<div class="cash-row"><div><div class="cash-row-ticker">'+r[0]+'</div><div class="cash-row-name">'+r[1]+'</div></div><div class="cash-row-right"><div class="cash-row-val">'+fmtDollar(r[3])+'</div><div class="cash-row-pct">'+fmtPct(r[2])+'</div></div></div>'; }).join('');
-  html += '<div class="cash-total"><span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--amber)">Total Cash Sleeve</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber)">'+(cashData.cash_sleeve_pct?(parseFloat(cashData.cash_sleeve_pct)*100).toFixed(2)+'%':'—')+'</span></div>';
+  var card = document.getElementById('cash-card');
+  var rect = card.getBoundingClientRect();
+  popup.style.top = (rect.bottom + 6) + 'px';
+  popup.style.left = rect.left + 'px';
+  popup.style.display = 'block';
+  var rows = [
+    ['SGOV', 'iShares 0-3M Treasury', cashData.sgov_pct, cashData.sgov_value],
+    ['FDUXX', 'Fidelity Money Market', cashData.fduxx_pct, cashData.fduxx_value],
+    ['FTSM', 'First Trust Short Maturity', cashData.ftsm_pct, cashData.ftsm_value],
+    ['PTSHX', 'PIMCO Short-Term', cashData.ptshx_pct, cashData.ptshx_value],
+    ['GLD', 'SPDR Gold (above 9% core)', cashData.gld_excess_pct, cashData.gld_excess_value]
+  ];
+  var html = rows.map(function(r) {
+    return '<div class="cash-row"><div><div class="cash-row-ticker">' + r[0] + '</div><div class="cash-row-name">' + r[1] + '</div></div><div class="cash-row-right"><div class="cash-row-val">' + fmtDollar(r[3]) + '</div><div class="cash-row-pct">' + fmtPct(r[2]) + '</div></div></div>';
+  }).join('');
+  var total = cashData.cash_sleeve_pct ? (parseFloat(cashData.cash_sleeve_pct)*100).toFixed(2) + '%' : '—';
+  html += '<div class="cash-total"><span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--amber)">Total Cash Sleeve</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber)">' + total + '</span></div>';
   document.getElementById('cash-popup-body').innerHTML = html;
 });
-document.getElementById('cash-popup-close').addEventListener('click', function() { document.getElementById('cash-popup').style.display = 'none'; });
+document.getElementById('cash-popup-close').addEventListener('click', function() {
+  document.getElementById('cash-popup').style.display = 'none';
+});
 document.addEventListener('click', function(e) {
   var popup = document.getElementById('cash-popup');
-  if (popup.style.display === 'block' && !popup.contains(e.target) && !document.getElementById('cash-card').contains(e.target)) popup.style.display = 'none';
+  var card = document.getElementById('cash-card');
+  if (popup.style.display === 'block' && !popup.contains(e.target) && !card.contains(e.target)) {
+    popup.style.display = 'none';
+  }
 });
 
-// ─── DASHBOARD WATCH ITEMS PANEL ───────────────────────────────
+// Load phase tickers then holdings
+var PHASE1 = [];
+var holdingsData = {};
+var activeHoldingTicker = null;
+
+supaFetch('phase_tickers', { select: 'ticker,name,sort_order', phase: 'eq.Phase 1', status: 'eq.active', order: 'sort_order.asc' }).then(function(data) {
+  if (data && data.length) {
+    PHASE1 = data;
+  } else {
+    PHASE1 = [
+      {ticker:'LNG',name:'Cheniere Energy'},{ticker:'NEXT',name:'NextDecade'},
+      {ticker:'EOG',name:'EOG Resources'},{ticker:'WMB',name:'Williams Companies'},
+      {ticker:'EPD',name:'Enterprise Products'},{ticker:'CF',name:'CF Industries'},
+      {ticker:'INSW',name:'Intl Seaways'}
+    ];
+  }
+  return loadHoldings();
+}).catch(function() {
+  PHASE1 = [
+    {ticker:'LNG',name:'Cheniere Energy'},{ticker:'NEXT',name:'NextDecade'},
+    {ticker:'EOG',name:'EOG Resources'},{ticker:'WMB',name:'Williams Companies'},
+    {ticker:'EPD',name:'Enterprise Products'},{ticker:'CF',name:'CF Industries'},
+    {ticker:'INSW',name:'Intl Seaways'}
+  ];
+  loadHoldings();
+});
+
+function loadHoldings() {
+  var today = new Date().toISOString().split('T')[0];
+  return supaFetch('holdings_detail', { select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date', metric_date: 'eq.' + today, order: 'ticker.asc' }).then(function(data) {
+    if (data && data.length) {
+      data.forEach(function(row) { holdingsData[row.ticker] = row; });
+    }
+    renderHoldings();
+  }).catch(function() { renderHoldings(); });
+}
+
+function renderHoldings() {
+  var list = document.getElementById('holdings-list');
+  if (!PHASE1.length) { list.innerHTML = '<div class="loading">No tickers configured</div>'; return; }
+  document.getElementById('holdings-count').textContent = PHASE1.length + ' positions';
+  var html = '';
+  PHASE1.forEach(function(h) {
+    var d = holdingsData[h.ticker] || {};
+    var alloc = d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—';
+    var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
+    var plTxt = pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—';
+    var plClr = pl != null ? (pl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--muted)';
+    var dotCls = h.ticker === 'NEXT' ? 'dot-amber' : 'dot-green';
+    var barW = d.alloc_pct ? Math.min(100, parseFloat(d.alloc_pct)*100/0.05) : 15;
+    var barClr = h.ticker === 'NEXT' ? 'var(--amber)' : 'var(--green)';
+    html += '<div id="hrow-' + h.ticker + '" class="holding-row" onclick="toggleHolding(\'' + h.ticker + '\')">';
+    html += '<div class="h-dot ' + dotCls + '"></div>';
+    html += '<span class="h-ticker">' + h.ticker + '</span>';
+    html += '<span class="h-name">' + h.name + '</span>';
+    html += '<div class="h-bar-wrap"><div class="h-bar" style="width:' + barW + '%;background:' + barClr + '"></div></div>';
+    html += '<span class="h-pl" style="color:' + plClr + '">' + plTxt + '</span>';
+    html += '<span class="h-alloc">' + alloc + '</span>';
+    html += '</div>';
+    html += '<div class="detail-panel" id="detail-' + h.ticker + '">';
+    html += '<div class="detail-grid" id="detail-grid-' + h.ticker + '"><div class="loading" style="grid-column:1/-1">Loading detail...</div></div>';
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function toggleHolding(ticker) {
+  var panel = document.getElementById('detail-' + ticker);
+  var row = document.getElementById('hrow-' + ticker);
+  if (panel.style.display === 'block') {
+    panel.style.display = 'none';
+    row.classList.remove('active-row');
+    activeHoldingTicker = null;
+    return;
+  }
+  if (activeHoldingTicker) {
+    document.getElementById('detail-' + activeHoldingTicker).style.display = 'none';
+    document.getElementById('hrow-' + activeHoldingTicker).classList.remove('active-row');
+  }
+  activeHoldingTicker = ticker;
+  row.classList.add('active-row');
+  panel.style.display = 'block';
+  var d = holdingsData[ticker] || {};
+  var daysHeld = '—';
+  if (d.purchase_date && d.purchase_date !== '—') {
+    var pd = new Date(d.purchase_date);
+    if (isNaN(pd.getTime())) {
+      // Try M/D format without year — assume most recent past occurrence
+      var parts = String(d.purchase_date).split('/');
+      if (parts.length >= 2) {
+        var yr = parts.length >= 3 ? parseInt(parts[2]) : new Date().getFullYear();
+        pd = new Date(yr, parseInt(parts[0])-1, parseInt(parts[1]));
+        if (pd > new Date()) pd.setFullYear(pd.getFullYear() - 1);
+      }
+    }
+    var diff = Math.floor((new Date() - pd) / 86400000);
+    if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
+  }
+  var unrealized = (d.current_value && d.cost_basis) ? parseFloat(d.current_value) - parseFloat(d.cost_basis) : null;
+  var cells = [
+    ['Entry Price', fmtDollar(d.entry_price)],
+    ['Cost Basis', fmtDollar(d.cost_basis)],
+    ['Current Value', fmtDollar(d.current_value)],
+    ['P / L', '<span style="color:' + plColor(d.pl_pct) + '">' + fmtPl(d.pl_pct) + '</span>'],
+    ['Unrealized', unrealized != null ? '<span style="color:' + (unrealized>=0?'var(--green)':'var(--red)') + '">' + fmtDollar(unrealized) + '</span>' : '—'],
+    ['Weight', fmtPct(d.alloc_pct)],
+    ['Days Held', daysHeld],
+    ['Purchased', d.purchase_date || '—']
+  ];
+  var ghtml = cells.map(function(c) {
+    return '<div class="detail-cell"><div class="detail-cell-label">' + c[0] + '</div><div class="detail-cell-val">' + c[1] + '</div></div>';
+  }).join('');
+  document.getElementById('detail-grid-' + ticker).innerHTML = ghtml;
+}
+
+// Load watch items
 supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase_tag,status', status: 'eq.active', order: 'trigger_date.asc.nullslast', limit: 8 }).then(function(data) {
   var today = new Date(); today.setHours(0,0,0,0);
   document.getElementById('wi-count').textContent = (data && data.length) ? data.length + '+' : '—';
@@ -1123,7 +869,7 @@ supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase
   document.getElementById('wi-nav-badge').textContent = (data && data.length) ? data.length : '—';
   document.getElementById('wi-panel-count').textContent = (data && data.length) ? data.length + ' shown' : '—';
   if (!data || !data.length) { document.getElementById('wi-list').innerHTML = '<div class="loading">No active watch items</div>'; return; }
-  document.getElementById('wi-list').innerHTML = data.map(function(wi) {
+  var html = data.map(function(wi) {
     var badgeCls = 'wi-pend', badgeTxt = 'Pending';
     if (wi.trigger_date) {
       var td = new Date(wi.trigger_date); td.setHours(0,0,0,0);
@@ -1135,12 +881,17 @@ supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase
     } else if (wi.trigger_condition) { badgeCls = 'wi-watch'; badgeTxt = 'Condition'; }
     var meta = wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : (wi.trigger_condition ? wi.trigger_condition.substring(0,45) : 'No date set');
     if (wi.phase_tag) meta += ' · ' + wi.phase_tag;
-    return '<div class="wi-row" id="wi-row-' + wi.id + '" onclick=\'openWiDetail(' + JSON.stringify({id:wi.id,item:wi.item,trigger_date:wi.trigger_date,trigger_condition:wi.trigger_condition,phase_tag:wi.phase_tag,owner:wi.owner,status:wi.status}) + ')\'><div class="wi-num">WI-' + wi.id + '</div><div class="wi-content"><div class="wi-text">' + escHtml(wi.item.length > 70 ? wi.item.substring(0,70)+'…' : wi.item) + '</div><div class="wi-meta">' + meta + '</div></div><div class="wi-badge ' + badgeCls + '">' + badgeTxt + '</div></div>';
+    var txt = wi.item.length > 70 ? wi.item.substring(0,70) + '…' : wi.item;
+    return '<div class="wi-row" id="wi-row-' + wi.id + '" onclick=\'openWiDetail(' + JSON.stringify({id:wi.id,item:wi.item,trigger_date:wi.trigger_date,trigger_condition:wi.trigger_condition,phase_tag:wi.phase_tag,owner:wi.owner,status:wi.status}) + ')\'><div class="wi-num">WI-' + wi.id + '</div><div class="wi-content"><div class="wi-text">' + txt + '</div><div class="wi-meta">' + meta + '</div></div><div class="wi-badge ' + badgeCls + '">' + badgeTxt + '</div></div>';
   }).join('');
-}).catch(function(e) { document.getElementById('wi-list').innerHTML = '<div class="error-msg">Could not load: ' + e.message + '</div>'; });
+  document.getElementById('wi-list').innerHTML = html;
+}).catch(function(e) {
+  document.getElementById('wi-list').innerHTML = '<div class="error-msg">Could not load: ' + e.message + '</div>';
+});
 
-// ─── TOP RESEARCH ITEMS ────────────────────────────────────────
+// Load Top Research Items — tickers default
 var currentTopView = 'tickers';
+
 function switchTopView(view) {
   currentTopView = view;
   document.getElementById('toggle-tickers').classList.toggle('active', view === 'tickers');
@@ -1148,271 +899,760 @@ function switchTopView(view) {
   document.getElementById('top-search-row').style.display = view === 'tickers' ? 'block' : 'none';
   document.getElementById('more-themes-row').style.display = 'none';
   document.getElementById('more-themes-list').style.display = 'none';
-  if(document.getElementById('ticker-search-input')) document.getElementById('ticker-search-input').value = '';
+  document.getElementById('ticker-search-input') && (document.getElementById('ticker-search-input').value = '');
   document.getElementById('top5-list').innerHTML = '<div class="loading">Loading...</div>';
   loadTopItems(view);
 }
+
 function loadTopItems(view) {
   var endpoint = view === 'tickers' ? 'top_research_tags' : 'top_theme_tags';
-  fetch(SUPA_URL + '/rest/v1/rpc/' + endpoint, { method:'POST', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'}, body:JSON.stringify({tag_limit: view === 'themes' ? 30 : 10}) }).then(function(r){return r.json();}).then(function(data){renderTopItems(data,view);}).catch(function(){
-    renderTopItems(view==='tickers'?[{tag:'LNG',frequency:186},{tag:'WMB',frequency:156},{tag:'EOG',frequency:156},{tag:'CEG',frequency:145},{tag:'EPD',frequency:145},{tag:'VST',frequency:142},{tag:'NEXT',frequency:134},{tag:'GLD',frequency:111},{tag:'INSW',frequency:89},{tag:'CF',frequency:82}]:[{tag:'Hormuz',frequency:76},{tag:'macro',frequency:64},{tag:'stagflation',frequency:50},{tag:'LNG export',frequency:44},{tag:'Phase 2',frequency:43}],view);
+  var limit = view === 'themes' ? 30 : 10;
+  fetch(SUPA_URL + '/rest/v1/rpc/' + endpoint, {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tag_limit: limit })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    renderTopItems(data, view);
+  }).catch(function() {
+    if (view === 'tickers') {
+      renderTopItems([
+        {tag:'LNG',frequency:186},{tag:'WMB',frequency:156},{tag:'EOG',frequency:156},
+        {tag:'CEG',frequency:145},{tag:'EPD',frequency:145},{tag:'VST',frequency:142},
+        {tag:'NEXT',frequency:134},{tag:'GLD',frequency:111},{tag:'INSW',frequency:89},{tag:'CF',frequency:82}
+      ], view);
+    } else {
+      renderTopItems([
+        {tag:'Hormuz',frequency:76},{tag:'macro',frequency:64},{tag:'stagflation',frequency:50},
+        {tag:'LNG export',frequency:44},{tag:'Phase 2',frequency:43}
+      ], view);
+    }
   });
 }
+
 function renderTopItems(data, view) {
   if (!data || !data.length) { document.getElementById('top5-list').innerHTML = '<div class="loading">No data</div>'; return; }
-  var top = data.slice(0,10); var max = top[0].frequency;
-  document.getElementById('top5-list').innerHTML = top.map(function(item,i){
-    var pct = Math.round((item.frequency/max)*100);
-    var rawLabel = item.tag.replace(/_/g,' ');
-    var displayLabel = view==='themes' ? rawLabel.charAt(0).toUpperCase()+rawLabel.slice(1) : rawLabel;
-    var label = displayLabel.length>22 ? displayLabel.substring(0,22)+'…' : displayLabel;
-    return '<div class="top5-row" onclick="openSummary(\''+item.tag.replace(/'/g,"\\'")+"','"+ view +'\')">' +
-      '<div class="top5-rank">'+(i+1)+'</div>' +
-      '<div class="top5-ticker" style="width:'+(view==='themes'?'130px':'46px')+';font-size:'+(view==='themes'?'11px':'13px')+'">'+label+'</div>' +
-      '<div class="top5-bar-wrap"><div class="top5-bar" style="width:'+pct+'%"></div></div>' +
-      '<div class="top5-count">'+item.frequency+'</div></div>';
+  var top = data.slice(0, 10);
+  var max = top[0].frequency;
+  var html = top.map(function(item, i) {
+    var pct = Math.round((item.frequency / max) * 100);
+    var rawLabel = item.tag.replace(/_/g, ' ');
+    var displayLabel = view === 'themes' ? rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1) : rawLabel;
+    var label = displayLabel.length > 22 ? displayLabel.substring(0,22) + '…' : displayLabel;
+    return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'' + view + '\')">' +
+      '<div class="top5-rank">' + (i+1) + '</div>' +
+      '<div class="top5-ticker" style="width:' + (view === 'themes' ? '130px' : '46px') + ';font-size:' + (view === 'themes' ? '11px' : '13px') + '">' + label + '</div>' +
+      '<div class="top5-bar-wrap"><div class="top5-bar" style="width:' + pct + '%"></div></div>' +
+      '<div class="top5-count">' + item.frequency + '</div>' +
+      '</div>';
   }).join('');
-  if (view==='themes'&&data.length>10) {
-    var extras=data.slice(10);
-    document.getElementById('more-themes-list').innerHTML=extras.map(function(item,i){
-      var label=item.tag.replace(/_/g,' ');label=label.charAt(0).toUpperCase()+label.slice(1);if(label.length>22)label=label.substring(0,22)+'…';
-      var safeTag=item.tag.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return '<div class="top5-row" onclick="openSummary(\''+safeTag+'\',\'themes\')">' +
-        '<div class="top5-rank">'+(i+11)+'</div><div class="top5-ticker" style="width:130px;font-size:11px">'+label+'</div>' +
-        '<div class="top5-bar-wrap"><div class="top5-bar" style="width:'+Math.round((item.frequency/max)*100)+'%"></div></div>' +
-        '<div class="top5-count">'+item.frequency+'</div></div>';
+  document.getElementById('top5-list').innerHTML = html;
+
+  // Show more themes button if there are extras
+  if (view === 'themes' && data.length > 10) {
+    var extras = data.slice(10);
+    document.getElementById('more-themes-row').style.display = 'block';
+    var extraHtml = extras.map(function(item, i) {
+      var rawLabel = item.tag.replace(/_/g, ' ');
+      var displayLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
+      var label = displayLabel.length > 22 ? displayLabel.substring(0,22) + '…' : displayLabel;
+      return '<div class="top5-row" onclick="openSummary(\'' + item.tag.replace(/'/g,"\\'") + '\',\'themes\')">' +
+        '<div class="top5-rank">' + (i+11) + '</div>' +
+        '<div class="top5-ticker" style="width:130px;font-size:11px">' + label + '</div>' +
+        '<div class="top5-bar-wrap"><div class="top5-bar" style="width:' + Math.round((item.frequency / max) * 100) + '%"></div></div>' +
+        '<div class="top5-count">' + item.frequency + '</div>' +
+        '</div>';
     }).join('');
-    document.getElementById('more-themes-row').style.display='block';
-  } else { document.getElementById('more-themes-row').style.display='none'; }
+    document.getElementById('more-themes-list').innerHTML = extraHtml;
+  } else {
+    document.getElementById('more-themes-row').style.display = 'none';
+  }
 }
-function toggleMoreThemes(){var list=document.getElementById('more-themes-list');var arrow=document.getElementById('more-themes-arrow');var isOpen=list.style.display!=='none';list.style.display=isOpen?'none':'block';arrow.textContent=isOpen?'▼':'▲';}
-function searchTicker(){var input=document.getElementById('ticker-search-input').value.trim().toUpperCase();if(!input)return;openSummary(input,'tickers');}
-function clearTickerSearch(){document.getElementById('ticker-search-input').value='';loadTopItems('tickers');}
+
+function toggleMoreThemes() {
+  var list = document.getElementById('more-themes-list');
+  var arrow = document.getElementById('more-themes-arrow');
+  var isOpen = list.style.display !== 'none';
+  list.style.display = isOpen ? 'none' : 'block';
+  arrow.textContent = isOpen ? '▼' : '▲';
+  document.getElementById('more-themes-toggle').querySelector('span:last-child') &&
+    (document.getElementById('more-themes-toggle').lastChild.textContent = isOpen ? ' More themes' : ' Less themes');
+}
+
+function searchTicker() {
+  var input = document.getElementById('ticker-search-input').value.trim().toUpperCase();
+  if (!input) return;
+  openSummary(input, 'tickers');
+}
+
+function clearTickerSearch() {
+  document.getElementById('ticker-search-input').value = '';
+  loadTopItems('tickers');
+}
+
+// Initial load
+document.getElementById('top-search-row').style.display = 'block';
 loadTopItems('tickers');
 
-// ─── PHASE OVERLAY ─────────────────────────────────────────────
+// Phase definitions
 var PHASE_CONFIG = {
-  'Phase 1':{title:'Phase 1 — Energy / LNG',color:'var(--green)',tickers:['LNG','NEXT','EOG','WMB','EPD','CF','INSW'],thesisTag:'Phase 1',summary:'Hormuz closure thesis: U.S. energy producers, midstream infrastructure, LNG exporters, and nitrogen fertilizer producers positioned to outperform through mine clearance timeline (6+ months) and Ras Laffan repair window (3–5 years).'},
-  'Phase 2':{title:'Phase 2 — Power / Grid',color:'var(--blue)',tickers:['CEG','VST','ETN','VRT','ABBNY'],thesisTag:'Phase 2',summary:'AI compute demand driving structural power deficit. Positioned at the power infrastructure input layer. June 17 Warsh FOMC is the next deployment gate.'},
-  'Phase 3':{title:'Phase 3 — Critical Metals',color:'var(--muted)',tickers:['FCX','SCCO','CCJ'],thesisTag:'Phase 3',summary:'Critical minerals thesis. Copper (FCX, SCCO) and uranium (CCJ). Crowding risk active. No adds pending Phase 3 confirmation triggers.'},
-  'Phase 4':{title:'Phase 4 — Monetary / Gold',color:'var(--amber)',tickers:['GLD','PSLV'],thesisTag:'Phase 4',summary:'Monetary reset hedge. GLD ~10.01% total (9% core + ~1.01% dry powder).'}
-};
-var activePhaseSecTicker = null;
-document.getElementById('phase-overlay-close').addEventListener('click',function(){document.getElementById('phase-overlay').classList.remove('open');activePhaseSecTicker=null;});
-document.getElementById('phase-overlay').addEventListener('click',function(e){if(e.target===this){this.classList.remove('open');activePhaseSecTicker=null;}});
-
-function openPhaseOverlay(phase){
-  var cfg=PHASE_CONFIG[phase];if(!cfg)return;
-  activePhaseSecTicker=null;
-  // Set activePhaseId from phase string
-  activePhaseId = parseInt(phase.replace('Phase ',''));
-  // Populate status badge and updated-by line
-  var pRow = phaseStatusData[activePhaseId];
-  var ob = document.getElementById('phase-overlay-status-badge');
-  var updLine = document.getElementById('phase-overlay-updated');
-  if (ob && pRow) {
-    ob.textContent = pRow.status;
-    var s = STATUS_STYLES[pRow.status] || STATUS_STYLES['Watching'];
-    ob.style.background = s.bg; ob.style.color = s.color; ob.style.border = s.border;
+  'Phase 1': {
+    title: 'Phase 1 — Energy / LNG',
+    color: 'var(--green)',
+    tickers: ['LNG','NEXT','EOG','WMB','EPD','CF','INSW'],
+    thesisTag: 'Phase 1',
+    summary: 'Hormuz closure thesis: U.S. energy producers, midstream infrastructure, LNG exporters, and nitrogen fertilizer producers positioned to outperform through mine clearance timeline (6+ months) and Ras Laffan repair window (3–5 years).'
+  },
+  'Phase 2': {
+    title: 'Phase 2 — Power / Grid',
+    color: 'var(--blue)',
+    tickers: ['CEG','VST','ETN','VRT','ABBNY'],
+    thesisTag: 'Phase 2',
+    summary: 'AI compute demand driving structural power deficit. Positioned at the power infrastructure input layer — electricity generators and electrical equipment manufacturers. June 17 Warsh FOMC is the next deployment gate.'
+  },
+  'Phase 3': {
+    title: 'Phase 3 — Critical Metals',
+    color: 'var(--muted)',
+    tickers: ['FCX','SCCO','CCJ'],
+    thesisTag: 'Phase 3',
+    summary: 'Critical minerals thesis. Copper (FCX, SCCO) and uranium (CCJ). Crowding risk active. No adds pending Phase 3 confirmation triggers.'
+  },
+  'Phase 4': {
+    title: 'Phase 4 — Monetary / Gold',
+    color: 'var(--amber)',
+    tickers: ['GLD','PSLV'],
+    thesisTag: 'Phase 4',
+    summary: 'Monetary reset hedge. GLD ~10.01% total (9% core + ~1.01% dry powder). Mental accounting: 9% = core position, above 9% = dry powder deployed into better asset class than cash.'
   }
-  if (updLine && pRow && pRow.updated_by) {
-    var d = new Date(pRow.updated_at);
-    updLine.textContent = 'Updated by ' + pRow.updated_by + ' at ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  } else if (updLine) { updLine.textContent = ''; }
-  document.getElementById('phase-overlay-title').textContent=cfg.title;
-  document.getElementById('phase-overlay-sub').textContent=cfg.tickers.join(' · ');
-  document.getElementById('phase-thesis-content').innerHTML='<p>'+cfg.summary+'</p><p style="color:var(--dim);font-style:italic;font-size:11px">Loading database synthesis...</p>';
-  document.getElementById('phase-securities-list').innerHTML='<div class="loading" style="padding:20px">Loading securities...</div>';
-  document.getElementById('phase-overlay').classList.add('open');
-  var today=new Date().toISOString().split('T')[0];
-  supaFetch('holdings_detail',{select:'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date',metric_date:'eq.'+today,ticker:'in.('+cfg.tickers.join(',')+')',order:'ticker.asc'}).then(function(data){
-    var dataMap={};cfg.tickers.forEach(function(t){if(KNOWN_HOLDINGS[t])dataMap[t]=Object.assign({},KNOWN_HOLDINGS[t]);});
-    if(data&&data.length)data.forEach(function(r){dataMap[r.ticker]=r;});
-    renderPhaseSecurities(cfg.tickers,dataMap,cfg.color);
-  }).catch(function(){
-    var dataMap={};cfg.tickers.forEach(function(t){if(KNOWN_HOLDINGS[t])dataMap[t]=Object.assign({},KNOWN_HOLDINGS[t]);});
-    renderPhaseSecurities(cfg.tickers,dataMap,cfg.color);
-  });
-  fetch(SUPA_URL+'/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"'+cfg.thesisTag+'"}&select=content&order=created_at.desc&limit=5',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}}).then(function(r){return r.json();}).then(function(records){
-    if(!records||!records.length)return;
-    var context=records.map(function(r,i){return(i+1)+'. '+(r.content||'').substring(0,600);}).join('\n\n');
-    fetch(SUPA_URL+'/functions/v1/analyze-article',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},body:JSON.stringify({mode:'chat',conversation:[{role:'user',content:'Synthesize these recent KMWM analysis records for '+phase+':\n\n'+context+'\n\nProvide a concise 3-4 paragraph thesis summary. Bold KMWM conclusions. Be direct and terse.'}]})}).then(function(r){return r.json();}).then(function(data){
-      var reply=data.analysis||cfg.summary;
-      document.getElementById('phase-thesis-content').innerHTML='<p>'+reply.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>';
-    });
-  });
-}
-
-var KNOWN_HOLDINGS={
-  'CEG':{name:'Constellation Energy',entry_price:'278.86',cost_basis:'2800856',current_value:'2666456',pl_pct:'-0.0480',alloc_pct:'0.0275',purchase_date:'2/12/2026'},
-  'VST':{name:'Vistra Corp',entry_price:'160.90',cost_basis:'4159592',current_value:'4000815',pl_pct:'-0.0382',alloc_pct:'0.0275',purchase_date:'2/12/2026'},
-  'ETN':{name:'Eaton',entry_price:'342.96',cost_basis:'4773033',current_value:'5567909',pl_pct:'0.1666',alloc_pct:'0.0300',purchase_date:'8/27/2024'},
-  'VRT':{name:'Vertiv Holdings',entry_price:'174.66',cost_basis:'1335222',current_value:'1726326',pl_pct:'0.0000',alloc_pct:'0.0213',purchase_date:'9/5/2024'},
-  'ABBNY':{name:'ABB Ltd',entry_price:'73.09',cost_basis:'2645331',current_value:'3867436',pl_pct:'0.4619',alloc_pct:'0.0150',purchase_date:'11/10/2024'},
-  'FCX':{name:'Freeport-McMoRan',entry_price:'49.19',cost_basis:'5369694',current_value:'7317993',pl_pct:'0.3629',alloc_pct:'0.0400',purchase_date:'10/30/2025'},
-  'SCCO':{name:'Southern Copper',entry_price:'142.62',cost_basis:'1504493',current_value:'1953403',pl_pct:'0.0000',alloc_pct:'0.0100',purchase_date:'10/30/2025'},
-  'CCJ':{name:'Cameco',entry_price:'88.46',cost_basis:'4112207',current_value:'5233810',pl_pct:'0.2728',alloc_pct:'0.0301',purchase_date:'8/27/2025'},
-  'GLD':{name:'SPDR Gold Shares',entry_price:'334.37',cost_basis:'12539804',current_value:'15423484',pl_pct:'0.2300',alloc_pct:'0.1001',purchase_date:'—'},
-  'PSLV':{name:'Sprott Physical Silver',entry_price:'21.91',cost_basis:'10063641',current_value:'10923509',pl_pct:'0.0853',alloc_pct:'0.0730',purchase_date:'12/9/2025'},
-  'CAT':{name:'Caterpillar',entry_price:'707.38',cost_basis:'3426984',current_value:'4192358',pl_pct:'0.2233',alloc_pct:'0.0200',purchase_date:'—'},
-  'RTX':{name:'RTX Corp',entry_price:'197.32',cost_basis:'3451940',current_value:'3051115',pl_pct:'-0.1161',alloc_pct:'0.0200',purchase_date:'3/17/2025'},
-  'WMT':{name:'Walmart',entry_price:'93.40',cost_basis:'4138688',current_value:'5078046',pl_pct:'0.2270',alloc_pct:'0.0275',purchase_date:'—'}
 };
 
-function renderPhaseSecurities(tickers,dataMap,color){
-  document.getElementById('phase-securities-list').innerHTML=tickers.map(function(ticker){
-    var d=dataMap[ticker]||{};var pl=d.pl_pct!=null?parseFloat(d.pl_pct):null;
-    return '<div class="phase-sec-row" id="psrow-'+ticker+'" onclick="togglePhaseSec(\''+ticker+'\')">' +
-      '<div><div class="phase-sec-dot" style="background:'+color+'"></div></div>' +
-      '<div class="phase-sec-ticker">'+ticker+'</div><div class="phase-sec-name">'+(d.name||ticker)+'</div>' +
-      '<div class="phase-sec-val">'+fmtDollar(d.entry_price)+'</div><div class="phase-sec-val">'+fmtDollar(d.current_value)+'</div>' +
-      '<div class="phase-sec-pl '+(pl!=null?(pl>=0?'pos':'neg'):'')+'">'+(pl!=null?(pl>=0?'+':'')+(pl*100).toFixed(2)+'%':'—')+'</div>' +
-      '<div class="phase-sec-val">'+(d.alloc_pct?(parseFloat(d.alloc_pct)*100).toFixed(2)+'%':'—')+'</div></div>' +
-      '<div class="phase-sec-detail" id="psdetail-'+ticker+'">'+renderPhaseSecDetail(ticker,d)+'</div>';
-  }).join('');
-}
-function renderPhaseSecDetail(ticker,d){
-  var daysHeld='—';
-  if(d.purchase_date&&d.purchase_date!=='—'){var parts=String(d.purchase_date).split('/');if(parts.length>=2){var pd=new Date(parseInt(parts[2]||2026),parseInt(parts[0])-1,parseInt(parts[1]));var diff=Math.floor((new Date()-pd)/86400000);if(!isNaN(diff)&&diff>=0&&diff<3650)daysHeld=diff+' days';}}
-  var cv=d.current_value?parseFloat(String(d.current_value).replace(/,/g,'')):null;var cb=d.cost_basis?parseFloat(String(d.cost_basis).replace(/,/g,'')):null;
-  var unrealized=(cv&&cb&&!isNaN(cv)&&!isNaN(cb))?cv-cb:null;var pl=d.pl_pct!=null?parseFloat(d.pl_pct):null;
-  var cells=[['Entry Price',fmtDollar(d.entry_price)],['Cost Basis',fmtDollar(d.cost_basis)],['Current Value',fmtDollar(d.current_value)],['Unrealized G/L',unrealized!=null?(unrealized>=0?'+':'')+fmtDollar(unrealized):'—'],['P / L %',pl!=null?(pl>=0?'+':'')+(pl*100).toFixed(2)+'%':'—'],['Weight',d.alloc_pct?(parseFloat(d.alloc_pct)*100).toFixed(2)+'%':'—'],['Purchase Date',d.purchase_date||'—'],['Holding Period',daysHeld]];
-  return '<div class="phase-detail-grid">'+cells.map(function(c){return '<div class="phase-detail-cell"><div class="phase-detail-label">'+c[0]+'</div><div class="phase-detail-val">'+c[1]+'</div></div>';}).join('')+'</div>';
-}
-function togglePhaseSec(ticker){
-  if(activePhaseSecTicker&&activePhaseSecTicker!==ticker){document.getElementById('psdetail-'+activePhaseSecTicker).classList.remove('open');document.getElementById('psrow-'+activePhaseSecTicker).classList.remove('expanded');}
-  var detail=document.getElementById('psdetail-'+ticker);var row=document.getElementById('psrow-'+ticker);
-  var isOpen=detail.classList.contains('open');detail.classList.toggle('open',!isOpen);row.classList.toggle('expanded',!isOpen);
-  activePhaseSecTicker=isOpen?null:ticker;
-}
+document.getElementById('phase-overlay-close').addEventListener('click', function() {
+  document.getElementById('phase-overlay').classList.remove('open');
+  activePhaseSecTicker = null;
+});
+document.getElementById('phase-overlay').addEventListener('click', function(e) {
+  if (e.target === this) { this.classList.remove('open'); activePhaseSecTicker = null; }
+});
 
-// ─── SUMMARY MODAL ─────────────────────────────────────────────
-document.getElementById('summary-close-btn').addEventListener('click',function(){document.getElementById('summary-modal').classList.remove('open');});
-document.getElementById('summary-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
-document.getElementById('summary-font-btn').addEventListener('click',function(){var body=document.getElementById('summary-body');var isLarge=body.classList.contains('large-text');body.classList.toggle('large-text',!isLarge);this.textContent=isLarge?'A+':'A−';this.classList.toggle('active',!isLarge);});
-document.getElementById('summary-copy-btn').addEventListener('click',function(){var text=document.getElementById('summary-body').innerText;navigator.clipboard.writeText(text).then(function(){var btn=document.getElementById('summary-copy-btn');btn.textContent='Copied ✓';btn.classList.add('copied');setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied');},2000);});});
+function openPhaseOverlay(phase) {
+  var cfg = PHASE_CONFIG[phase];
+  if (!cfg) return;
+  activePhaseSecTicker = null;
+  document.getElementById('phase-overlay-title').textContent = cfg.title;
+  document.getElementById('phase-overlay-sub').textContent = cfg.tickers.join(' · ');
+  document.getElementById('phase-thesis-content').innerHTML = '<p>' + cfg.summary + '</p><p style="color:var(--dim);font-style:italic;font-size:11px">Loading database synthesis...</p>';
+  document.getElementById('phase-securities-list').innerHTML = '<div class="loading" style="padding:20px">Loading securities...</div>';
+  document.getElementById('phase-overlay').classList.add('open');
 
-function openSummary(tag,view){
-  var isTheme=view==='themes';
-  document.getElementById('summary-title').textContent=tag+' — Research Summary';
-  document.getElementById('summary-sub').textContent='Synthesizing from database...';
-  document.getElementById('summary-body').innerHTML='<p style="color:var(--dim);font-style:italic">Loading analysis records...</p>';
-  document.getElementById('summary-modal').classList.add('open');
-  var filterParam=isTheme?'topic_tags=cs.{"'+tag+'"}':'company_tags=cs.{"'+tag+'"}';
-  fetch(SUPA_URL+'/rest/v1/research_chunks?research_type=eq.kmwm_analysis&'+filterParam+'&select=content,created_at&order=created_at.desc&limit=20',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}}).then(function(r){return r.json();}).then(function(records){
-    if(!records||!records.length){document.getElementById('summary-body').innerHTML='<p>No analysis records found for '+tag+'.</p>';return;}
-    document.getElementById('summary-sub').textContent=records.length+' records · Generating summary...';
-    var context=records.map(function(r,i){return(i+1)+'. '+(r.content||'').substring(0,800);}).join('\n\n');
-    fetch(SUPA_URL+'/functions/v1/analyze-article',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},body:JSON.stringify({mode:'chat',conversation:[{role:'user',content:'Here are the most recent KMWM analysis records mentioning "'+tag+'":\n\n'+context+'\n\nSynthesize into a concise research summary. Cover: (1) what the collective research says, (2) key thesis points that recur, (3) tensions or risks flagged, (4) current portfolio relevance. Be direct and terse. Bold KMWM conclusions.'}]})}).then(function(r){return r.json();}).then(function(data){
-      document.getElementById('summary-sub').textContent=records.length+' most recent records synthesized';
-      document.getElementById('summary-body').innerHTML='<p>'+(data.analysis||'No summary generated.').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>';
+  // Load holdings data for this phase
+  var today = new Date().toISOString().split('T')[0];
+  var tickerFilter = 'in.(' + cfg.tickers.join(',') + ')';
+  supaFetch('holdings_detail', {
+    select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date',
+    metric_date: 'eq.' + today,
+    ticker: tickerFilter,
+    order: 'ticker.asc'
+  }).then(function(data) {
+    var dataMap = {};
+    // Seed with known data first
+    cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
+    // Overlay live data where available
+    if (data && data.length) data.forEach(function(r) { dataMap[r.ticker] = r; });
+    renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
+  }).catch(function() {
+    var dataMap = {};
+    cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
+    renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
+  });
+
+  // Pull thesis synthesis from database
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"' + cfg.thesisTag + '"}&select=content&order=created_at.desc&limit=5', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); }).then(function(records) {
+    if (!records || !records.length) return;
+    var context = records.map(function(r,i) { return (i+1)+'. '+(r.content||'').substring(0,600); }).join('\n\n');
+    fetch(SUPA_URL + '/functions/v1/analyze-article', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
+      body: JSON.stringify({ mode: 'chat', conversation: [{
+        role: 'user',
+        content: 'Synthesize these recent KMWM analysis records for ' + phase + ':\n\n' + context + '\n\nProvide a concise 3-4 paragraph thesis summary covering: current thesis status, key drivers, active risks, and next catalyst. Bold KMWM conclusions. Be direct and terse.'
+      }]})
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var reply = data.analysis || cfg.summary;
+      document.getElementById('phase-thesis-content').innerHTML = '<p>' + reply
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+        .replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>';
     });
-  }).catch(function(e){document.getElementById('summary-body').innerHTML='<p style="color:var(--red)">Error: '+e.message+'</p>';});
+  });
 }
 
-// ─── WATCH ITEM DETAIL MODAL ───────────────────────────────────
-var activeWiId=null;
-document.getElementById('wi-detail-close').addEventListener('click',function(){document.getElementById('wi-detail-modal').classList.remove('open');});
-document.getElementById('wi-detail-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
-document.getElementById('wi-complete-btn').addEventListener('click',function(){
-  if(!activeWiId)return;
-  fetch(SUPA_URL+'/rest/v1/watch_items?id=eq.'+activeWiId,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({status:'completed'})}).then(function(){document.getElementById('wi-detail-modal').classList.remove('open');var r=document.getElementById('wi-row-'+activeWiId);if(r)r.remove();});
+// Known holdings data sourced from Google Sheets (updated from live spreadsheet)
+var KNOWN_HOLDINGS = {
+  'CEG': { name:'Constellation Energy', entry_price:'278.86', cost_basis:'2800856', current_value:'2666456', pl_pct:'-0.0480', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
+  'VST': { name:'Vistra Corp', entry_price:'160.90', cost_basis:'4159592', current_value:'4000815', pl_pct:'-0.0382', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
+  'ETN': { name:'Eaton', entry_price:'342.96', cost_basis:'4773033', current_value:'5567909', pl_pct:'0.1666', alloc_pct:'0.0300', purchase_date:'8/27/2024' },
+  'VRT': { name:'Vertiv Holdings', entry_price:'174.66', cost_basis:'1335222', current_value:'1726326', pl_pct:'0.0000', alloc_pct:'0.0213', purchase_date:'9/5/2024' },
+  'ABBNY': { name:'ABB Ltd', entry_price:'73.09', cost_basis:'2645331', current_value:'3867436', pl_pct:'0.4619', alloc_pct:'0.0150', purchase_date:'11/10/2024' },
+  'FCX': { name:'Freeport-McMoRan', entry_price:'49.19', cost_basis:'5369694', current_value:'7317993', pl_pct:'0.3629', alloc_pct:'0.0400', purchase_date:'10/30/2025' },
+  'SCCO': { name:'Southern Copper', entry_price:'142.62', cost_basis:'1504493', current_value:'1953403', pl_pct:'0.0000', alloc_pct:'0.0100', purchase_date:'10/30/2025' },
+  'CCJ': { name:'Cameco', entry_price:'88.46', cost_basis:'4112207', current_value:'5233810', pl_pct:'0.2728', alloc_pct:'0.0301', purchase_date:'8/27/2025' },
+  'GLD': { name:'SPDR Gold Shares', entry_price:'334.37', cost_basis:'12539804', current_value:'15423484', pl_pct:'0.2300', alloc_pct:'0.1001', purchase_date:'—' },
+  'PSLV': { name:'Sprott Physical Silver', entry_price:'21.91', cost_basis:'10063641', current_value:'10923509', pl_pct:'0.0853', alloc_pct:'0.0730', purchase_date:'12/9/2025' },
+  'CAT': { name:'Caterpillar', entry_price:'707.38', cost_basis:'3426984', current_value:'4192358', pl_pct:'0.2233', alloc_pct:'0.0200', purchase_date:'—' },
+  'RTX': { name:'RTX Corp', entry_price:'197.32', cost_basis:'3451940', current_value:'3051115', pl_pct:'-0.1161', alloc_pct:'0.0200', purchase_date:'3/17/2025' },
+  'WMT': { name:'Walmart', entry_price:'93.40', cost_basis:'4138688', current_value:'5078046', pl_pct:'0.2270', alloc_pct:'0.0275', purchase_date:'—' }
+};
+
+function renderPhaseSecurities(tickers, dataMap, color) {
+  var html = tickers.map(function(ticker) {
+    var d = dataMap[ticker] || {};
+    var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
+    var plTxt = pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—';
+    var plCls = pl != null ? (pl >= 0 ? 'pos' : 'neg') : '';
+    var alloc = d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—';
+    var val = fmtDollar(d.current_value);
+    var entry = fmtDollar(d.entry_price);
+    return '<div class="phase-sec-row" id="psrow-' + ticker + '" onclick="togglePhaseSec(\'' + ticker + '\')">' +
+      '<div><div class="phase-sec-dot" style="background:' + color + '"></div></div>' +
+      '<div class="phase-sec-ticker">' + ticker + '</div>' +
+      '<div class="phase-sec-name">' + (d.name || ticker) + '</div>' +
+      '<div class="phase-sec-val">' + entry + '</div>' +
+      '<div class="phase-sec-val">' + val + '</div>' +
+      '<div class="phase-sec-pl ' + plCls + '">' + plTxt + '</div>' +
+      '<div class="phase-sec-val">' + alloc + '</div>' +
+      '</div>' +
+      '<div class="phase-sec-detail" id="psdetail-' + ticker + '">' +
+        renderPhaseSecDetail(ticker, d) +
+      '</div>';
+  }).join('');
+  document.getElementById('phase-securities-list').innerHTML = html;
+}
+
+function renderPhaseSecDetail(ticker, d) {
+  var daysHeld = '—';
+  if (d.purchase_date) {
+    var parts = String(d.purchase_date).split('/');
+    if (parts.length >= 2) {
+      var pd = new Date(parseInt(parts[2]||2026), parseInt(parts[0])-1, parseInt(parts[1]));
+      var diff = Math.floor((new Date() - pd) / 86400000);
+      if (!isNaN(diff) && diff >= 0 && diff < 3650) daysHeld = diff + ' days';
+    }
+  }
+  var cv = d.current_value ? parseFloat(String(d.current_value).replace(/,/g,'')) : null;
+  var cb = d.cost_basis ? parseFloat(String(d.cost_basis).replace(/,/g,'')) : null;
+  var unrealized = (cv && cb && !isNaN(cv) && !isNaN(cb)) ? cv - cb : null;
+  var pl = d.pl_pct != null ? parseFloat(d.pl_pct) : null;
+  var cells = [
+    ['Entry Price', fmtDollar(d.entry_price)],
+    ['Cost Basis', fmtDollar(d.cost_basis)],
+    ['Current Value', fmtDollar(d.current_value)],
+    ['Unrealized G/L', unrealized != null ? (unrealized >= 0 ? '+' : '') + fmtDollar(unrealized) : '—'],
+    ['P / L %', pl != null ? (pl >= 0 ? '+' : '') + (pl*100).toFixed(2) + '%' : '—'],
+    ['Weight', d.alloc_pct ? (parseFloat(d.alloc_pct)*100).toFixed(2) + '%' : '—'],
+    ['Purchase Date', d.purchase_date || '—'],
+    ['Holding Period', daysHeld]
+  ];
+  return '<div class="phase-detail-grid">' + cells.map(function(c) {
+    return '<div class="phase-detail-cell"><div class="phase-detail-label">' + c[0] + '</div><div class="phase-detail-val">' + c[1] + '</div></div>';
+  }).join('') + '</div>';
+}
+
+function togglePhaseSec(ticker) {
+  if (activePhaseSecTicker && activePhaseSecTicker !== ticker) {
+    document.getElementById('psdetail-' + activePhaseSecTicker).classList.remove('open');
+    document.getElementById('psrow-' + activePhaseSecTicker).classList.remove('expanded');
+  }
+  var detail = document.getElementById('psdetail-' + ticker);
+  var row = document.getElementById('psrow-' + ticker);
+  var isOpen = detail.classList.contains('open');
+  detail.classList.toggle('open', !isOpen);
+  row.classList.toggle('expanded', !isOpen);
+  activePhaseSecTicker = isOpen ? null : ticker;
+}
+
+// Summary modal controls
+document.getElementById('summary-close-btn').addEventListener('click', function() {
+  document.getElementById('summary-modal').classList.remove('open');
 });
-document.getElementById('wi-kill-btn').addEventListener('click',function(){
-  if(!activeWiId)return;
-  if(!confirm('Kill watch item WI-'+activeWiId+'? This cannot be undone.'))return;
-  fetch(SUPA_URL+'/rest/v1/watch_items?id=eq.'+activeWiId,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({status:'killed'})}).then(function(){document.getElementById('wi-detail-modal').classList.remove('open');var r=document.getElementById('wi-row-'+activeWiId);if(r)r.remove();});
+document.getElementById('summary-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
 });
-function openWiDetail(wi){
-  activeWiId=wi.id;
-  document.getElementById('wi-detail-body').innerHTML=[['ID','WI-'+wi.id],['Item',wi.item],['Trigger Date',wi.trigger_date?new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—'],['Trigger Condition',wi.trigger_condition||'—'],['Phase',wi.phase_tag||'—'],['Owner',wi.owner||'—'],['Status',wi.status]].map(function(f){return '<div class="wi-detail-field"><div class="wi-detail-label">'+f[0]+'</div><div class="wi-detail-val">'+(f[1]||'—')+'</div></div>';}).join('');
+document.getElementById('summary-font-btn').addEventListener('click', function() {
+  var body = document.getElementById('summary-body');
+  var isLarge = body.classList.contains('large-text');
+  body.classList.toggle('large-text', !isLarge);
+  this.textContent = isLarge ? 'A+' : 'A−';
+  this.classList.toggle('active', !isLarge);
+});
+document.getElementById('summary-copy-btn').addEventListener('click', function() {
+  var body = document.getElementById('summary-body');
+  var text = body.innerText || body.textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('summary-copy-btn');
+    btn.textContent = 'Copied ✓';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+});
+
+// Watch item detail modal
+var activeWiId = null;
+document.getElementById('wi-detail-close').addEventListener('click', function() {
+  document.getElementById('wi-detail-modal').classList.remove('open');
+});
+document.getElementById('wi-detail-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+document.getElementById('wi-complete-btn').addEventListener('click', function() {
+  if (!activeWiId) return;
+  fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ status: 'completed' })
+  }).then(function() {
+    document.getElementById('wi-detail-modal').classList.remove('open');
+    document.getElementById('wi-row-' + activeWiId) && document.getElementById('wi-row-' + activeWiId).remove();
+  });
+});
+document.getElementById('wi-kill-btn').addEventListener('click', function() {
+  if (!activeWiId) return;
+  if (!confirm('Kill watch item WI-' + activeWiId + '? This cannot be undone.')) return;
+  fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.' + activeWiId, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ status: 'killed' })
+  }).then(function() {
+    document.getElementById('wi-detail-modal').classList.remove('open');
+    document.getElementById('wi-row-' + activeWiId) && document.getElementById('wi-row-' + activeWiId).remove();
+  });
+});
+
+function openWiDetail(wi) {
+  activeWiId = wi.id;
+  var fields = [
+    ['ID', 'WI-' + wi.id],
+    ['Item', wi.item],
+    ['Trigger Date', wi.trigger_date ? new Date(wi.trigger_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—'],
+    ['Trigger Condition', wi.trigger_condition || '—'],
+    ['Phase', wi.phase_tag || '—'],
+    ['Owner', wi.owner || '—'],
+    ['Status', wi.status]
+  ];
+  document.getElementById('wi-detail-body').innerHTML = fields.map(function(f) {
+    return '<div class="wi-detail-field"><div class="wi-detail-label">' + f[0] + '</div><div class="wi-detail-val">' + (f[1] || '—') + '</div></div>';
+  }).join('');
   document.getElementById('wi-detail-modal').classList.add('open');
 }
 
-// ─── INTAKE MODAL ──────────────────────────────────────────────
-var intakeAnalysis='';var intakeArticle='';var intakeChatHistory=[];var intakeThreadIndex=0;var intakeParentSlug='';
-function resetIntake(){intakeArticle='';intakeAnalysis='';intakeChatHistory=[];intakeThreadIndex=0;intakeParentSlug='';document.getElementById('intake-text').value='';document.getElementById('intake-output').innerHTML='<p class="placeholder">Analysis will appear here after you submit an article.</p>';document.getElementById('signal-badge').style.display='none';document.getElementById('output-toolbar').classList.remove('visible');document.getElementById('intake-footer').classList.remove('visible');document.getElementById('intake-chat-input-row').style.display='none';document.getElementById('pdf-drop-label').textContent='Drop PDF here or click to browse';setIntakeStatus('Ready — paste article and analyze');}
-document.getElementById('intake-open-btn').addEventListener('click',function(){document.getElementById('intake-modal').classList.add('open');});
-document.getElementById('intake-close-btn').addEventListener('click',function(){document.getElementById('intake-modal').classList.remove('open');document.getElementById('intake-text').value='';document.getElementById('pdf-drop-label').textContent='Drop PDF here or click to browse';});
-document.getElementById('intake-modal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('open');document.getElementById('intake-text').value='';document.getElementById('pdf-drop-label').textContent='Drop PDF here or click to browse';}});
-var dropZone=document.getElementById('pdf-drop-zone');var fileInput=document.getElementById('pdf-file-input');
-dropZone.addEventListener('dragover',function(e){e.preventDefault();dropZone.classList.add('drag-over');});
-dropZone.addEventListener('dragleave',function(){dropZone.classList.remove('drag-over');});
-dropZone.addEventListener('drop',function(e){e.preventDefault();dropZone.classList.remove('drag-over');var file=e.dataTransfer.files[0];if(file)handlePdfFile(file);});
-fileInput.addEventListener('change',function(){if(fileInput.files[0])handlePdfFile(fileInput.files[0]);});
-function handlePdfFile(file){if(file.type!=='application/pdf'){setIntakeStatus('Only PDF files are supported here.','error');return;}document.getElementById('pdf-drop-label').textContent=file.name+' — extracting text...';setIntakeStatus('Reading PDF...','active');if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';var reader=new FileReader();reader.onload=function(e){var ab=e.target.result;if(!window.pdfjsLib){setIntakeStatus('PDF.js not loaded — paste text manually.','error');return;}pdfjsLib.getDocument({data:ab}).promise.then(function(pdf){var pp=[];for(var i=1;i<=pdf.numPages;i++)pp.push(pdf.getPage(i).then(function(p){return p.getTextContent().then(function(tc){return tc.items.map(function(it){return it.str;}).join(' ');});}));return Promise.all(pp);}).then(function(pages){var ft=pages.join('\n\n').trim();if(ft){document.getElementById('intake-text').value=ft;document.getElementById('pdf-drop-label').textContent=file.name+' ✓ — text extracted ('+ft.length+' chars)';setIntakeStatus('PDF extracted — review text and click Analyze','active');}else{document.getElementById('pdf-drop-label').textContent=file.name+' — no text found';setIntakeStatus('No text extracted — PDF may be image-based.','error');}}).catch(function(err){document.getElementById('pdf-drop-label').textContent=file.name+' — extraction failed';setIntakeStatus('PDF extraction failed: '+err.message,'error');});};reader.readAsArrayBuffer(file);}
-document.getElementById('intake-analyze-btn').addEventListener('click',function(){
-  var article=document.getElementById('intake-text').value.trim();var author=document.getElementById('intake-author').value;
-  if(!article){setIntakeStatus('Please paste article text first.','error');return;}
-  intakeArticle=article;intakeAnalysis='';intakeChatHistory=[];intakeThreadIndex=0;intakeParentSlug='';
-  document.getElementById('intake-chat-input-row').style.display='none';document.getElementById('intake-analyze-btn').disabled=true;document.getElementById('intake-footer').classList.remove('visible');document.getElementById('output-toolbar').classList.remove('visible');document.getElementById('signal-badge').style.display='none';document.getElementById('intake-output').innerHTML='<p class="placeholder">Analyzing with Claude...</p>';setIntakeStatus('Sending to Claude...','active');
-  var prog=document.getElementById('intake-progress');var progBar=document.getElementById('intake-progress-bar');prog.classList.add('visible');progBar.classList.add('indeterminate');
-  fetch(SUPA_URL+'/functions/v1/analyze-article',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},body:JSON.stringify({article:article,author:author,max_tokens:4000})}).then(function(r){return r.json();}).then(function(data){
-    if(data.error)throw new Error(data.error);var text=data.analysis||'';if(!text)throw new Error('No response from Claude');
-    intakeAnalysis=text;document.getElementById('intake-output').innerHTML=renderMarkdown(text);
-    var tierMatch=text.match(/SIGNAL TIER[:\s]+([A-Z]+)/i);if(tierMatch){var tier=tierMatch[1].toUpperCase().trim();var badge=document.getElementById('signal-badge');badge.textContent=tier;badge.className='signal-badge';if(tier==='ACT')badge.classList.add('signal-act');else if(tier==='READ')badge.classList.add('signal-read');else badge.classList.add('signal-file');badge.style.display='inline-block';}
-    document.getElementById('output-toolbar').classList.add('visible');document.getElementById('intake-footer').classList.add('visible');document.getElementById('intake-chat-input-row').style.display='flex';setIntakeStatus('Analysis complete — review and save or kill','active');
-  }).catch(function(e){document.getElementById('intake-output').innerHTML='<p style="color:var(--red)">Error: '+e.message+'</p>';setIntakeStatus('Error: '+e.message,'error');}).finally(function(){document.getElementById('intake-analyze-btn').disabled=false;progBar.classList.remove('indeterminate');prog.classList.remove('visible');});
+function openSummary(tag, view) {
+  var isTheme = view === 'themes';
+  document.getElementById('summary-title').textContent = tag + ' — Research Summary';
+  document.getElementById('summary-sub').textContent = 'Synthesizing from database...';
+  document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading analysis records...</p>';
+  document.getElementById('summary-modal').classList.add('open');
+
+  // Build query — tickers use company_tags, themes use topic_tags
+  var filterParam = isTheme
+    ? 'topic_tags=cs.{"' + tag + '"}'
+    : 'company_tags=cs.{"' + tag + '"}';
+
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&' + filterParam + '&select=content,created_at&order=created_at.desc&limit=20', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); }).then(function(records) {
+    if (!records || !records.length) {
+      document.getElementById('summary-body').innerHTML = '<p>No analysis records found for ' + tag + '.</p>';
+      return;
+    }
+    var totalRefs = document.querySelector('.top5-row[onclick*="' + tag.replace(/'/g,"\\'") + '"] .top5-count');
+    var totalCount = totalRefs ? totalRefs.textContent : '?';
+    document.getElementById('summary-sub').textContent = records.length + ' of ' + totalCount + ' records · Generating summary...';
+    var context = records.map(function(r, i) { return (i+1) + '. ' + (r.content || '').substring(0, 800); }).join('\n\n');
+    fetch(SUPA_URL + '/functions/v1/analyze-article', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
+      body: JSON.stringify({
+        mode: 'chat',
+        conversation: [{
+          role: 'user',
+          content: 'Here are the most recent KMWM analysis records mentioning "' + tag + '":\n\n' + context + '\n\nSynthesize these into a concise research summary for "' + tag + '". Cover: (1) what the collective research says about this ' + (isTheme ? 'theme' : 'company') + ', (2) key thesis points that recur, (3) any tensions or risks flagged, (4) current portfolio relevance. Be direct and terse. Use bold for KMWM conclusions.'
+        }]
+      })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var reply = data.analysis || data.reply || 'No summary generated.';
+      document.getElementById('summary-sub').textContent = records.length + ' most recent records synthesized';
+      document.getElementById('summary-body').innerHTML = '<p>' + reply
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+        .replace(/\n\n/g,'</p><p>')
+        .replace(/\n/g,'<br>') + '</p>';
+    });
+  }).catch(function(e) {
+    document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
+  });
+}
+
+// Research Intake Modal
+var intakeAnalysis = '';
+var intakeArticle = '';
+
+document.getElementById('intake-open-btn').addEventListener('click', function() {
+  document.getElementById('intake-modal').classList.add('open');
 });
-document.getElementById('intake-copy-btn').addEventListener('click',function(){var text=document.getElementById('intake-output').innerText||document.getElementById('intake-output').textContent;navigator.clipboard.writeText(text).then(function(){var btn=document.getElementById('intake-copy-btn');btn.textContent='Copied ✓';btn.classList.add('copied');setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied');},2000);});});
-document.getElementById('font-toggle-btn2').addEventListener('click',function(){var output=document.getElementById('intake-output');var isLarge=output.classList.contains('large-text');output.classList.toggle('large-text',!isLarge);this.textContent=isLarge?'A+':'A−';this.classList.toggle('active',!isLarge);document.getElementById('font-toggle-btn').textContent=isLarge?'A+':'A−';document.getElementById('font-toggle-btn').classList.toggle('active',!isLarge);});
-document.getElementById('font-toggle-btn').addEventListener('click',function(){var output=document.getElementById('intake-output');var isLarge=output.classList.contains('large-text');output.classList.toggle('large-text',!isLarge);this.textContent=isLarge?'A+':'A−';this.classList.toggle('active',!isLarge);document.getElementById('font-toggle-btn2').textContent=isLarge?'A+':'A−';document.getElementById('font-toggle-btn2').classList.toggle('active',!isLarge);});
-function renderMarkdown(text){var html='';text.split('\n').forEach(function(line){var trimmed=line.trim();if(trimmed.startsWith('## ')||trimmed.startsWith('# ')){html+='<h3>'+escHtml(trimmed.replace(/^#+\s*/,''))+'</h3>';}else if(trimmed===''){html+='<br>';}else{html+='<p>'+escHtml(trimmed).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')+'</p>';}});return html;}
-function setIntakeStatus(msg,type){var el=document.getElementById('intake-status');el.textContent=msg;el.className='intake-status'+(type?' '+type:'');}
-document.getElementById('intake-save-btn').addEventListener('click',function(){
-  var author=document.getElementById('intake-author').value;var dateStr=new Date().toISOString().split('T')[0];var sourceRaw='research-intake';
-  var srcMatch=intakeAnalysis.match(/source[:\s]+([^\n]{3,40})/i);if(srcMatch)sourceRaw=srcMatch[1].trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').substring(0,30);
-  var phaseTag='phase-1';if(/phase 2/i.test(intakeAnalysis))phaseTag='phase-2';else if(/phase 3/i.test(intakeAnalysis))phaseTag='phase-3';
-  var ts=Date.now().toString().slice(-6);var slug=(sourceRaw+'-'+dateStr+'-'+ts).substring(0,60);var fileName=sourceRaw+' — '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('intake-save-note').textContent='Saving...';
-  var base={source_file_id:slug,source_file_name:fileName,source_folder:'Research Intake',company_tags:'{}',topic_tags:'{"author: '+author+'","source: '+sourceRaw+'","'+phaseTag+'"}',portfolio_impact_tags:'{"'+phaseTag+'"}',portfolio_status:'{"research"}',research_stage:'analyzed',is_analyzed:true,read_by_steve:author==='Steve',read_by_michael:author==='Michael'};
-  var records=[Object.assign({},base,{chunk_index:0,research_type:'research',content:intakeArticle,content_summary:intakeArticle.substring(0,200)}),Object.assign({},base,{chunk_index:1,research_type:'kmwm_analysis',content:intakeAnalysis,content_summary:intakeAnalysis.substring(0,200)})];
-  var saveNext=function(i){if(i>=records.length){intakeParentSlug=slug;document.getElementById('intake-footer').classList.remove('visible');document.getElementById('intake-output').innerHTML+='<div class="success-banner">✓ Records committed to database</div>';setIntakeStatus('Saved to database','active');setTimeout(function(){document.getElementById('intake-modal').classList.remove('open');resetIntake();},2000);return;}fetch(SUPA_URL+'/rest/v1/research_chunks',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(records[i])}).then(function(r){if(!r.ok){r.text().then(function(t){document.getElementById('intake-save-note').textContent='Error: '+t.substring(0,80);});return;}saveNext(i+1);}).catch(function(e){document.getElementById('intake-save-note').textContent='Error: '+e.message;});};
+document.getElementById('intake-close-btn').addEventListener('click', function() {
+  document.getElementById('intake-modal').classList.remove('open');
+});
+document.getElementById('intake-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+document.getElementById('intake-analyze-btn').addEventListener('click', function() {
+  var article = document.getElementById('intake-text').value.trim();
+  var author = document.getElementById('intake-author').value;
+  if (!article) { setIntakeStatus('Please paste article text first.', 'error'); return; }
+  intakeArticle = article;
+  intakeAnalysis = '';
+  intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
+  document.getElementById('intake-chat-messages').innerHTML = '';
+  document.getElementById('intake-chat-area').classList.remove('visible');
+  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
+  document.getElementById('intake-analyze-btn').disabled = true;
+  document.getElementById('intake-footer').classList.remove('visible');
+  document.getElementById('signal-badge').style.display = 'none';
+  document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analyzing with Claude...</p>';
+  setIntakeStatus('Sending to Claude...', 'active');
+  var prog = document.getElementById('intake-progress');
+  var progBar = document.getElementById('intake-progress-bar');
+  prog.classList.add('visible');
+  progBar.classList.add('indeterminate');
+  var sysPrompt = 'You are Claude, the senior analyst for Kelley & Mullis Wealth Management. Analyze research documents using the KMWM framework. Determine the source and phase yourself from the content. Format your response with these sections: SIGNAL RATING (include SIGNAL TIER: ACT or READ or FILE, ONE-LINE VERDICT max 20 words, THESIS IMPACT with phase and tickers), then Section 1 Article Summary, Section 2 Executive Overview, Section 3 Strong Points (KMWM conclusions in bold), Section 4 Weak Points, Section 5 Additional Thoughts, Section 6 KMWM Portfolio Verdict. Author: ' + author + '. Spell out all abbreviations on first use.';
+  fetch(SUPA_URL + '/functions/v1/analyze-article', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
+    body: JSON.stringify({ article: article, author: author })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.error) throw new Error(data.error);
+    var text = data.analysis || '';
+    if (!text) throw new Error('No response from Claude');
+    intakeAnalysis = text;
+    var html = renderMarkdown(text);
+    document.getElementById('intake-output').innerHTML = html;
+    var tierMatch = text.match(/SIGNAL TIER[:\s]+([A-Z]+)/i);
+    if (tierMatch) {
+      var tier = tierMatch[1].toUpperCase().trim();
+      var badge = document.getElementById('signal-badge');
+      badge.textContent = tier;
+      badge.className = 'signal-badge';
+      if (tier === 'ACT') badge.classList.add('signal-act');
+      else if (tier === 'READ') badge.classList.add('signal-read');
+      else badge.classList.add('signal-file');
+      badge.style.display = 'inline-block';
+    }
+    document.getElementById('intake-footer').classList.add('visible');
+    document.getElementById('intake-important-btn').style.display = 'none';
+    setIntakeStatus('Analysis complete — review and save or kill', 'active');
+  }).catch(function(e) {
+    document.getElementById('intake-output').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
+    setIntakeStatus('Error: ' + e.message, 'error');
+  }).finally(function() {
+    document.getElementById('intake-analyze-btn').disabled = false;
+    var prog = document.getElementById('intake-progress');
+    var progBar = document.getElementById('intake-progress-bar');
+    progBar.classList.remove('indeterminate');
+    prog.classList.remove('visible');
+  });
+});
+
+function renderMarkdown(text) {
+  var lines = text.split('\n');
+  var html = '';
+  lines.forEach(function(line) {
+    var trimmed = line.trim();
+    if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
+      var heading = trimmed.replace(/^#+\s*/, '');
+      html += '<h3>' + escHtml(heading) + '</h3>';
+    } else if (trimmed === '') {
+      html += '<br>';
+    } else {
+      var processed = escHtml(trimmed).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      html += '<p>' + processed + '</p>';
+    }
+  });
+  return html;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setIntakeStatus(msg, type) {
+  var el = document.getElementById('intake-status');
+  el.textContent = msg;
+  el.className = 'intake-status' + (type ? ' ' + type : '');
+}
+
+document.getElementById('intake-save-btn').addEventListener('click', function() {
+  var author = document.getElementById('intake-author').value;
+  var dateStr = new Date().toISOString().split('T')[0];
+  // Derive source from analysis text or fall back to 'research-intake'
+  var sourceRaw = 'research-intake';
+  var srcMatch = intakeAnalysis.match(/source[:\s]+([^\n]{3,40})/i);
+  if (srcMatch) sourceRaw = srcMatch[1].trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g,'').substring(0,30);
+  // Derive phase tag
+  var phaseTag = 'phase-1';
+  if (/phase 2/i.test(intakeAnalysis)) phaseTag = 'phase-2';
+  else if (/phase 3/i.test(intakeAnalysis)) phaseTag = 'phase-3';
+  var ts = Date.now().toString().slice(-6); var slug = (sourceRaw + '-' + dateStr + '-' + ts).substring(0, 60);
+  var fileName = sourceRaw + ' \u2014 ' + new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('intake-save-note').textContent = 'Saving...';
+  var base = {
+    source_file_id: slug, source_file_name: fileName,
+    source_folder: 'Research Intake', company_tags: '{}',
+    topic_tags: '{"author: ' + author + '","source: ' + sourceRaw + '","' + phaseTag + '"}',
+    portfolio_impact_tags: '{"' + phaseTag + '"}',
+    portfolio_status: '{"research"}', research_stage: 'analyzed',
+    is_analyzed: true, read_by_steve: author === 'Steve', read_by_michael: author === 'Michael'
+  };
+  var records = [
+    Object.assign({}, base, { chunk_index: 0, research_type: 'research', content: intakeArticle, content_summary: intakeArticle.substring(0,200) }),
+    Object.assign({}, base, { chunk_index: 1, research_type: 'kmwm_analysis', content: intakeAnalysis, content_summary: intakeAnalysis.substring(0,200) })
+  ];
+  var saveNext = function(i) {
+    if (i >= records.length) {
+      document.getElementById('intake-footer').classList.remove('visible');
+      document.getElementById('intake-output').innerHTML += '<div class="success-banner">\u2713 Records committed to database</div>';
+      setIntakeStatus('Saved to database', 'active');
+      document.getElementById('intake-text').value = '';
+      intakeParentSlug = slug; currentImportantSlug = slug;
+      document.getElementById('intake-important-btn').style.display = 'inline-block';
+      intakeArticle = ''; intakeAnalysis = '';
+      // Auto-close modal after 2 seconds
+      setTimeout(function() {
+        document.getElementById('intake-modal').classList.remove('open');
+        document.getElementById('intake-output').innerHTML = '<p class="placeholder">Analysis will appear here after you submit an article.</p>';
+        document.getElementById('signal-badge').style.display = 'none';
+        document.getElementById('intake-chat-messages').innerHTML = '';
+        document.getElementById('intake-chat-area').classList.remove('visible');
+        document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
+        setIntakeStatus('Ready \u2014 paste article and analyze');
+        intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = '';
+      }, 2000);
+      return;
+    }
+    fetch(SUPA_URL + '/rest/v1/research_chunks', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(records[i])
+    }).then(function(r) {
+      if (!r.ok) { r.text().then(function(t) { document.getElementById('intake-save-note').textContent = 'Error: ' + t.substring(0,80); }); return; }
+      saveNext(i + 1);
+    }).catch(function(e) { document.getElementById('intake-save-note').textContent = 'Error: ' + e.message; });
+  };
   saveNext(0);
 });
-document.getElementById('intake-kill-btn').addEventListener('click',function(){document.getElementById('intake-footer').classList.remove('visible');document.getElementById('output-toolbar').classList.remove('visible');document.getElementById('intake-output').innerHTML='<p class="placeholder">Killed — not saved. Ready for next article.</p>';document.getElementById('signal-badge').style.display='none';document.getElementById('intake-text').value='';document.getElementById('pdf-drop-label').textContent='Drop PDF here or click to browse';setIntakeStatus('Killed — not saved');intakeArticle='';intakeAnalysis='';intakeChatHistory=[];intakeThreadIndex=0;intakeParentSlug='';document.getElementById('intake-chat-input-row').style.display='none';});
-document.getElementById('intake-chat-send').addEventListener('click',sendChatMessage);
-document.getElementById('intake-chat-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage();}});
-function saveThreadRecord(role,content){if(!intakeParentSlug)return;fetch(SUPA_URL+'/rest/v1/research_threads',{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({parent_source_file_id:intakeParentSlug,thread_index:intakeThreadIndex++,role:role,content:content})}).catch(function(){});}
-function sendChatMessage(){var input=document.getElementById('intake-chat-input');var msg=input.value.trim();if(!msg)return;if(!intakeAnalysis){appendChatMsg('assistant','Please run an analysis first before asking follow-up questions.');return;}input.value='';appendChatMsg('user',msg);saveThreadRecord('user',msg);document.getElementById('intake-chat-send').disabled=true;document.getElementById('chat-progress').classList.add('visible');if(intakeChatHistory.length===0){intakeChatHistory.push({role:'user',content:'Here is the article I submitted:\n\n'+intakeArticle+'\n\n---\n\nHere is the KMWM analysis you produced:\n\n'+intakeAnalysis+'\n\n---\n\nNow I have a follow-up question: '+msg});}else{intakeChatHistory.push({role:'user',content:msg});}fetch(SUPA_URL+'/functions/v1/analyze-article',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},body:JSON.stringify({mode:'chat',conversation:intakeChatHistory})}).then(function(r){return r.json();}).then(function(data){if(data.error)throw new Error(data.error);var reply=data.analysis||data.reply||'No response received.';intakeChatHistory.push({role:'assistant',content:reply});appendChatMsg('assistant',reply);saveThreadRecord('assistant',reply);}).catch(function(e){appendChatMsg('assistant','Error: '+e.message);}).finally(function(){document.getElementById('intake-chat-send').disabled=false;document.getElementById('chat-progress').classList.remove('visible');});}
-document.addEventListener("DOMContentLoaded", applyViewOnly);
 
-function appendChatMsg(role,text){var output=document.getElementById('intake-output');var div=document.createElement('div');if(role==='user'){div.style.cssText='margin:14px 0 8px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:7px;font-size:13px;color:var(--text);font-style:italic;';div.innerHTML='<span style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Follow-up question</span>'+escHtml(text).replace(/\n/g,'<br>');}else{div.style.cssText='margin:8px 0 14px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;font-size:13px;line-height:1.7;color:var(--text);';div.innerHTML='<span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:4px">Response</span>'+escHtml(text).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}output.appendChild(div);div.scrollIntoView({behavior:'smooth',block:'nearest'});}
+// Font size toggle
+document.getElementById('font-toggle-btn').addEventListener('click', function() {
+  var output = document.getElementById('intake-output');
+  var isLarge = output.classList.contains('large-text');
+  output.classList.toggle('large-text', !isLarge);
+  this.textContent = isLarge ? 'A+' : 'A−';
+  this.classList.toggle('active', !isLarge);
+});
+
+// Chat toggle
+document.getElementById('intake-chat-toggle').addEventListener('click', function() {
+  var area = document.getElementById('intake-chat-area');
+  var isOpen = area.classList.contains('visible');
+  area.classList.toggle('visible', !isOpen);
+  this.textContent = isOpen ? 'Ask follow-up \u2191' : 'Ask follow-up \u2193';
+});
+
+// Chat send
+var intakeChatHistory = [];
+var intakeThreadIndex = 0;
+var intakeParentSlug = '';
+
+document.getElementById('intake-chat-send').addEventListener('click', sendChatMessage);
+document.getElementById('intake-chat-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+});
+
+function saveThreadRecord(role, content) {
+  if (!intakeParentSlug) return; // no parent yet — will save when user clicks Save
+  fetch(SUPA_URL + '/rest/v1/research_threads', {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ parent_source_file_id: intakeParentSlug, thread_index: intakeThreadIndex++, role: role, content: content })
+  }).catch(function() {}); // silent — don't interrupt the UI on thread save failure
+}
+
+function sendChatMessage() {
+  var input = document.getElementById('intake-chat-input');
+  var msg = input.value.trim();
+  if (!msg) return;
+  if (!intakeAnalysis) { appendChatMsg('assistant', 'Please run an analysis first before asking follow-up questions.'); return; }
+  input.value = '';
+  appendChatMsg('user', msg);
+  saveThreadRecord('user', msg);
+  document.getElementById('intake-chat-send').disabled = true;
+  document.getElementById('chat-progress').classList.add('visible');
+
+  // Build message history — first message injects full article + analysis as context
+  if (intakeChatHistory.length === 0) {
+    intakeChatHistory.push({
+      role: 'user',
+      content: 'Here is the article I submitted:\n\n' + intakeArticle + '\n\n---\n\nHere is the KMWM analysis you produced:\n\n' + intakeAnalysis + '\n\n---\n\nNow I have a follow-up question: ' + msg
+    });
+  } else {
+    intakeChatHistory.push({ role: 'user', content: msg });
+  }
+
+  // Route through Edge Function to avoid CORS
+  fetch(SUPA_URL + '/functions/v1/analyze-article', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY },
+    body: JSON.stringify({ mode: 'chat', conversation: intakeChatHistory })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.error) throw new Error(data.error);
+    var reply = data.analysis || data.reply || 'No response received.';
+    intakeChatHistory.push({ role: 'assistant', content: reply });
+    appendChatMsg('assistant', reply);
+    saveThreadRecord('assistant', reply);
+  }).catch(function(e) {
+    appendChatMsg('assistant', 'Error: ' + e.message);
+  }).finally(function() {
+    document.getElementById('intake-chat-send').disabled = false;
+    document.getElementById('chat-progress').classList.remove('visible');
+  });
+}
+
+function appendChatMsg(role, text) {
+  var container = document.getElementById('intake-chat-messages');
+  var div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  // Simple markdown: bold
+  div.innerHTML = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  container.appendChild(div);
+  if (role === 'assistant') {
+    div.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    container.scrollTop = container.scrollHeight;
+  }
+  // Auto-open chat area if not already open
+  document.getElementById('intake-chat-area').classList.add('visible');
+  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2193';
+}
+
+document.getElementById('intake-kill-btn').addEventListener('click', function() {
+  document.getElementById('intake-footer').classList.remove('visible');
+  document.getElementById('intake-output').innerHTML = '<p class="placeholder">Killed \u2014 not saved. Ready for next article.</p>';
+  document.getElementById('signal-badge').style.display = 'none';
+  setIntakeStatus('Killed \u2014 not saved');
+  intakeArticle = ''; intakeAnalysis = ''; intakeChatHistory = []; intakeThreadIndex = 0; intakeParentSlug = ''; currentImportantSlug = '';
+  document.getElementById('intake-important-btn').style.display = 'none';
+  document.getElementById('intake-important-btn').textContent = '★ Mark Important';
+  document.getElementById('intake-important-btn').disabled = false;
+  document.getElementById('intake-important-btn').style.background = 'var(--amber-dim)';
+  document.getElementById('intake-important-btn').style.color = 'var(--amber)';
+  document.getElementById('intake-chat-messages').innerHTML = '';
+  document.getElementById('intake-chat-area').classList.remove('visible');
+  document.getElementById('intake-chat-toggle').textContent = 'Ask follow-up \u2191';
+});
+
+// Important Articles
+var currentImportantSlug = '';
+
+document.getElementById('important-close-btn').addEventListener('click', function() {
+  document.getElementById('important-modal').classList.remove('open');
+});
+document.getElementById('important-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+function loadImportantBadge() {
+  var author = 'Steve'; // current user — shows articles flagged BY the other user
+  var otherAuthor = 'Michael';
+  fetch(SUPA_URL + '/rest/v1/research_chunks?is_important=eq.true&research_type=eq.kmwm_analysis&topic_tags=cs.{"author: ' + otherAuthor + '"}&select=id&limit=1', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+  }).then(function(r) {
+    var cr = r.headers.get('content-range');
+    if (cr) {
+      var total = parseInt(cr.split('/')[1]);
+      var badge = document.getElementById('important-badge');
+      if (total > 0) {
+        badge.textContent = total;
+        badge.style.background = 'var(--amber-dim)';
+        badge.style.color = 'var(--amber)';
+      } else {
+        badge.textContent = '0';
+      }
+    }
+  }).catch(function() {});
+}
+loadImportantBadge();
+
+function showImportantArticles() {
+  document.getElementById('important-modal').classList.add('open');
+  document.getElementById('important-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading important articles...</p>';
+  // Steve sees articles flagged by Michael, Michael sees articles flagged by Steve
+  var otherAuthor = 'Michael';
+  fetch(SUPA_URL + '/rest/v1/research_chunks?is_important=eq.true&research_type=eq.kmwm_analysis&topic_tags=cs.{"author: ' + otherAuthor + '"}&select=id,source_file_name,content_summary,created_at,topic_tags&order=created_at.desc&limit=20', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data || !data.length) {
+      document.getElementById('important-sub').textContent = 'No important articles flagged yet';
+      document.getElementById('important-body').innerHTML = '<p style="color:var(--dim);font-style:italic">No articles have been marked as important.</p>';
+      return;
+    }
+    document.getElementById('important-sub').textContent = data.length + ' important article' + (data.length > 1 ? 's' : '') + ' flagged by Michael';
+    var html = data.map(function(r) {
+      var date = new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      var summary = (r.content_summary || '').substring(0, 200);
+      return '<div style="padding:14px 0;border-bottom:1px solid var(--border);">' +
+        '<div style="font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px">★ Important · ' + date + '</div>' +
+        '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + (r.source_file_name || 'Untitled') + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);line-height:1.5">' + summary + '</div>' +
+        '</div>';
+    }).join('');
+    document.getElementById('important-body').innerHTML = html;
+  }).catch(function(e) {
+    document.getElementById('important-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
+  });
+}
+
+// Show Mark as Important button after analysis completes — wire into save flow
+// The button appears after analysis is generated alongside Save/Kill
+document.getElementById('intake-important-btn').addEventListener('click', function() {
+  if (!currentImportantSlug) {
+    // Article not saved yet — save first then mark important
+    alert('Please save the article to the database first, then mark as important.');
+    return;
+  }
+  var btn = document.getElementById('intake-important-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+  fetch(SUPA_URL + '/rest/v1/research_chunks?source_file_id=eq.' + currentImportantSlug + '&research_type=eq.kmwm_analysis', {
+    method: 'PATCH',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ is_important: true })
+  }).then(function(r) {
+    if (r.ok) {
+      btn.textContent = '★ Marked Important';
+      btn.style.background = 'var(--amber)';
+      btn.style.color = '#fff';
+      btn.disabled = true;
+      loadImportantBadge();
+    } else {
+      btn.textContent = '★ Mark Important';
+      btn.disabled = false;
+    }
+  }).catch(function() {
+    btn.textContent = '★ Mark Important';
+    btn.disabled = false;
+  });
+});
+
 </script>
-
-<!-- Phase Status Edit Modal -->
-<div class="wi-detail-overlay" id="phase-status-modal">
-  <div class="wi-detail-box" style="width:400px">
-    <div class="wi-detail-header">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase">Edit Phase Status</div>
-      <button class="modal-close" onclick="document.getElementById('phase-status-modal').classList.remove('open')">Close ✕</button>
-    </div>
-    <div class="wi-detail-body">
-      <div class="wi-detail-field">
-        <div class="wi-detail-label">Phase</div>
-        <div class="wi-detail-val" id="phase-edit-name">—</div>
-      </div>
-      <div class="wi-detail-field">
-        <div class="wi-detail-label">New Status</div>
-        <select id="phase-status-select" style="margin-top:4px">
-          <option value="Active">Active</option>
-          <option value="Deploying">Deploying</option>
-          <option value="Watching">Watching</option>
-          <option value="Monitoring">Monitoring</option>
-          <option value="Complete">Complete</option>
-        </select>
-      </div>
-      <div class="wi-detail-field" style="margin-top:8px">
-        <div class="wi-detail-label">Changing as</div>
-        <div class="wi-detail-val" style="font-family:var(--mono);font-size:13px;color:var(--green)" id="phase-edit-user">—</div>
-      </div>
-    </div>
-    <div class="wi-detail-footer">
-      <button class="btn-wi-complete" onclick="savePhaseStatus()">Save Status</button>
-      <button class="btn-wi-kill" onclick="document.getElementById('phase-status-modal').classList.remove('open')">Cancel</button>
-      <span id="phase-status-save-msg" style="font-family:var(--mono);font-size:10px;color:var(--green);margin-left:auto"></span>
-    </div>
-  </div>
-</div>
 </body>
 </html>
