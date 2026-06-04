@@ -332,6 +332,9 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
     <div class="sidebar-footer">
       <button class="intake-btn" id="intake-open-btn">+ Research Intake</button>
       <div class="ts-label">Deployed</div>
+      <div class="ts-label">Logged in as</div>
+<div class="ts-val" id="identity-label" style="color:var(--green)">—</div>
+<div style="font-family:var(--mono);font-size:9px;color:var(--dim);cursor:pointer;text-decoration:underline;margin-top:2px;" onclick="switchUser()">Switch user</div>
       <div class="ts-val" id="deploy-time">—</div>
       <div class="ts-label">Last Synced</div>
       <div class="ts-val" id="sync-time">—</div>
@@ -1608,19 +1611,60 @@ fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_
   }
 }).catch(function() {});
 
-var sixtyDaysAgo = new Date();
-sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-var cutoff = sixtyDaysAgo.toISOString();
+// Identity system
+function setIdentity(name) {
+  localStorage.setItem('kmwm_identity', name);
+  document.getElementById('identity-modal').style.display = 'none';
+  document.getElementById('identity-label').textContent = name;
+  loadBadges(name);
+}
 
-fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"author: Michael"}&read_by_steve=eq.false&created_at=gte.' + cutoff + '&select=id&limit=1', {
-  headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
-}).then(function(r) {
-  var cr = r.headers.get('content-range');
-  if (cr) {
-    var total = parseInt(cr.split('/')[1]);
-    document.getElementById('unread-badge').textContent = total > 0 ? total : '—';
-  }
-}).catch(function() {});
+function switchUser() {
+  localStorage.removeItem('kmwm_identity');
+  document.getElementById('identity-modal').style.display = 'flex';
+}
+
+
+function loadBadges(identity) {
+  var sixtyDaysAgo = new Date();
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+  var cutoff = sixtyDaysAgo.toISOString();
+  var otherAuthor = identity === 'Steve' ? 'Michael' : 'Steve';
+  var readByMe = identity === 'Steve' ? 'read_by_steve=eq.false' : 'read_by_michael=eq.false';
+
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"author: ' + otherAuthor + '"}&' + readByMe + '&created_at=gte.' + cutoff + '&select=id&limit=1', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+  }).then(function(r) {
+    var cr = r.headers.get('content-range');
+    if (cr) { var total = parseInt(cr.split('/')[1]); document.getElementById('unread-badge').textContent = total > 0 ? total : '—'; }
+  }).catch(function() {});
+
+  fetch(SUPA_URL + '/rest/v1/research_chunks?research_type=eq.kmwm_analysis&topic_tags=cs.{"important"}&' + readByMe + '&select=id&limit=1', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+  }).then(function(r) {
+    var cr = r.headers.get('content-range');
+    if (cr) { var total = parseInt(cr.split('/')[1]); document.getElementById('important-badge').textContent = total > 0 ? total : '—'; }
+  }).catch(function() {});
+}
+
+var savedIdentity = localStorage.getItem('kmwm_identity');
+if (savedIdentity) {
+  document.getElementById('identity-label').textContent = savedIdentity;
+  loadBadges(savedIdentity);
+} else {
+  document.getElementById('identity-modal').style.display = 'flex';
+}
 </script>
+  <div id="identity-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:14px;padding:40px 48px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.22);border:1px solid var(--border2);">
+    <div style="font-family:var(--serif);font-size:22px;color:var(--text);margin-bottom:6px">Kelley &amp; Mullis</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:32px;font-style:italic">Research System</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px">Who are you?</div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button onclick="setIdentity('Steve')" style="padding:12px 32px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);">Steve</button>
+      <button onclick="setIdentity('Michael')" style="padding:12px 32px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);">Michael</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
