@@ -698,19 +698,36 @@ document.getElementById('cash-card').addEventListener('click', function(e) {
   popup.style.top = (rect.bottom + 6) + 'px';
   popup.style.left = rect.left + 'px';
   popup.style.display = 'block';
-  var rows = [
-    ['SGOV', 'iShares 0-3M Treasury', cashData.sgov_pct, cashData.sgov_value],
-    ['FDUXX', 'Fidelity Money Market', cashData.fduxx_pct, cashData.fduxx_value],
-    ['FTSM', 'First Trust Short Maturity', cashData.ftsm_pct, cashData.ftsm_value],
-    ['PTSHX', 'PIMCO Short-Term', cashData.ptshx_pct, cashData.ptshx_value],
-    ['GLD', 'SPDR Gold (above 9% core)', cashData.gld_excess_pct, cashData.gld_excess_value]
-  ];
-  var html = rows.map(function(r) {
-    return '<div class="cash-row"><div><div class="cash-row-ticker">' + r[0] + '</div><div class="cash-row-name">' + r[1] + '</div></div><div class="cash-row-right"><div class="cash-row-val">' + fmtDollar(r[3]) + '</div><div class="cash-row-pct">' + fmtPct(r[2]) + '</div></div></div>';
-  }).join('');
-  var total = cashData.cash_sleeve_pct ? (parseFloat(cashData.cash_sleeve_pct)*100).toFixed(2) + '%' : '—';
-  html += '<div class="cash-total"><span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--amber)">Total Cash Sleeve</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber)">' + total + '</span></div>';
-  document.getElementById('cash-popup-body').innerHTML = html;
+  document.getElementById('cash-popup-body').innerHTML = '<div class="loading">Loading...</div>';
+  // Query cash_sleeve_holdings dynamically
+  supaFetch('cash_sleeve_holdings', { select: 'ticker,name,theme,pct,value', order: 'id.asc' }).then(function(rows) {
+    if (!rows || !rows.length) {
+      // Fallback to portfolio_metrics if table is empty
+      var fallback = [
+        ['SGOV', 'iShares 0-3M Treasury', cashData.sgov_pct, cashData.sgov_value],
+        ['FDUXX', 'Fidelity Money Market', cashData.fduxx_pct, cashData.fduxx_value],
+        ['FTSM', 'First Trust Short Maturity', cashData.ftsm_pct, cashData.ftsm_value],
+        ['GLD', 'SPDR Gold (above 9% core)', cashData.gld_excess_pct, cashData.gld_excess_value]
+      ].filter(function(r) { return r[2] && parseFloat(r[2]) > 0; });
+      var html = fallback.map(function(r) {
+        return '<div class="cash-row"><div><div class="cash-row-ticker">' + r[0] + '</div><div class="cash-row-name">' + r[1] + '</div></div><div class="cash-row-right"><div class="cash-row-val">' + fmtDollar(r[3]) + '</div><div class="cash-row-pct">' + fmtPct(r[2]) + '</div></div></div>';
+      }).join('');
+      var total = cashData.cash_sleeve_pct ? (parseFloat(cashData.cash_sleeve_pct)*100).toFixed(2) + '%' : '—';
+      html += '<div class="cash-total"><span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--amber)">Total Cash Sleeve</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber)">' + total + '</span></div>';
+      document.getElementById('cash-popup-body').innerHTML = html;
+      return;
+    }
+    // Render dynamic rows from cash_sleeve_holdings
+    var html = rows.map(function(r) {
+      return '<div class="cash-row"><div><div class="cash-row-ticker">' + r.ticker + '</div><div class="cash-row-name">' + r.name + '</div></div><div class="cash-row-right"><div class="cash-row-val">' + fmtDollar(r.value) + '</div><div class="cash-row-pct">' + fmtPct(r.pct) + '</div></div></div>';
+    }).join('');
+    var totalPct = rows.reduce(function(sum, r) { return sum + parseFloat(r.pct || 0); }, 0);
+    var totalStr = (totalPct * 100).toFixed(2) + '%';
+    html += '<div class="cash-total"><span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--amber)">Total Cash Sleeve</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber)">' + totalStr + '</span></div>';
+    document.getElementById('cash-popup-body').innerHTML = html;
+  }).catch(function() {
+    document.getElementById('cash-popup-body').innerHTML = '<div class="error-msg">Could not load cash sleeve data</div>';
+  });
 });
 document.getElementById('cash-popup-close').addEventListener('click', function() {
   document.getElementById('cash-popup').style.display = 'none';
