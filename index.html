@@ -1079,14 +1079,14 @@ function openPhaseOverlay(phase) {
 // Live data from holdings_detail always overrides these values when available.
 // Last updated: June 12, 2026
 var KNOWN_HOLDINGS = {
-  // Phase 1 — Energy / LNG
-  'LNG':  { name:'Cheniere Energy',      entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0400', purchase_date:'—' },
-  'NEXT': { name:'NextDecade',           entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0300', purchase_date:'—' },
-  'EOG':  { name:'EOG Resources',        entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0300', purchase_date:'—' },
-  'WMB':  { name:'Williams Companies',   entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0300', purchase_date:'—' },
-  'EPD':  { name:'Enterprise Products',  entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0300', purchase_date:'—' },
-  'CF':   { name:'CF Industries',        entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0000', purchase_date:'—' },
-  'INSW': { name:'Intl Seaways',         entry_price:'79.89', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0150', purchase_date:'5/28/2026' },
+  // Phase 1 — Energy / LNG (values as of 2026-06-11)
+  'LNG':  { name:'Cheniere Energy',    entry_price:'278.05', cost_basis:'10297483.43', current_value:'8910168.85',  pl_pct:'-0.1347', alloc_pct:'0.0391', purchase_date:'3/25' },
+  'NEXT': { name:'NextDecade',         entry_price:'7.78',   cost_basis:'10843383.54', current_value:'11567361.40', pl_pct:'0.0668',  alloc_pct:'0.0508', purchase_date:'4/13' },
+  'EOG':  { name:'EOG Resources',      entry_price:'136.82', cost_basis:'6578955.31',  current_value:'6618140.87',  pl_pct:'0.0059',  alloc_pct:'0.0291', purchase_date:'3/17' },
+  'WMB':  { name:'Williams Companies', entry_price:'64.82',  cost_basis:'6210822.43',  current_value:'6884855.97',  pl_pct:'0.1085',  alloc_pct:'0.0302', purchase_date:'12/30' },
+  'EPD':  { name:'Enterprise Products',entry_price:'37.63',  cost_basis:'8681280.08',  current_value:'8712257.94',  pl_pct:'0.0035',  alloc_pct:'0.0383', purchase_date:'4/13' },
+  'CF':   { name:'CF Industries',      entry_price:'—',      cost_basis:'—',           current_value:'—',           pl_pct:null,      alloc_pct:'0.0000', purchase_date:'—' },
+  'INSW': { name:'Intl Seaways',       entry_price:'80.18',  cost_basis:'8779692.26',  current_value:'9163462.08',  pl_pct:'0.0437',  alloc_pct:'0.0402', purchase_date:'4/28' },
   // Phase 2 — Power / Grid
   'CEG':   { name:'Constellation Energy', entry_price:'278.86', cost_basis:'2800856', current_value:'2666456', pl_pct:'-0.0480', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
   'VST':   { name:'Vistra Corp',          entry_price:'160.90', cost_basis:'4159592', current_value:'4000815', pl_pct:'-0.0382', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
