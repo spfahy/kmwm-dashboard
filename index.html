@@ -304,7 +304,7 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
     <div class="sidebar-logo">
       <div class="sidebar-logo-name">Kelley &amp; Mullis</div>
       <div class="sidebar-logo-sub">Wealth Management</div>
-      <div class="sidebar-version">Research System v10.2</div>
+      <div class="sidebar-version">Research System v10.8</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Overview</div>
@@ -751,9 +751,13 @@ supaFetch('phase_tickers', { select: 'ticker,name,sort_order', phase: 'eq.Phase 
 
 function loadHoldings() {
   var today = new Date().toISOString().split('T')[0];
-  return supaFetch('holdings_detail', { select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date', metric_date: 'eq.' + today, order: 'ticker.asc' }).then(function(data) {
+  // Use lte + desc so most recent available date is used when today's sync hasn't run yet
+  return supaFetch('holdings_detail', { select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date,metric_date', metric_date: 'lte.' + today, order: 'metric_date.desc,ticker.asc', limit: 100 }).then(function(data) {
     if (data && data.length) {
-      data.forEach(function(row) { holdingsData[row.ticker] = row; });
+      // Keep only the most recent row per ticker
+      data.forEach(function(row) {
+        if (!holdingsData[row.ticker]) holdingsData[row.ticker] = row;
+      });
     }
     renderHoldings();
   }).catch(function() { renderHoldings(); });
@@ -995,9 +999,9 @@ var PHASE_CONFIG = {
   'Phase 4': {
     title: 'Phase 4 — Monetary / Gold',
     color: 'var(--amber)',
-    tickers: ['GLD','PSLV'],
+    tickers: ['GLD','PSLV','PAAS','NEM'],
     thesisTag: 'Phase 4',
-    summary: 'Monetary reset hedge. GLD ~10.01% total (9% core + ~1.01% dry powder). Mental accounting: 9% = core position, above 9% = dry powder deployed into better asset class than cash.'
+    summary: 'Monetary reset hedge. GLD ~10.01% total (9% core + ~1.01% dry powder). Mental accounting: 9% = core position, above 9% = dry powder deployed into better asset class than cash. PAAS and NEM entered June 10 as silver miner exposure (Watch Item 130 fired at $64.09 silver).'
   }
 };
 
@@ -1019,20 +1023,28 @@ function openPhaseOverlay(phase) {
   document.getElementById('phase-securities-list').innerHTML = '<div class="loading" style="padding:20px">Loading securities...</div>';
   document.getElementById('phase-overlay').classList.add('open');
 
-  // Load holdings data for this phase
+  // Load holdings data for this phase — use lte today + desc so most recent available date always wins
   var today = new Date().toISOString().split('T')[0];
   var tickerFilter = 'in.(' + cfg.tickers.join(',') + ')';
   supaFetch('holdings_detail', {
-    select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date',
-    metric_date: 'eq.' + today,
+    select: 'ticker,name,entry_price,cost_basis,current_value,pl_pct,alloc_pct,purchase_date,metric_date',
+    metric_date: 'lte.' + today,
     ticker: tickerFilter,
-    order: 'ticker.asc'
+    order: 'metric_date.desc,ticker.asc',
+    limit: cfg.tickers.length * 3
   }).then(function(data) {
     var dataMap = {};
     // Seed with known data first
     cfg.tickers.forEach(function(t) { if (KNOWN_HOLDINGS[t]) dataMap[t] = Object.assign({}, KNOWN_HOLDINGS[t]); });
-    // Overlay live data where available
-    if (data && data.length) data.forEach(function(r) { dataMap[r.ticker] = r; });
+    // Overlay live data — keep only the most recent row per ticker (data is ordered metric_date desc)
+    if (data && data.length) {
+      data.forEach(function(r) {
+        if (!dataMap[r.ticker] || dataMap[r.ticker]._source !== 'live') {
+          r._source = 'live';
+          dataMap[r.ticker] = r;
+        }
+      });
+    }
     renderPhaseSecurities(cfg.tickers, dataMap, cfg.color);
   }).catch(function() {
     var dataMap = {};
@@ -1063,21 +1075,36 @@ function openPhaseOverlay(phase) {
   });
 }
 
-// Known holdings data sourced from Google Sheets (updated from live spreadsheet)
+// Known holdings data — static fallback when holdings_detail has no data for a given date.
+// Live data from holdings_detail always overrides these values when available.
+// Last updated: June 12, 2026
 var KNOWN_HOLDINGS = {
-  'CEG': { name:'Constellation Energy', entry_price:'278.86', cost_basis:'2800856', current_value:'2666456', pl_pct:'-0.0480', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
-  'VST': { name:'Vistra Corp', entry_price:'160.90', cost_basis:'4159592', current_value:'4000815', pl_pct:'-0.0382', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
-  'ETN': { name:'Eaton', entry_price:'342.96', cost_basis:'4773033', current_value:'5567909', pl_pct:'0.1666', alloc_pct:'0.0300', purchase_date:'8/27/2024' },
-  'VRT': { name:'Vertiv Holdings', entry_price:'174.66', cost_basis:'1335222', current_value:'1726326', pl_pct:'0.0000', alloc_pct:'0.0213', purchase_date:'9/5/2024' },
-  'ABBNY': { name:'ABB Ltd', entry_price:'73.09', cost_basis:'2645331', current_value:'3867436', pl_pct:'0.4619', alloc_pct:'0.0150', purchase_date:'11/10/2024' },
-  'FCX': { name:'Freeport-McMoRan', entry_price:'49.19', cost_basis:'5369694', current_value:'7317993', pl_pct:'0.3629', alloc_pct:'0.0400', purchase_date:'10/30/2025' },
-  'SCCO': { name:'Southern Copper', entry_price:'142.62', cost_basis:'1504493', current_value:'1953403', pl_pct:'0.0000', alloc_pct:'0.0100', purchase_date:'10/30/2025' },
-  'CCJ': { name:'Cameco', entry_price:'88.46', cost_basis:'4112207', current_value:'5233810', pl_pct:'0.2728', alloc_pct:'0.0301', purchase_date:'8/27/2025' },
-  'GLD': { name:'SPDR Gold Shares', entry_price:'334.37', cost_basis:'12539804', current_value:'15423484', pl_pct:'0.2300', alloc_pct:'0.1001', purchase_date:'—' },
-  'PSLV': { name:'Sprott Physical Silver', entry_price:'21.91', cost_basis:'10063641', current_value:'10923509', pl_pct:'0.0853', alloc_pct:'0.0730', purchase_date:'12/9/2025' },
-  'CAT': { name:'Caterpillar', entry_price:'707.38', cost_basis:'3426984', current_value:'4192358', pl_pct:'0.2233', alloc_pct:'0.0200', purchase_date:'—' },
-  'RTX': { name:'RTX Corp', entry_price:'197.32', cost_basis:'3451940', current_value:'3051115', pl_pct:'-0.1161', alloc_pct:'0.0200', purchase_date:'3/17/2025' },
-  'WMT': { name:'Walmart', entry_price:'93.40', cost_basis:'4138688', current_value:'5078046', pl_pct:'0.2270', alloc_pct:'0.0275', purchase_date:'—' }
+  // Phase 1 — Energy / LNG
+  'LNG':  { name:'Cheniere Energy',      entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0400', purchase_date:'—' },
+  'NEXT': { name:'NextDecade',           entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0300', purchase_date:'—' },
+  'EOG':  { name:'EOG Resources',        entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0300', purchase_date:'—' },
+  'WMB':  { name:'Williams Companies',   entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0300', purchase_date:'—' },
+  'EPD':  { name:'Enterprise Products',  entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0300', purchase_date:'—' },
+  'CF':   { name:'CF Industries',        entry_price:'—', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0000', purchase_date:'—' },
+  'INSW': { name:'Intl Seaways',         entry_price:'79.89', cost_basis:'—', current_value:'—', pl_pct:null, alloc_pct:'0.0150', purchase_date:'5/28/2026' },
+  // Phase 2 — Power / Grid
+  'CEG':   { name:'Constellation Energy', entry_price:'278.86', cost_basis:'2800856', current_value:'2666456', pl_pct:'-0.0480', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
+  'VST':   { name:'Vistra Corp',          entry_price:'160.90', cost_basis:'4159592', current_value:'4000815', pl_pct:'-0.0382', alloc_pct:'0.0275', purchase_date:'2/12/2026' },
+  'ETN':   { name:'Eaton',               entry_price:'342.96', cost_basis:'4773033', current_value:'5567909', pl_pct:'0.1666', alloc_pct:'0.0300', purchase_date:'8/27/2024' },
+  'VRT':   { name:'Vertiv Holdings',      entry_price:'174.66', cost_basis:'1335222', current_value:'1726326', pl_pct:'0.0000', alloc_pct:'0.0213', purchase_date:'9/5/2024' },
+  'ABBNY': { name:'ABB Ltd',             entry_price:'73.09',  cost_basis:'2645331', current_value:'3867436', pl_pct:'0.4619', alloc_pct:'0.0150', purchase_date:'11/10/2024' },
+  // Phase 3 — Metals
+  'FCX':  { name:'Freeport-McMoRan', entry_price:'49.19',  cost_basis:'5369694', current_value:'7317993', pl_pct:'0.3629', alloc_pct:'0.0400', purchase_date:'10/30/2025' },
+  'SCCO': { name:'Southern Copper',  entry_price:'142.62', cost_basis:'1504493', current_value:'1953403', pl_pct:'0.0000', alloc_pct:'0.0100', purchase_date:'10/30/2025' },
+  'CCJ':  { name:'Cameco',           entry_price:'88.46',  cost_basis:'4112207', current_value:'5233810', pl_pct:'0.2728', alloc_pct:'0.0301', purchase_date:'8/27/2025' },
+  // Phase 4 — Monetary Metals
+  'GLD':  { name:'SPDR Gold Shares',        entry_price:'334.37', cost_basis:'12539804', current_value:'15423484', pl_pct:'0.2300', alloc_pct:'0.1001', purchase_date:'—' },
+  'PSLV': { name:'Sprott Physical Silver',  entry_price:'21.91',  cost_basis:'10063641', current_value:'10923509', pl_pct:'0.0853', alloc_pct:'0.0730', purchase_date:'12/9/2025' },
+  'PAAS': { name:'Pan American Silver',     entry_price:'45.26',  cost_basis:'—',        current_value:'—',        pl_pct:null,    alloc_pct:'0.0150', purchase_date:'6/10/2026' },
+  'NEM':  { name:'Newmont Corp',            entry_price:'95.69',  cost_basis:'—',        current_value:'—',        pl_pct:null,    alloc_pct:'0.0150', purchase_date:'6/10/2026' },
+  // Defensive
+  'RTX': { name:'RTX Corp',  entry_price:'197.32', cost_basis:'3451940', current_value:'3051115', pl_pct:'-0.1161', alloc_pct:'0.0200', purchase_date:'3/17/2025' },
+  'WMT': { name:'Walmart',   entry_price:'93.40',  cost_basis:'4138688', current_value:'5078046', pl_pct:'0.2270',  alloc_pct:'0.0275', purchase_date:'—' }
 };
 
 function renderPhaseSecurities(tickers, dataMap, color) {
