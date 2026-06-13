@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMWM — Oil Scenario Tracker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+  :root {
+    --bg:#0D1117; --surface:#161C26; --surface2:#1C2433; --border:#232D3F; --border2:#2E3D52;
+    --gold:#C9A84C; --gold-dim:#7A6330; --text:#E2E8F0; --muted:#64748B; --dim:#334155;
+    --green:#22C55E; --amber:#F59E0B; --red:#EF4444; --blue:#3B82F6; --purple:#A78BFA;
+    --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;padding:0;}
+
+  /* COMMAND CENTER */
+  .command-center {
+    background: #0A0F1A;
+    border-bottom: 2px solid var(--gold);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+  }
+  .cc-top {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cc-firm {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .ticker-strip {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  .ts-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .ts-sym { font-family:var(--mono); font-size:10px; color:var(--gold); font-weight:600; }
+  .ts-price { font-family:var(--mono); font-size:13px; font-weight:600; }
+  .ts-chg { font-family:var(--mono); font-size:10px; }
+  .ts-trigger {
+    font-family:var(--mono); font-size:8px; font-weight:600; letter-spacing:0.1em;
+    padding:1px 5px; text-transform:uppercase;
+  }
+  .trig-hot  { background:#14532D; color:var(--green); }
+  .trig-near { background:#431407; color:var(--amber); }
+  .trig-off  { background:var(--border); color:var(--muted); }
+  .cc-time { font-family:var(--mono); font-size:9px; color:var(--muted); padding:6px 12px; white-space:nowrap; }
+
+  /* SITUATION ROOM */
+  .situation-room {
+    padding: 10px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+  .sr-alerts { display: flex; flex-direction: column; gap: 6px; }
+  .alert-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    border-left: 3px solid;
+    background: var(--surface);
+  }
+  .alert-card.urgent  { border-color: var(--red);    background: #1A0808; }
+  .alert-card.warning { border-color: var(--amber);  background: #1A1208; }
+  .alert-card.watch   { border-color: var(--blue);   background: #081420; }
+  .alert-card.info    { border-color: var(--gold);   background: #12100A; }
+  .alert-icon { font-size: 14px; line-height: 1; margin-top: 1px; flex-shrink:0; }
+  .alert-body { flex: 1; }
+  .alert-headline {
+    font-size: 12px; font-weight: 600; line-height: 1.3; margin-bottom: 2px;
+  }
+  .alert-detail { font-family:var(--mono); font-size:10px; color:var(--muted); line-height:1.5; }
+  .alert-tag {
+    font-family:var(--mono); font-size:8px; font-weight:600; letter-spacing:0.12em;
+    padding:1px 6px; text-transform:uppercase; flex-shrink:0; margin-top:2px;
+    align-self:flex-start;
+  }
+  .tag-urgent  { background:#450A0A; color:var(--red);    }
+  .tag-warning { background:#431407; color:var(--amber);  }
+  .tag-watch   { background:#1E3A5F; color:var(--blue);   }
+  .tag-info    { background:#12100A; color:var(--gold);   }
+
+  .sr-next-events {
+    min-width: 220px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    padding: 10px 12px;
+  }
+  .sr-next-label {
+    font-family:var(--mono); font-size:9px; letter-spacing:0.15em;
+    color:var(--gold); text-transform:uppercase; margin-bottom:8px;
+    padding-bottom:6px; border-bottom:1px solid var(--border);
+  }
+  .next-event {
+    display:flex; align-items:flex-start; gap:8px;
+    padding: 5px 0; border-bottom:1px solid var(--border);
+  }
+  .next-event:last-child { border-bottom:none; }
+  .ne-date {
+    font-family:var(--mono); font-size:9px; color:var(--amber);
+    white-space:nowrap; min-width:56px; padding-top:1px;
+  }
+  .ne-text { font-size:10px; line-height:1.4; color:var(--text); }
+
+  /* FREEZE BANNER */
+  .freeze-banner {
+    display:flex; align-items:center; gap:12px;
+    background:#1A0808; border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    padding:6px 16px;
+  }
+  .fb-icon { font-size:14px; }
+  .fb-text { font-family:var(--mono); font-size:10px; color:var(--red); font-weight:600; flex:1; }
+  .fb-sub  { font-family:var(--mono); font-size:9px; color:var(--muted); }
+  .fb-gap  { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--amber); text-align:right; }
+
+  /* MAIN CONTENT */
+  .main-wrap { padding: 16px; }
+
+  /* CRISIS STATS */
+  .crisis-stats {
+    display: flex; gap: 10px; flex-wrap:wrap; margin-bottom:16px;
+  }
+  .cs-card {
+    background:var(--surface); border:1px solid var(--border);
+    padding:10px 14px; flex:1; min-width:130px;
+  }
+  .cs-label { font-family:var(--mono); font-size:8px; color:var(--muted); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:4px; }
+  .cs-val   { font-family:var(--mono); font-size:18px; font-weight:600; }
+  .cs-sub   { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:2px; }
+  .cs-prog  { height:3px; background:var(--border); margin-top:6px; border-radius:1px; overflow:hidden; }
+  .cs-prog-fill { height:100%; border-radius:1px; transition: width 0.6s ease; }
+
+  /* TABS */
+  .tab-row { display:flex; gap:2px; margin-bottom:0; }
+  .tab {
+    font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase;
+    padding:8px 18px; cursor:pointer; border:1px solid var(--border); border-bottom:none;
+    background:var(--surface); color:var(--muted); transition:all 0.15s;
+  }
+  .tab.active-a { background:#1A2A1A; color:var(--green);  border-color:var(--green); }
+  .tab.active-b { background:#2A1F0A; color:var(--amber);  border-color:var(--amber); }
+  .tab.active-w { background:#0F1E30; color:var(--blue);   border-color:var(--blue);  }
+  .tab.active-p { background:#1A1208; color:var(--gold);   border-color:var(--gold);  }
+
+  .scenario-pane { display:none; }
+  .scenario-pane.active { display:block; }
+  .pane-a { border:1px solid var(--green); border-top:2px solid var(--green); }
+  .pane-b { border:1px solid var(--amber); border-top:2px solid var(--amber); }
+  .pane-w { border:1px solid var(--blue);  border-top:2px solid var(--blue);  }
+  .pane-p { border:1px solid var(--gold);  border-top:2px solid var(--gold);  }
+
+  .pane-header {
+    padding:12px 18px; border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .pane-title { font-size:14px; font-weight:700; }
+  .pane-sub   { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:3px; }
+  .sbadge {
+    font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:0.12em;
+    padding:4px 12px; text-transform:uppercase;
+  }
+  .sb-a { background:#14532D; color:var(--green); }
+  .sb-b { background:#431407; color:var(--amber); }
+  .sb-w { background:#1E3A5F; color:var(--blue);  }
+  .sb-p { background:#12100A; color:var(--gold);  }
+
+  /* GATES */
+  .gates-wrap { padding:14px 18px; }
+  .gate-section { margin-bottom:22px; }
+  .gate-header {
+    display:flex; align-items:center; gap:10px; margin-bottom:10px;
+    padding-bottom:7px; border-bottom:1px solid var(--border);
+  }
+  .gate-label { font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:0.18em; color:var(--gold); text-transform:uppercase; }
+  .gate-date  { font-family:var(--mono); font-size:10px; color:var(--muted); }
+  .gate-sbadge {
+    margin-left:auto; font-family:var(--mono); font-size:9px; font-weight:600;
+    padding:2px 8px; letter-spacing:0.1em; text-transform:uppercase;
+  }
+  .gs-approaching { background:#431407; color:var(--amber); }
+  .gs-pending     { background:#1E3A5F; color:var(--blue);  }
+
+  .gate-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .gate-col  { background:var(--surface); border:1px solid var(--border); }
+  .gate-col-header {
+    font-family:var(--mono); font-size:9px; letter-spacing:0.15em; color:var(--muted);
+    text-transform:uppercase; padding:6px 12px; background:var(--surface2); border-bottom:1px solid var(--border);
+  }
+  .vars-table { width:100%; border-collapse:collapse; }
+  .vars-table td { padding:6px 12px; border-bottom:1px solid var(--border); font-size:11px; }
+  .vars-table tr:last-child td { border-bottom:none; }
+  .vars-table td:first-child { font-family:var(--mono); font-size:10px; color:var(--muted); width:50%; }
+  .vars-table td:last-child  { font-family:var(--mono); font-weight:500; text-align:right; }
+
+  .ticker-rows {}
+  .ticker-row {
+    padding:7px 12px; border-bottom:1px solid var(--border);
+    display:flex; align-items:flex-start; gap:8px;
+  }
+  .ticker-row:last-child { border-bottom:none; }
+  .tr-sym  { font-family:var(--mono); font-size:11px; font-weight:600; color:var(--gold); width:36px; flex-shrink:0; padding-top:1px; }
+  .tr-text { font-size:11px; line-height:1.5; flex:1; }
+  .tr-live { font-family:var(--mono); font-size:10px; white-space:nowrap; padding-top:1px; }
+  .al { display:inline-block; font-family:var(--mono); font-size:8px; font-weight:600; letter-spacing:0.12em; padding:1px 5px; text-transform:uppercase; margin-right:4px; vertical-align:middle; }
+  .al-entry { background:#14532D; color:var(--green); }
+  .al-exit  { background:#450A0A; color:var(--red);   }
+  .al-hold  { background:#1E3A5F; color:var(--blue);  }
+  .al-trim  { background:#431407; color:var(--amber); }
+
+  /* DEAL TABLE */
+  .deal-table-wrap { overflow-x:auto; padding:14px 18px; }
+  .deal-table { width:100%; border-collapse:collapse; font-size:11px; }
+  .deal-table th { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); padding:7px 12px; border-bottom:1px solid var(--border2); text-align:left; background:var(--surface2); }
+  .deal-table td { padding:8px 12px; border-bottom:1px solid var(--border); vertical-align:top; line-height:1.5; }
+  .deal-table tr:last-child td { border-bottom:none; }
+  .deal-table td:first-child { font-family:var(--mono); font-size:10px; color:var(--gold); white-space:nowrap; }
+  .deal-table td:nth-child(3),.deal-table td:nth-child(4) { font-family:var(--mono); font-size:10px; }
+
+  /* WATCH ITEMS */
+  .wi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:10px; padding:14px 18px; }
+  .wi-card { background:var(--surface2); border:1px solid var(--border); padding:12px; }
+  .wi-top  { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .wi-id   { font-family:var(--mono); font-size:11px; font-weight:600; color:var(--gold); }
+  .wi-st   { font-family:var(--mono); font-size:8px; font-weight:600; letter-spacing:0.12em; padding:2px 6px; text-transform:uppercase; }
+  .wi-date { margin-left:auto; font-family:var(--mono); font-size:9px; color:var(--muted); }
+  .wi-trigger { font-size:11px; font-weight:500; margin-bottom:5px; }
+  .wi-action  { font-size:11px; color:var(--muted); line-height:1.5; }
+  .ws-approaching { background:#431407; color:var(--amber); }
+  .ws-pending     { background:#1E3A5F; color:var(--blue);  }
+  .ws-active      { background:#14532D; color:var(--green); }
+  .ws-govern      { background:#2D1B69; color:var(--purple);}
+
+  /* POSITION SUMMARY */
+  .pos-table { width:100%; border-collapse:collapse; }
+  .pos-table th { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); padding:7px 14px; border-bottom:1px solid var(--border2); text-align:left; background:var(--surface2); }
+  .pos-table td { padding:9px 14px; border-bottom:1px solid var(--border); font-size:11px; vertical-align:top; line-height:1.5; }
+  .pos-table tr:last-child td { border-bottom:none; }
+  .pos-table td:first-child { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--gold); }
+  .pos-table td:nth-child(2) { font-family:var(--mono); font-size:10px; }
+
+  /* INSIGHT BOX */
+  .insight-box { background:var(--surface2); border-left:3px solid var(--gold); padding:9px 13px; margin:10px 18px; font-size:11px; line-height:1.6; color:var(--muted); }
+  .insight-box strong { color:var(--text); }
+
+  /* MISC */
+  .section-label { font-family:var(--mono); font-size:9px; letter-spacing:0.2em; color:var(--gold-dim); text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:5px; margin:16px 0 12px; }
+  .warn { color:var(--amber); } .up { color:var(--green); } .down { color:var(--red); }
+
+  .footer { border-top:1px solid var(--border); margin-top:20px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; }
+  .footer-left { font-family:var(--mono); font-size:9px; color:var(--dim); line-height:1.9; }
+  .refresh-btn { background:transparent; border:1px solid var(--border2); color:var(--muted); font-family:var(--mono); font-size:9px; letter-spacing:0.1em; padding:5px 12px; cursor:pointer; text-transform:uppercase; transition:all 0.2s; }
+  .refresh-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+  /* PULSE ANIMATION on urgent alerts */
+  @keyframes border-pulse {
+    0%,100%{ border-left-color: var(--red); }
+    50%     { border-left-color: #FF8080; }
+  }
+  .alert-card.urgent { animation: border-pulse 2s infinite; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     COMMAND CENTER (sticky top)
+══════════════════════════════════════════════════════ -->
+<div class="command-center">
+
+  <!-- ticker strip -->
+  <div class="cc-top">
+    <div class="cc-firm">KMWM / OIL TRACKER</div>
+    <div class="ticker-strip" id="ticker-strip">
+      <!-- populated by JS -->
+    </div>
+    <div class="cc-time" id="cc-time">—</div>
+  </div>
+
+  <!-- freeze banner -->
+  <div class="freeze-banner">
+    <div class="fb-icon">🔒</div>
+    <div style="flex:1">
+      <div class="fb-text">WATCH ITEM 129 — UNIVERSAL DEPLOYMENT FREEZE</div>
+      <div class="fb-sub">All entry points conditional on S&P 500 closing at or below 6,406.76</div>
+    </div>
+    <div>
+      <div class="fb-gap" id="freeze-gap">…</div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--muted);text-align:right">pts above unlock</div>
+    </div>
+  </div>
+
+  <!-- situation room -->
+  <div class="situation-room">
+    <div class="sr-alerts" id="sr-alerts">
+      <!-- dynamic alerts -->
+    </div>
+    <div class="sr-next-events">
+      <div class="sr-next-label">Next Events</div>
+      <div class="next-event"><span class="ne-date">Jun 15</span><span class="ne-text">NEXT 10-Q — cash runway disclosure. Break &lt;$50M.</span></div>
+      <div class="next-event"><span class="ne-date">Jun 17</span><span class="ne-text">Warsh FOMC. Monitoring only — freeze supersedes.</span></div>
+      <div class="next-event"><span class="ne-date" id="ne-cushing-date">Jun 18</span><span class="ne-text">Next EIA Cushing/SPR weekly report. WI-117 gate.</span></div>
+      <div class="next-event"><span class="ne-date">Jun 25</span><span class="ne-text">WI-117 projected fire (Cushing ≤20M bbl).</span></div>
+      <div class="next-event"><span class="ne-date">Jun 30</span><span class="ne-text">Section 232 copper tariff. WI-39 Phase 3 gate.</span></div>
+      <div class="next-event"><span class="ne-date">Jul 10–15</span><span class="ne-text">Gate 2 window. SPR ~WI-138 threshold.</span></div>
+      <div class="next-event"><span class="ne-date">Aug 20</span><span class="ne-text">Earliest first Hormuz barrels at Cushing (Scenario B).</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════════════ -->
+<div class="main-wrap">
+
+  <!-- CRISIS STATS -->
+  <div class="section-label">Baseline — June 12, 2026</div>
+  <div class="crisis-stats">
+    <div class="cs-card">
+      <div class="cs-label">Hormuz Day</div>
+      <div class="cs-val warn" id="cs-days">—</div>
+      <div class="cs-sub">Since Feb 28, 2026</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-label">Cushing (Jun 5)</div>
+      <div class="cs-val warn">21.64M</div>
+      <div class="cs-sub">bbl · WI-117 gate: 20M</div>
+      <div class="cs-prog"><div class="cs-prog-fill" style="width:72%;background:var(--amber)"></div></div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-label">Cushing Weekly Draw</div>
+      <div class="cs-val down">−801K</div>
+      <div class="cs-sub">bbl/week · 🚨 red flag active</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-label">SPR (Jun 5)</div>
+      <div class="cs-val warn">349.2M</div>
+      <div class="cs-sub">bbl · WI-138 gate: 300M</div>
+      <div class="cs-prog"><div class="cs-prog-fill" style="width:82%;background:var(--amber)"></div></div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-label">SPR Draw Rate</div>
+      <div class="cs-val down">−9.0M</div>
+      <div class="cs-sub">bbl/week · 🚨 accelerated</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-label">WTI Live</div>
+      <div class="cs-val" id="cs-wti">…</div>
+      <div class="cs-sub">Thesis floor: $85+</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-label">Weeks to WI-117</div>
+      <div class="cs-val warn" id="cs-weeks117">~2.1</div>
+      <div class="cs-sub">At 801K/wk draw rate</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-label">Weeks to WI-138</div>
+      <div class="cs-val warn" id="cs-weeks138">~5.5</div>
+      <div class="cs-sub">SPR at 9M/wk draw rate</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="section-label">Scenario Playbooks</div>
+  <div class="tab-row">
+    <div class="tab active-a" onclick="showTab('a')">Scenario A — Crisis Track</div>
+    <div class="tab" onclick="showTab('b')">Scenario B — Deal Track</div>
+    <div class="tab" onclick="showTab('w')">Watch Items</div>
+    <div class="tab" onclick="showTab('p')">Position Summary</div>
+  </div>
+
+  <!-- ══ SCENARIO A ══ -->
+  <div class="scenario-pane pane-a active" id="pane-a">
+    <div class="pane-header">
+      <div>
+        <div class="pane-title">Scenario A — Crisis Track</div>
+        <div class="pane-sub">No deal by June 20 · Hormuz closed through July · SPR −9M bbl/wk · Cushing −801K bbl/wk</div>
+      </div>
+      <span class="sbadge sb-a">MONITORING</span>
+    </div>
+    <div class="gates-wrap">
+
+      <!-- GATE 1 -->
+      <div class="gate-section">
+        <div class="gate-header">
+          <span class="gate-label">Gate 1</span>
+          <span class="gate-date">End of June 2026 (June 25–30)</span>
+          <span class="gate-sbadge gs-approaching">⚠ APPROACHING — est. ~2 weeks</span>
+        </div>
+        <div class="gate-grid">
+          <div class="gate-col">
+            <div class="gate-col-header">Projected Variables</div>
+            <table class="vars-table">
+              <tr><td>Cushing</td><td class="warn">~19.5–20.5M bbl</td></tr>
+              <tr><td>WI-117</td><td class="warn">TRIGGER ZONE</td></tr>
+              <tr><td>SPR</td><td class="warn">~290–305M bbl</td></tr>
+              <tr><td>WI-138</td><td class="warn">Approaching 300M</td></tr>
+              <tr><td>WTI</td><td class="warn">$92–100/bbl</td></tr>
+              <tr><td>Market</td><td>WTI backwardation. Cash mkt strength. Refineries bidding.</td></tr>
+            </table>
+          </div>
+          <div class="gate-col">
+            <div class="gate-col-header">Entry Points (Watch Item 129 required)</div>
+            <div class="ticker-rows">
+              <div class="ticker-row">
+                <span class="tr-sym">EOG</span>
+                <span class="tr-text"><span class="al al-entry">ENTRY</span>$128–132. WTI >$90 + Cushing <21M bbl. Extraordinary FCF at $90+ WTI.</span>
+                <span class="tr-live" id="g1-eog">…</span>
+              </div>
+              <div class="ticker-row">
+                <span class="tr-sym">WMB</span>
+                <span class="tr-text"><span class="al al-entry">ENTRY</span>Below $72. Throughput benefits as refineries scramble for crude.</span>
+                <span class="tr-live" id="g1-wmb">…</span>
+              </div>
+              <div class="ticker-row">
+                <span class="tr-sym">EPD</span>
+                <span class="tr-text"><span class="al al-entry">ENTRY</span>Below $37.50. NGL volumes + fractionation spreads benefit from tight crude.</span>
+                <span class="tr-live" id="g1-epd">…</span>
+              </div>
+              <div class="ticker-row">
+                <span class="tr-sym">INSW</span>
+                <span class="tr-text"><span class="al al-entry">ENTRY</span>$77–79 if war-risk compresses on peace narrative. Ton-mile + Red Sea intact. No add above $83.</span>
+                <span class="tr-live" id="g1-insw">…</span>
+              </div>
+            </div>
+          </div>
+          <div class="gate-col" style="margin-top:-12px">
+            <div class="gate-col-header">Exit Points</div>
+            <div class="ticker-rows">
+              <div class="ticker-row"><span class="tr-sym">EOG</span><span class="tr-text"><span class="al al-hold">HOLD</span>No exit at Gate 1. Hold through thesis confirmation.</span></div>
+              <div class="ticker-row"><span class="tr-sym">WMB</span><span class="tr-text"><span class="al al-hold">HOLD</span>No exit. Midstream thesis intact regardless of WTI direction.</span></div>
+              <div class="ticker-row"><span class="tr-sym">EPD</span><span class="tr-text"><span class="al al-hold">HOLD</span>No exit. Distribution yield provides hard floor.</span></div>
+              <div class="ticker-row"><span class="tr-sym">INSW</span><span class="tr-text"><span class="al al-trim">TRIM 30–40%</span>War-risk leg ONLY if named blockade-lift date announced with explicit mine clearance timeline from credible naval authority. NOT on Trump statement alone.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GATE 2 -->
+      <div class="gate-section">
+        <div class="gate-header">
+          <span class="gate-label">Gate 2</span>
+          <span class="gate-date">Mid-July 2026 (July 10–15)</span>
+          <span class="gate-sbadge gs-pending">PENDING</span>
+        </div>
+        <div class="gate-grid">
+          <div class="gate-col">
+            <div class="gate-col-header">Projected Variables</div>
+            <table class="vars-table">
+              <tr><td>Cushing</td><td class="down">~17–19M bbl</td></tr>
+              <tr><td>Status</td><td class="down">Below operational floor</td></tr>
+              <tr><td>SPR</td><td class="down">~245–270M bbl</td></tr>
+              <tr><td>WI-138</td><td class="down">CRITICAL — threshold breached</td></tr>
+              <tr><td>WTI</td><td class="down">$100–112/bbl</td></tr>
+              <tr><td>Market</td><td>Refinery run rate cuts. Gasoline tightening. Political pressure for emergency declaration.</td></tr>
+            </table>
+          </div>
+          <div class="gate-col">
+            <div class="gate-col-header">Entry Points</div>
+            <div class="ticker-rows">
+              <div class="ticker-row"><span class="tr-sym">EOG</span><span class="tr-text"><span class="al al-entry">ENTRY</span>Add aggressively $135–145 if WTI at $100+. At $105 WTI → $60+ FCF per barrel. Primary add point of thesis.</span></div>
+              <div class="ticker-row"><span class="tr-sym">WMB</span><span class="tr-text"><span class="al al-entry">ENTRY</span>$71–73 on broader market volatility. Record throughput — any price weakness is entry, not exit.</span></div>
+              <div class="ticker-row"><span class="tr-sym">EPD</span><span class="tr-text"><span class="al al-entry">ENTRY</span>$36.50–37.50. Record volumes. Distribution yield 6%+ — hard floor.</span></div>
+              <div class="ticker-row"><span class="tr-sym">INSW</span><span class="tr-text"><span class="al al-hold">HOLD</span>Hold only. War-risk likely compressing on deal speculation even as physical shortage deepens. Ton-mile holds regardless.</span></div>
+            </div>
+          </div>
+          <div class="gate-col" style="margin-top:-12px">
+            <div class="gate-col-header">Exit Points</div>
+            <div class="ticker-rows">
+              <div class="ticker-row"><span class="tr-sym">EOG</span><span class="tr-text"><span class="al al-trim">TRIM 20–25%</span>If WTI reaches $115–120 AND credible deal + mine clearance timeline announced. Spike = exit window, not entry.</span></div>
+              <div class="ticker-row"><span class="tr-sym">WMB</span><span class="tr-text"><span class="al al-hold">HOLD</span>No exit at Gate 2. Throughput is the thesis, not spot price.</span></div>
+              <div class="ticker-row"><span class="tr-sym">EPD</span><span class="tr-text"><span class="al al-hold">HOLD</span>Distribution-anchored MLP — hold through crisis.</span></div>
+              <div class="ticker-row"><span class="tr-sym">INSW</span><span class="tr-text"><span class="al al-trim">TRIM 40–50%</span>War-risk near pre-crisis AND CENTCOM mine clearance confirmed AND P&amp;I club coverage being restored. All three simultaneously.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GATE 3 -->
+      <div class="gate-section">
+        <div class="gate-header">
+          <span class="gate-label">Gate 3</span>
+          <span class="gate-date">Late July / Early August 2026 (July 20 – Aug 5)</span>
+          <span class="gate-sbadge gs-pending">PENDING</span>
+        </div>
+        <div class="insight-box" style="margin:0 0 12px">
+          <strong>Emergency Declaration Scenario.</strong> Refinery shutdowns. Gasoline $4.50–5.00+ at pump. Defense Production Act invoked. Iran negotiating from position of strength. Policy risk overrides market mechanics — <strong>no new entries at Gate 3.</strong>
+        </div>
+        <div class="gate-grid">
+          <div class="gate-col">
+            <div class="gate-col-header">Projected Variables</div>
+            <table class="vars-table">
+              <tr><td>Cushing</td><td class="down">~14–18M bbl or Emergency</td></tr>
+              <tr><td>SPR</td><td class="down">~200–240M bbl or draw halted</td></tr>
+              <tr><td>WTI</td><td class="down">$105–125/bbl crisis premium</td></tr>
+              <tr><td>Political</td><td class="down">Bipartisan Congressional action</td></tr>
+            </table>
+          </div>
+          <div class="gate-col">
+            <div class="gate-col-header">Entry Points</div>
+            <div class="ticker-rows">
+              <div class="ticker-row"><span class="tr-sym">EOG</span><span class="tr-text"><span class="al al-hold">HOLD ONLY</span>No new entries. Extreme volatility. Emergency declarations create price control / export restriction risk.</span></div>
+              <div class="ticker-row"><span class="tr-sym">WMB</span><span class="tr-text"><span class="al al-hold">HOLD ONLY</span>Same policy risk applies to midstream.</span></div>
+              <div class="ticker-row"><span class="tr-sym">EPD</span><span class="tr-text"><span class="al al-hold">HOLD ONLY</span>Policy risk elevated.</span></div>
+              <div class="ticker-row"><span class="tr-sym">INSW</span><span class="tr-text"><span class="al al-hold">HOLD ONLY</span>War-risk could spike violently on naval action OR collapse on emergency deal under duress.</span></div>
+            </div>
+          </div>
+          <div class="gate-col" style="margin-top:-12px">
+            <div class="gate-col-header">Exit Points</div>
+            <div class="ticker-rows">
+              <div class="ticker-row"><span class="tr-sym">EOG</span><span class="tr-text"><span class="al al-trim">TRIM 30–50%</span>On WTI spike to $115–125. Government intervention risk is real — lock in gains on the spike.</span></div>
+              <div class="ticker-row"><span class="tr-sym">WMB</span><span class="tr-text"><span class="al al-trim">TRIM 20–30%</span>If regulatory risk on pipeline ops flagged in emergency declaration language.</span></div>
+              <div class="ticker-row"><span class="tr-sym">EPD</span><span class="tr-text"><span class="al al-hold">HOLD</span>Distribution is the anchor. Trim only if leverage approaches 4.0x on rising rates.</span></div>
+              <div class="ticker-row"><span class="tr-sym">INSW</span><span class="tr-text"><span class="al al-exit">EXIT CONSIDER</span>Full exit if war-risk collapses AND CENTCOM confirms mine clearance active AND P&amp;I coverage being restored. All three simultaneously.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ SCENARIO B ══ -->
+  <div class="scenario-pane pane-b" id="pane-b">
+    <div class="pane-header">
+      <div>
+        <div class="pane-title">Scenario B — Deal Track</div>
+        <div class="pane-sub">Agreement signed by June 20 · Mine clearance 3–4 months · First barrels Cushing Aug 20 – Sep 5</div>
+      </div>
+      <span class="sbadge sb-b">MONITORING</span>
+    </div>
+    <div class="insight-box" style="margin:14px 18px">
+      <strong>Critical Timing Insight:</strong> Even under the deal scenario, the July inventory crisis window is NOT avoided. First barrels do not arrive at Cushing until August 20 at earliest. Cushing hits the operational floor in late July regardless of any deal announcement. <strong>The deal reduces the duration of the crisis, not the onset.</strong>
+    </div>
+    <div class="deal-table-wrap">
+      <table class="deal-table">
+        <thead><tr><th>Date</th><th>Event</th><th>Cushing</th><th>WTI</th><th>Portfolio Action</th></tr></thead>
+        <tbody>
+          <tr><td>June 20</td><td>Deal signed. Mine clearance begins under multinational naval supervision.</td><td class="warn">~20.5M bbl</td><td>$88–92 — peace premium</td><td><span class="al al-hold">HOLD</span> All Phase 1. No exits on deal announcement alone.</td></tr>
+          <tr><td>Late June</td><td>Cushing hits 20M floor despite deal. Physical shortage visible regardless.</td><td class="down">~19.5M bbl</td><td class="warn">$92–98</td><td><span class="al al-hold">HOLD</span> EOG/WMB/EPD/INSW. WI-117 fires.</td></tr>
+          <tr><td>Mid-July</td><td>SPR near 300M threshold. Emergency risk window remains live despite deal.</td><td class="down">~17–19M bbl</td><td class="down">$95–105</td><td><span class="al al-trim">TRIM</span> 20–25% EOG on spike if WTI >$105. Hold WMB/EPD/INSW.</td></tr>
+          <tr><td>Aug 20 – Sep 5</td><td>First Hormuz barrels arrive Cushing. Physical supply restoration begins.</td><td class="up">Recovering</td><td>$88–95 — recovery</td><td><span class="al al-trim">TRIM</span> Begin INSW war-risk leg trim. Hold EOG/WMB/EPD through recovery.</td></tr>
+          <tr><td>Oct – Nov 2026</td><td>Cushing recovering. Mine clearance completing. Phase 1 end conditions approaching.</td><td class="up">~24–27M bbl</td><td>$82–90 — normalizing</td><td><span class="al al-trim">SIZE DOWN</span> Assess Phase 1 end conditions. Begin sizing down INSW war-risk leg.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight-box" style="margin:0 18px 18px">
+      <strong>Phase 1 End Conditions (all five required simultaneously):</strong> Strait transit 20+ vessels/day for 30 consecutive days · War-risk below 0.5% H&amp;M/week · CENTCOM mine clearance confirmed complete · Cape rerouting below 30% of traffic · QatarEnergy announces Ras Laffan restart within 12 months.
+    </div>
+  </div>
+
+  <!-- ══ WATCH ITEMS ══ -->
+  <div class="scenario-pane pane-w" id="pane-w">
+    <div class="pane-header">
+      <div><div class="pane-title">Watch Item Integration</div><div class="pane-sub">When these fire, execute the corresponding gate analysis</div></div>
+      <span class="sbadge sb-w">5 ACTIVE</span>
+    </div>
+    <div class="wi-grid">
+      <div class="wi-card">
+        <div class="wi-top"><span class="wi-id">WI-117</span><span class="wi-st ws-approaching">⚠ APPROACHING</span><span class="wi-date">Wk Jun 22–25</span></div>
+        <div class="wi-trigger">Cushing at or below 20M barrels (EIA weekly)</div>
+        <div class="wi-action"><strong>Action:</strong> Gate 1 becomes active. Review EOG/WMB/EPD entry points. Assess INSW war-risk leg. Current 21.64M at −801K/wk → ~2 weeks to trigger.</div>
+      </div>
+      <div class="wi-card">
+        <div class="wi-top"><span class="wi-id">WI-138</span><span class="wi-st ws-pending">PENDING</span><span class="wi-date">Mid–Late Jul 2026</span></div>
+        <div class="wi-trigger">SPR reaches 300M barrel critical threshold</div>
+        <div class="wi-action"><strong>Action:</strong> Gate 2/Gate 3 boundary fires. Emergency scenario live. Trim EOG on WTI spike. Hold WMB/EPD. SPR at 349.2M at −9M/wk → ~5.5 weeks.</div>
+      </div>
+      <div class="wi-card">
+        <div class="wi-top"><span class="wi-id">WI-129</span><span class="wi-st ws-govern">GOVERNING</span><span class="wi-date">Condition-driven</span></div>
+        <div class="wi-trigger">S&P 500 closes at or below 6,406.76</div>
+        <div class="wi-action"><strong>Action:</strong> Universal freeze lifts. All entry points become executable. Gap: <span id="wi-gap" class="warn">calculating…</span></div>
+      </div>
+      <div class="wi-card">
+        <div class="wi-top"><span class="wi-id">WI-74</span><span class="wi-st ws-active">ACTIVE</span><span class="wi-date">Condition-driven</span></div>
+        <div class="wi-trigger">CENTCOM confirms active mine clearance operations underway</div>
+        <div class="wi-action"><strong>Action:</strong> Deal track confirmed operational. Shift to Scenario B timeline. Reassess INSW exit. Royal Navy departed Gibraltar May 28 — 6-month clock running.</div>
+      </div>
+      <div class="wi-card">
+        <div class="wi-top"><span class="wi-id">WI-93</span><span class="wi-st ws-approaching">⚠ APPROACHING</span><span class="wi-date">Imminent</span></div>
+        <div class="wi-trigger">SPR below 340M bbl or IEA second emergency release announced</div>
+        <div class="wi-action"><strong>Action:</strong> Phase 1 duration extension signal. Hold all positions. Reassess EOG exit timing. June 5 at 349.2M — may already be breached on next EIA print.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ POSITION SUMMARY ══ -->
+  <div class="scenario-pane pane-p" id="pane-p">
+    <div class="pane-header">
+      <div><div class="pane-title">Position Summary — Entry &amp; Exit Reference</div><div class="pane-sub">All entries conditional on Watch Item 129 firing first</div></div>
+      <span class="sbadge sb-p">LIVING DOCUMENT</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="pos-table">
+        <thead><tr><th>Ticker</th><th>Alloc</th><th>Buy Trigger</th><th>Entry Logic</th><th>Exit Signal</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>EOG<div style="font-size:9px;color:var(--muted);font-family:var(--sans);font-weight:400">EOG Resources<br><span id="pt-eog" style="color:var(--green)">…</span></div></td>
+            <td>~3%</td>
+            <td><span class="warn">$128–132</span> Gate 1<br><span class="warn">$135–145</span> Gate 2</td>
+            <td>WTI >$90 + Cushing <21M bbl. Low-cost producer generates $60+ FCF per barrel at $105 WTI.</td>
+            <td>WTI spikes $115–120 with credible deal + mine clearance timeline. Trim 25–50% on spike.</td>
+          </tr>
+          <tr>
+            <td>WMB<div style="font-size:9px;color:var(--muted);font-family:var(--sans);font-weight:400">Williams Cos.<br><span id="pt-wmb" style="color:var(--green)">…</span></div></td>
+            <td>~3%</td>
+            <td><span class="warn">&lt; $72</span></td>
+            <td>Throughput thesis — volumes elevated regardless of WTI direction. Add on market-driven pullback.</td>
+            <td>Henry Hub sustained below $2.50/MMBtu for 60+ days + U.S. LNG export demand destruction. Not near-term.</td>
+          </tr>
+          <tr>
+            <td>EPD<div style="font-size:9px;color:var(--muted);font-family:var(--sans);font-weight:400">Enterprise Products<br><span id="pt-epd" style="color:var(--green)">…</span></div></td>
+            <td>~3%</td>
+            <td><span class="warn">&lt; $37.50</span></td>
+            <td>Record operating volumes. 5.9% distribution yield is hard floor. Add at/below trigger.</td>
+            <td>Distribution cut or suspension. Leverage above 4.0x debt/EBITDA. Neither near-term.</td>
+          </tr>
+          <tr>
+            <td>INSW<div style="font-size:9px;color:var(--muted);font-family:var(--sans);font-weight:400">Int'l Seaways<br><span id="pt-insw" style="color:var(--green)">…</span></div></td>
+            <td>~2.5%</td>
+            <td><span class="warn">$77–79</span> war-risk compression</td>
+            <td>Add ONLY if ton-mile + Red Sea vectors intact. War-risk leg compresses on peace narrative. No add above $83.</td>
+            <td>Named blockade-lift date + CENTCOM mine clearance confirmed + P&amp;I coverage restoration. All three simultaneously. Trim 40–50%.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /main-wrap -->
+
+<div class="footer">
+  <div class="footer-left">
+    <div>KMWM Research System &nbsp;|&nbsp; Phase 1 Active &nbsp;|&nbsp; Context v10.8 &nbsp;|&nbsp; Living Document v1.0 &nbsp;|&nbsp; June 12, 2026</div>
+    <div>Update when WI-117 or WI-138 fires · New EIA weekly data · Diplomatic deal with mine clearance timeline announced</div>
+  </div>
+  <button class="refresh-btn" onclick="fetchAll()">↻ Refresh</button>
+</div>
+
+<script>
+// ── TAB SWITCHING ─────────────────────────────────────
+function showTab(t) {
+  ['a','b','w','p'].forEach(id => document.getElementById('pane-'+id).classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.className = 'tab');
+  document.getElementById('pane-'+t).classList.add('active');
+  const map={a:0,b:1,w:2,p:3};
+  document.querySelectorAll('.tab')[map[t]].className = 'tab active-'+t;
+}
+
+// ── DAY COUNTER ───────────────────────────────────────
+function updateDays() {
+  const d = Math.floor((new Date() - new Date('2026-02-28')) / 86400000);
+  document.getElementById('cs-days').textContent = 'Day ' + d;
+}
+updateDays();
+
+// ── NEXT EIA WEDNESDAY ────────────────────────────────
+function nextWednesday() {
+  const today = new Date();
+  const day = today.getDay(); // 0=Sun
+  const diff = (3 - day + 7) % 7 || 7;
+  const wed = new Date(today); wed.setDate(today.getDate() + diff);
+  return wed.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+document.getElementById('ne-cushing-date').textContent = nextWednesday();
+
+// ── PRICE FETCH ───────────────────────────────────────
+const TICKERS = [
+  { sym:'EOG',  id:'eog',  g1lo:128, g1hi:132, g2lo:135, g2hi:145 },
+  { sym:'WMB',  id:'wmb',  g1lo:0,   g1hi:72,  g2lo:71,  g2hi:73  },
+  { sym:'EPD',  id:'epd',  g1lo:0,   g1hi:37.5,g2lo:36.5,g2hi:37.5},
+  { sym:'INSW', id:'insw', g1lo:77,  g1hi:79,  g2lo:0,   g2hi:0   },
+];
+const FREEZE = 6406.76;
+
+async function getQ(sym) {
+  try {
+    const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`,{cache:'no-cache'});
+    const j = await r.json();
+    const m = j.chart.result[0].meta;
+    return { price: m.regularMarketPrice, prev: m.chartPreviousClose };
+  } catch(e) { return null; }
+}
+
+function chgStr(price, prev) {
+  const c = price - prev, p = (c/prev)*100;
+  return { text:(c>=0?'▲':'▼')+Math.abs(c).toFixed(2)+' ('+Math.abs(p).toFixed(2)+'%)', up:c>=0 };
+}
+
+function trigLabel(sym, price) {
+  const t = { EOG:[128,132], WMB:[0,72], EPD:[0,37.5], INSW:[77,83] }[sym];
+  if (!t) return { cls:'trig-off', text:'—' };
+  if (price <= t[0] || (t[0]===0 && price <= t[1])) return { cls:'trig-hot', text:'AT TRIGGER' };
+  const margin = t[t[0]===0?1:0] * 1.03;
+  if (price <= margin) return { cls:'trig-near', text:'NEAR TRIGGER' };
+  return { cls:'trig-off', text:'' };
+}
+
+// ── DYNAMIC ALERTS ────────────────────────────────────
+function buildAlerts(prices, spxPrice, wtiPrice) {
+  const alerts = [];
+  const CUSHING_CURRENT = 21.64;
+  const CUSHING_DRAW    = 0.801;
+  const SPR_CURRENT     = 349.2;
+  const SPR_DRAW        = 9.0;
+
+  // WI-117 proximity
+  const weeksTo117 = (CUSHING_CURRENT - 20) / CUSHING_DRAW;
+  document.getElementById('cs-weeks117').textContent = '~' + weeksTo117.toFixed(1);
+  if (weeksTo117 < 2) {
+    alerts.push({ level:'urgent', icon:'🚨', headline:'WI-117 IMMINENT — Cushing approaching 20M bbl trigger', detail:`At 801K bbl/week draw rate, WI-117 fires in approximately ${weeksTo117.toFixed(1)} weeks. Gate 1 entry points (EOG $128–132, WMB <$72, EPD <$37.50) become active when Watch Item 129 also fires.`, tag:'URGENT' });
+  } else {
+    alerts.push({ level:'warning', icon:'⚠️', headline:`WI-117 approaching — Cushing at 21.64M bbl, gate fires at 20M`, detail:`Current draw: 801K bbl/week. Estimated trigger: ~${weeksTo117.toFixed(1)} weeks (week of June 22–25). Next EIA print: ${nextWednesday()}.`, tag:'WATCH' });
+  }
+
+  // WI-93 SPR proximity
+  const weeksTo93 = (SPR_CURRENT - 340) / SPR_DRAW;
+  document.getElementById('cs-weeks138').textContent = '~' + ((SPR_CURRENT - 300) / SPR_DRAW).toFixed(1);
+  if (SPR_CURRENT < 340) {
+    alerts.push({ level:'urgent', icon:'🚨', headline:'WI-93 FIRED — SPR below 340M barrel threshold', detail:`SPR at ${SPR_CURRENT}M bbl, below the 340M trigger. Phase 1 duration extension signal active. Hold all positions. Reassess EOG exit timing.`, tag:'FIRED' });
+  } else if (weeksTo93 < 1.5) {
+    alerts.push({ level:'warning', icon:'⚠️', headline:`WI-93 IMMINENT — SPR ${SPR_CURRENT}M bbl, gate at 340M`, detail:`At 9M bbl/week SPR draw rate, WI-93 fires in approximately ${weeksTo93.toFixed(1)} weeks. May already be breached on next EIA print (${nextWednesday()}).`, tag:'URGENT' });
+  }
+
+  // Watch 129 freeze
+  if (spxPrice) {
+    const gap = spxPrice - FREEZE;
+    if (gap > 0) {
+      alerts.push({ level:'watch', icon:'🔒', headline:`Deployment freeze active — S&P 500 is ${gap.toLocaleString('en-US',{maximumFractionDigits:0})} pts above unlock level`, detail:`S&P 500 at ${spxPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} vs. 6,406.76 threshold. All entry points below are staged — do not execute until WI-129 fires. A 15% correction from the June 6 open (7,537.36) is required.`, tag:'GOVERNING' });
+    } else {
+      alerts.push({ level:'info', icon:'🔓', headline:'Watch Item 129 FIRED — deployment freeze lifted', detail:`S&P 500 at ${spxPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}, below 6,406.76. All staged entry points are NOW EXECUTABLE. Review gate status and execute per buy sheet.`, tag:'ACT NOW' });
+    }
+  }
+
+  // WTI level alert
+  if (wtiPrice) {
+    if (wtiPrice >= 100) {
+      alerts.push({ level:'urgent', icon:'🛢️', headline:`WTI at $${wtiPrice.toFixed(2)} — Gate 2 entry zone active for EOG`, detail:`WTI above $100 activates Gate 2 aggressive add zone for EOG ($135–145). FCF generation at $105 WTI exceeds $60/barrel. Gate 2 primary add point is live.`, tag:'ACT — IF 129 FIRED' });
+    } else if (wtiPrice >= 90) {
+      alerts.push({ level:'warning', icon:'🛢️', headline:`WTI at $${wtiPrice.toFixed(2)} — Gate 1 entry condition met for EOG`, detail:`WTI above $90 satisfies one of two Gate 1 EOG entry conditions. Second condition: Cushing below 21M bbl (currently 21.64M, ~${weeksTo117.toFixed(1)} wks away). Both required simultaneously.`, tag:'MONITOR' });
+    }
+  }
+
+  // Ticker-specific alerts
+  prices.forEach(({sym, price}) => {
+    const tl = trigLabel(sym, price);
+    if (tl.cls === 'trig-hot') {
+      alerts.push({ level:'info', icon:'📍', headline:`${sym} at trigger — $${price.toFixed(2)} is in entry zone`, detail:`${sym} has entered the buy sheet entry range. Confirm Watch Item 129 has fired before executing. Review gate conditions for full thesis confirmation.`, tag:'STAGED' });
+    }
+  });
+
+  const container = document.getElementById('sr-alerts');
+  container.innerHTML = alerts.map(a => `
+    <div class="alert-card ${a.level}">
+      <div class="alert-icon">${a.icon}</div>
+      <div class="alert-body">
+        <div class="alert-headline">${a.headline}</div>
+        <div class="alert-detail">${a.detail}</div>
+      </div>
+      <span class="alert-tag tag-${a.level}">${a.tag}</span>
+    </div>
+  `).join('');
+}
+
+// ── MAIN FETCH ────────────────────────────────────────
+async function fetchAll() {
+  document.getElementById('cc-time').textContent = 'Refreshing…';
+
+  const syms = [...TICKERS.map(t=>t.sym), 'CL%3DF', '%5EGSPC'];
+  const results = await Promise.all(syms.map(s => getQ(s)));
+
+  // build ticker strip
+  const strip = document.getElementById('ticker-strip');
+  strip.innerHTML = '';
+  const pricesForAlerts = [];
+
+  TICKERS.forEach((t, i) => {
+    const q = results[i];
+    const price = q ? q.price : null;
+    if (price) pricesForAlerts.push({sym:t.sym, price});
+    const tl = price ? trigLabel(t.sym, price) : {cls:'trig-off',text:''};
+    const chg = (q && price) ? chgStr(price, q.prev) : null;
+
+    const el = document.createElement('div');
+    el.className = 'ts-item';
+    el.innerHTML = `
+      <span class="ts-sym">${t.sym}</span>
+      <span class="ts-price" style="color:${tl.cls==='trig-hot'?'var(--green)':tl.cls==='trig-near'?'var(--amber)':'var(--text)'}">${price?'$'+price.toFixed(2):'…'}</span>
+      ${chg?`<span class="ts-chg" style="color:${chg.up?'var(--green)':'var(--red)'}">${chg.text}</span>`:''}
+      ${tl.text?`<span class="ts-trigger ${tl.cls}">${tl.text}</span>`:''}
+    `;
+    strip.appendChild(el);
+
+    // gate price mirrors
+    const gEl = document.getElementById('g1-'+t.id);
+    if (gEl && price) {
+      gEl.textContent = '$'+price.toFixed(2);
+      gEl.style.color = tl.cls==='trig-hot'?'var(--green)':tl.cls==='trig-near'?'var(--amber)':'var(--muted)';
+    }
+    // position table
+    const ptEl = document.getElementById('pt-'+t.id);
+    if (ptEl && price) ptEl.textContent = '$'+price.toFixed(2);
+  });
+
+  // WTI
+  const wtiQ = results[TICKERS.length];
+  const wtiPrice = wtiQ ? wtiQ.price : null;
+  if (wtiPrice) {
+    const csWti = document.getElementById('cs-wti');
+    csWti.textContent = '$'+wtiPrice.toFixed(2);
+    csWti.style.color = wtiPrice>=100?'var(--red)':wtiPrice>=90?'var(--amber)':'var(--green)';
+    strip.insertAdjacentHTML('beforeend', `
+      <div class="ts-item">
+        <span class="ts-sym">WTI</span>
+        <span class="ts-price" style="color:${wtiPrice>=100?'var(--red)':wtiPrice>=90?'var(--amber)':'var(--green)'}">$${wtiPrice.toFixed(2)}</span>
+      </div>
+    `);
+  }
+
+  // SPX + freeze
+  const spxQ = results[TICKERS.length+1];
+  const spxPrice = spxQ ? spxQ.price : null;
+  if (spxPrice) {
+    const gap = spxPrice - FREEZE;
+    const gapFmt = Math.abs(gap).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('freeze-gap').textContent = gap>0 ? '▼ '+gapFmt+' pts' : '✓ UNLOCKED';
+    document.getElementById('freeze-gap').style.color = gap>0?'var(--amber)':'var(--green)';
+    const wiGap = document.getElementById('wi-gap');
+    if (wiGap) wiGap.textContent = gap>0 ? gapFmt+' pts above unlock' : 'FREEZE LIFTED ✓';
+
+    const chg = chgStr(spxPrice, spxQ.prev);
+    strip.insertAdjacentHTML('beforeend', `
+      <div class="ts-item">
+        <span class="ts-sym">S&amp;P 500</span>
+        <span class="ts-price">${spxPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+        <span class="ts-chg" style="color:${chg.up?'var(--green)':'var(--red)'}">${chg.text}</span>
+        ${gap<=0?'<span class="ts-trigger trig-hot">FREEZE LIFTED</span>':''}
+      </div>
+    `);
+  }
+
+  buildAlerts(pricesForAlerts, spxPrice, wtiPrice);
+  document.getElementById('cc-time').textContent = 'Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+
+fetchAll();
+setInterval(fetchAll, 5*60*1000);
+</script>
+</body>
+</html>
