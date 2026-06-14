@@ -343,26 +343,26 @@
       <div class="cs-sub">Since Feb 28, 2026</div>
     </div>
     <div class="cs-card">
-      <div class="cs-label">Cushing (Jun 5)</div>
-      <div class="cs-val warn">21.64M</div>
+      <div class="cs-label">Cushing (<span id="cushing-date">—</span>)</div>
+      <div class="cs-val warn" id="cs-cushing">—</div>
       <div class="cs-sub">bbl · WI-117 gate: 20M</div>
-      <div class="cs-prog"><div class="cs-prog-fill" style="width:72%;background:var(--amber)"></div></div>
+      <div class="cs-prog"><div class="cs-prog-fill" id="cushing-prog" style="width:0%;background:var(--amber)"></div></div>
     </div>
     <div class="cs-card">
       <div class="cs-label">Cushing Weekly Draw</div>
-      <div class="cs-val down">−801K</div>
-      <div class="cs-sub">bbl/week · 🚨 red flag active</div>
+      <div class="cs-val down" id="cs-cushing-draw">—</div>
+      <div class="cs-sub" id="cs-cushing-draw-sub">bbl/week</div>
     </div>
     <div class="cs-card">
-      <div class="cs-label">SPR (Jun 5)</div>
-      <div class="cs-val warn">349.2M</div>
+      <div class="cs-label">SPR (<span id="spr-date">—</span>)</div>
+      <div class="cs-val warn" id="cs-spr">—</div>
       <div class="cs-sub">bbl · WI-138 gate: 300M</div>
-      <div class="cs-prog"><div class="cs-prog-fill" style="width:82%;background:var(--amber)"></div></div>
+      <div class="cs-prog"><div class="cs-prog-fill" id="spr-prog" style="width:0%;background:var(--amber)"></div></div>
     </div>
     <div class="cs-card">
       <div class="cs-label">SPR Draw Rate</div>
-      <div class="cs-val down">−9.0M</div>
-      <div class="cs-sub">bbl/week · 🚨 accelerated</div>
+      <div class="cs-val down" id="cs-spr-draw">—</div>
+      <div class="cs-sub" id="cs-spr-draw-sub">bbl/week</div>
     </div>
     <div class="cs-card">
       <div class="cs-label">WTI Live</div>
@@ -720,10 +720,10 @@ function trigLabel(sym, price) {
 // ── DYNAMIC ALERTS ────────────────────────────────────
 function buildAlerts(prices, spxPrice, wtiPrice) {
   const alerts = [];
-  const CUSHING_CURRENT = 21.64;
-  const CUSHING_DRAW    = 0.801;
-  const SPR_CURRENT     = 349.2;
-  const SPR_DRAW        = 9.0;
+  const CUSHING_CURRENT = window._cushingCurrent || 21.64;
+  const CUSHING_DRAW    = window._cushingDraw    || 0.801;
+  const SPR_CURRENT     = window._sprCurrent     || 349.2;
+  const SPR_DRAW        = window._sprDraw        || 9.0;
 
   // WI-117 proximity
   const weeksTo117 = (CUSHING_CURRENT - 20) / CUSHING_DRAW;
@@ -864,8 +864,111 @@ async function fetchAll() {
   document.getElementById('cc-time').textContent = 'Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 }
 
-fetchAll();
+
+// ── SUPABASE CONFIG ───────────────────────────────────
+const SUPA_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
+
+async function fetchEIAFromSupabase() {
+  try {
+    const url = SUPA_URL + '/rest/v1/cushing_spr_weekly_tracking?order=report_date.desc&limit=2&select=*';
+    const resp = await fetch(url, {
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Accept': 'application/json'
+      }
+    });
+    const rows = await resp.json();
+    if (!rows || !rows.length) {
+      console.warn('No EIA data returned from Supabase');
+      return;
+    }
+
+    const latest = rows[0];
+    const prev   = rows[1] || null;
+
+    // Parse values — handle various possible field names
+    const cushingVal  = parseFloat(latest.cushing_inventory || latest.cushing || 0);
+    const sprVal      = parseFloat(latest.spr_inventory     || latest.spr     || 0);
+    const reportDate  = latest.report_date || latest.date || '—';
+
+    // Compute draws vs prior week if not stored directly
+    let cushingDraw = parseFloat(latest.cushing_draw || latest.cushing_weekly_change || 0);
+    let sprDraw     = parseFloat(latest.spr_draw     || latest.spr_weekly_change     || 0);
+    if (prev && cushingDraw === 0) {
+      const prevCushing = parseFloat(prev.cushing_inventory || prev.cushing || 0);
+      if (prevCushing) cushingDraw = prevCushing - cushingVal;
+    }
+    if (prev && sprDraw === 0) {
+      const prevSpr = parseFloat(prev.spr_inventory || prev.spr || 0);
+      if (prevSpr) sprDraw = prevSpr - sprVal;
+    }
+
+    // Store globally for alert recalculation
+    window._cushingCurrent = cushingVal;
+    window._cushingDraw    = Math.abs(cushingDraw);
+    window._sprCurrent     = sprVal;
+    window._sprDraw        = Math.abs(sprDraw);
+
+    // Format date
+    const dObj   = new Date(reportDate);
+    const dateFmt = isNaN(dObj) ? reportDate : dObj.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+    // Update stat cards
+    const cushingEl = document.getElementById('cs-cushing');
+    if (cushingEl) {
+      cushingEl.textContent = cushingVal.toFixed(2) + 'M';
+      cushingEl.style.color = cushingVal <= 20 ? 'var(--red)' : cushingVal <= 22 ? 'var(--amber)' : 'var(--text)';
+    }
+    const cushingDateEl = document.getElementById('cushing-date');
+    if (cushingDateEl) cushingDateEl.textContent = dateFmt;
+
+    const cushingProgEl = document.getElementById('cushing-prog');
+    if (cushingProgEl) {
+      const pct = Math.min(100, Math.max(0, (cushingVal / 30) * 100));
+      cushingProgEl.style.width = pct + '%';
+      cushingProgEl.style.background = cushingVal <= 20 ? 'var(--red)' : 'var(--amber)';
+    }
+
+    const cushingDrawEl  = document.getElementById('cs-cushing-draw');
+    const cushingDrawSub = document.getElementById('cs-cushing-draw-sub');
+    if (cushingDrawEl) cushingDrawEl.textContent = '−' + Math.abs(cushingDraw).toFixed(0) + 'K';
+    if (cushingDrawSub) cushingDrawSub.textContent = 'bbl/week' + (Math.abs(cushingDraw) > 700 ? ' · 🚨 red flag active' : '');
+
+    const sprEl = document.getElementById('cs-spr');
+    if (sprEl) {
+      sprEl.textContent = sprVal.toFixed(1) + 'M';
+      sprEl.style.color = sprVal <= 300 ? 'var(--red)' : sprVal <= 340 ? 'var(--amber)' : 'var(--text)';
+    }
+    const sprDateEl = document.getElementById('spr-date');
+    if (sprDateEl) sprDateEl.textContent = dateFmt;
+
+    const sprProgEl = document.getElementById('spr-prog');
+    if (sprProgEl) {
+      const pct = Math.min(100, Math.max(0, (sprVal / 700) * 100));
+      sprProgEl.style.width = pct + '%';
+      sprProgEl.style.background = sprVal <= 300 ? 'var(--red)' : 'var(--amber)';
+    }
+
+    const sprDrawEl  = document.getElementById('cs-spr-draw');
+    const sprDrawSub = document.getElementById('cs-spr-draw-sub');
+    if (sprDrawEl)  sprDrawEl.textContent = '−' + Math.abs(sprDraw).toFixed(1) + 'M';
+    if (sprDrawSub) sprDrawSub.textContent = 'bbl/week' + (Math.abs(sprDraw) >= 8 ? ' · 🚨 accelerated' : '');
+
+    // Also update the WI-117 gate note in Watch Items tab
+    const wiGapEl = document.getElementById('wi-gap');
+    console.log('EIA data loaded:', { cushingVal, sprVal, cushingDraw, sprDraw, dateFmt });
+
+  } catch(e) {
+    console.warn('Supabase EIA fetch failed:', e);
+    // Fallback to hardcoded values — already set as defaults in buildAlerts
+  }
+}
+
+fetchEIAFromSupabase().then(() => { fetchAll(); });
 setInterval(fetchAll, 5*60*1000);
+setInterval(fetchEIAFromSupabase, 60*60*1000); // re-fetch EIA data hourly
 </script>
 </body>
 </html>
