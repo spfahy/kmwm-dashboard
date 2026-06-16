@@ -743,23 +743,12 @@ async function getQ(sym) {
 // Fetch WTI from Supabase commodity_prices (populated daily by n8n EIA workflow)
 async function getWTIPrice() {
   try {
-    var url = SUPA_URL + '/rest/v1/commodity_prices?commodity=eq.WTI&order=price_date.desc&limit=1&select=price,prev_close';
-    var xhr = new XMLHttpRequest();
-    return new Promise(function(resolve) {
-      xhr.open('GET', url, true);
-      xhr.setRequestHeader('apikey', SUPA_KEY);
-      xhr.setRequestHeader('Authorization', 'Bearer ' + SUPA_KEY);
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState !== 4) return;
-        try {
-          var rows = JSON.parse(xhr.responseText);
-          if (rows && rows.length) resolve({ price: parseFloat(rows[0].price), prev: parseFloat(rows[0].prev_close || rows[0].price) });
-          else resolve(null);
-        } catch(e) { resolve(null); }
-      };
-      xhr.send();
-    });
-  } catch(e) { return null; }
+    const url = SUPA_URL + '/rest/v1/commodity_prices?commodity=eq.WTI&order=price_date.desc&limit=1&select=price,prev_close';
+    const r = await fetch(url, { headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY } });
+    const rows = await r.json();
+    if (rows && rows.length) return { price: parseFloat(rows[0].price), prev: parseFloat(rows[0].prev_close || rows[0].price) };
+    return null;
+  } catch(e) { console.warn('WTI fetch error:', e); return null; }
 }
 
 // SPX via Yahoo Finance
