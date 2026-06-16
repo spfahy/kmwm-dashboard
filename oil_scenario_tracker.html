@@ -677,7 +677,7 @@ function nextWednesday() {
   const wed = new Date(today); wed.setDate(today.getDate() + diff);
   return wed.toLocaleDateString('en-US',{month:'short',day:'numeric'});
 }
-document.getElementById('ne-cushing-date').textContent = nextWednesday();
+var _ncd = document.getElementById('ne-cushing-date'); if (_ncd) _ncd.textContent = nextWednesday();
 
 // ── PRICE FETCH ───────────────────────────────────────
 const TICKERS = [
