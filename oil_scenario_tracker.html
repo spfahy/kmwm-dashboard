@@ -316,15 +316,9 @@
     <div class="sr-alerts" id="sr-alerts">
       <!-- dynamic alerts -->
     </div>
-    <div class="sr-next-events">
+    <div class="sr-next-events" id="sr-next-events-panel">
       <div class="sr-next-label">Next Events</div>
-      <div class="next-event"><span class="ne-date">Jun 15</span><span class="ne-text">NEXT 10-Q — cash runway disclosure. Break &lt;$50M.</span></div>
-      <div class="next-event"><span class="ne-date">Jun 17</span><span class="ne-text">Warsh FOMC. Monitoring only — freeze supersedes.</span></div>
-      <div class="next-event"><span class="ne-date" id="ne-cushing-date">Jun 18</span><span class="ne-text">Next EIA Cushing/SPR weekly report. WI-117 gate.</span></div>
-      <div class="next-event"><span class="ne-date">Jun 25</span><span class="ne-text">WI-117 projected fire (Cushing ≤20M bbl).</span></div>
-      <div class="next-event"><span class="ne-date">Jun 30</span><span class="ne-text">Section 232 copper tariff. WI-39 Phase 3 gate.</span></div>
-      <div class="next-event"><span class="ne-date">Jul 10–15</span><span class="ne-text">Gate 2 window. SPR ~WI-138 threshold.</span></div>
-      <div class="next-event"><span class="ne-date">Aug 20</span><span class="ne-text">Earliest first Hormuz barrels at Cushing (Scenario B).</span></div>
+      <div id="ne-rows"><div class="next-event"><span class="ne-date">—</span><span class="ne-text" style="color:var(--muted)">Loading…</span></div></div>
     </div>
   </div>
 </div>
@@ -1023,9 +1017,77 @@ async function fetchEIAFromSupabase() {
   } catch(e) {}
 })();
 
-fetchEIAFromSupabase().then(() => { fetchAll(); });
+// ── NEXT EVENTS — live from watch_items ───────────────
+async function loadNextEvents() {
+  try {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const iso = today.toISOString().split('T')[0]; // YYYY-MM-DD
+
+    // Phase color map
+    const phaseColor = {
+      'Phase 1': 'var(--amber)',
+      'Phase 2': '#60A5FA',   // blue-400
+      'Phase 3': '#A78BFA',   // violet-400
+      'Phase 4': 'var(--gold)',
+      'macro':   'var(--muted)',
+      'operational': 'var(--muted)',
+    };
+
+    const url = SUPA_URL +
+      '/rest/v1/watch_items' +
+      '?status=eq.active' +
+      '&trigger_date=gte.' + iso +
+      '&select=id,item,trigger_date,trigger_condition,phase_tag' +
+      '&order=trigger_date.asc' +
+      '&limit=8';
+
+    const resp = await fetch(url, {
+      headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }
+    });
+    if (!resp.ok) return;
+    const rows = await resp.json();
+    if (!rows || !rows.length) return;
+
+    const container = document.getElementById('ne-rows');
+    if (!container) return;
+
+    container.innerHTML = rows.map(wi => {
+      // Date label: "Jun 17"
+      const dt = new Date(wi.trigger_date + 'T00:00:00');
+      const dateLabel = dt.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+
+      // Display text: prefer trigger_condition (shorter), fall back to item
+      // Truncate to ~72 chars
+      const raw = (wi.trigger_condition && wi.trigger_condition.trim())
+        ? wi.trigger_condition
+        : wi.item;
+      const text = raw.length > 72 ? raw.substring(0, 70) + '…' : raw;
+
+      // Overdue / today highlight
+      const daysOut = Math.round((dt - today) / 86400000);
+      const dateColor = daysOut <= 0
+        ? 'var(--red)'
+        : daysOut <= 2
+          ? 'var(--amber)'
+          : (phaseColor[wi.phase_tag] || 'var(--amber)');
+
+      return `<div class="next-event" title="WI-${wi.id}: ${wi.item.replace(/"/g,'&quot;')}">
+        <span class="ne-date" style="color:${dateColor}">${dateLabel}</span>
+        <span class="ne-text">${text}</span>
+      </div>`;
+    }).join('');
+
+  } catch(e) {
+    console.warn('loadNextEvents error:', e);
+  }
+}
+
+fetchEIAFromSupabase().then(() => { fetchAll(); loadNextEvents(); });
 setInterval(fetchAll, 5*60*1000);
 setInterval(fetchEIAFromSupabase, 60*60*1000); // re-fetch EIA data hourly
+setInterval(loadNextEvents, 15*60*1000);        // refresh next events every 15 min
 </script>
 </body>
 </html>
+
