@@ -740,6 +740,19 @@ async function getQ(sym) {
   } catch(e) { return null; }
 }
 
+// Fetch price directly from Yahoo Finance for tickers not in the sheet (WTI, SPX)
+async function getYahooPrice(sym) {
+  try {
+    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=2d';
+    const r = await fetch(url, { cache: 'no-cache' });
+    const d = await r.json();
+    const meta = d.chart.result[0].meta;
+    const price = meta.regularMarketPrice || meta.previousClose;
+    const prev  = meta.previousClose || price;
+    return price ? { price, prev } : null;
+  } catch(e) { return null; }
+}
+
 function chgStr(price, prev) {
   const c = price - prev, p = (c/prev)*100;
   return { text:(c>=0?'▲':'▼')+Math.abs(c).toFixed(2)+' ('+Math.abs(p).toFixed(2)+'%)', up:c>=0 };
@@ -824,8 +837,13 @@ function buildAlerts(prices, spxPrice, wtiPrice) {
 async function fetchAll() {
   document.getElementById('cc-time').textContent = 'Refreshing…';
 
-  const syms = [...TICKERS.map(t=>t.sym), 'CL%3DF', '%5EGSPC'];
-  const results = await Promise.all(syms.map(s => getQ(s)));
+  const syms = TICKERS.map(t=>t.sym);
+  const [sheetResults, wtiQ, spxQ] = await Promise.all([
+    Promise.all(syms.map(s => getQ(s))),
+    getYahooPrice('CL%3DF'),
+    getYahooPrice('%5EGSPC')
+  ]);
+  const results = [...sheetResults, wtiQ, spxQ];
 
   // build ticker strip
   const strip = document.getElementById('ticker-strip');
