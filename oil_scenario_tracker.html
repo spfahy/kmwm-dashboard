@@ -740,7 +740,29 @@ async function getQ(sym) {
   } catch(e) { return null; }
 }
 
-// Fetch price directly from Yahoo Finance for tickers not in the sheet (WTI, SPX)
+// Fetch WTI from Supabase commodity_prices (populated daily by n8n EIA workflow)
+async function getWTIPrice() {
+  try {
+    var url = SUPA_URL + '/rest/v1/commodity_prices?commodity=eq.WTI&order=price_date.desc&limit=1&select=price,prev_close';
+    var xhr = new XMLHttpRequest();
+    return new Promise(function(resolve) {
+      xhr.open('GET', url, true);
+      xhr.setRequestHeader('apikey', SUPA_KEY);
+      xhr.setRequestHeader('Authorization', 'Bearer ' + SUPA_KEY);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+        try {
+          var rows = JSON.parse(xhr.responseText);
+          if (rows && rows.length) resolve({ price: parseFloat(rows[0].price), prev: parseFloat(rows[0].prev_close || rows[0].price) });
+          else resolve(null);
+        } catch(e) { resolve(null); }
+      };
+      xhr.send();
+    });
+  } catch(e) { return null; }
+}
+
+// SPX via Yahoo Finance
 async function getYahooPrice(sym) {
   try {
     const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=2d';
