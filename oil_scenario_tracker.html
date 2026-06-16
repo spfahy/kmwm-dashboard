@@ -1037,6 +1037,7 @@ function loadNextEvents() {
   var url = SUPA_URL + '/rest/v1/watch_items' +
     '?status=eq.active' +
     '&trigger_date=gte.' + iso +
+    '&or=(phase_tag.eq.Phase%201,phase_tag.eq.macro)' +
     '&select=id,item,trigger_date,trigger_condition,phase_tag' +
     '&order=trigger_date.asc' +
     '&limit=8';
