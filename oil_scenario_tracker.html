@@ -879,7 +879,6 @@ async function fetchAll() {
   });
 
   // WTI
-  const wtiQ = results[TICKERS.length];
   const wtiPrice = wtiQ ? wtiQ.price : null;
   if (wtiPrice) {
     const csWti = document.getElementById('cs-wti');
@@ -894,7 +893,6 @@ async function fetchAll() {
   }
 
   // SPX + freeze
-  const spxQ = results[TICKERS.length+1];
   const spxPrice = spxQ ? spxQ.price : null;
   if (spxPrice) {
     const gap = spxPrice - FREEZE;
