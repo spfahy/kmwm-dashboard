@@ -299,7 +299,7 @@
   </div>
 
   <!-- freeze banner -->
-  <div class="freeze-banner">
+  <div class="freeze-banner" id="freeze-banner">
     <div class="fb-icon">🔒</div>
     <div style="flex:1">
       <div class="fb-text">WATCH ITEM 129 — UNIVERSAL DEPLOYMENT FREEZE</div>
@@ -695,11 +695,16 @@ const TICKERS = [
 const FREEZE = 6406.76;
 
 async function getQ(sym) {
+  // Pull from Supabase holdings_detail (Yahoo Finance blocked by CORS)
   try {
-    const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`,{cache:'no-cache'});
-    const j = await r.json();
-    const m = j.chart.result[0].meta;
-    return { price: m.regularMarketPrice, prev: m.chartPreviousClose };
+    const today = new Date().toISOString().split('T')[0];
+    const url = SUPA_URL + '/rest/v1/holdings_detail?ticker=eq.' + encodeURIComponent(sym) + '&metric_date=lte.' + today + '&order=metric_date.desc&limit=1&select=ticker,current_price,prev_close';
+    const r = await fetch(url, { headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY } });
+    const data = await r.json();
+    if (data && data.length && data[0].current_price) {
+      return { price: parseFloat(data[0].current_price), prev: parseFloat(data[0].prev_close || data[0].current_price) };
+    }
+    return null;
   } catch(e) { return null; }
 }
 
@@ -965,6 +970,20 @@ async function fetchEIAFromSupabase() {
     // Fallback to hardcoded values — already set as defaults in buildAlerts
   }
 }
+
+// Check Watch Item 129 — hide freeze banner if cancelled
+(async function() {
+  try {
+    const r = await fetch(SUPA_URL + '/rest/v1/watch_items?id=eq.129&select=status&limit=1', {
+      headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }
+    });
+    const data = await r.json();
+    if (data && data.length && data[0].status === 'cancelled') {
+      const banner = document.getElementById('freeze-banner');
+      if (banner) banner.style.display = 'none';
+    }
+  } catch(e) {}
+})();
 
 fetchEIAFromSupabase().then(() => { fetchAll(); });
 setInterval(fetchAll, 5*60*1000);
