@@ -925,20 +925,21 @@ async function fetchEIAFromSupabase() {
     const latest = rows[0];
     const prev   = rows[1] || null;
 
-    // Parse values — handle various possible field names
-    const cushingVal  = parseFloat(latest.cushing_inventory || latest.cushing || 0);
-    const sprVal      = parseFloat(latest.spr_inventory     || latest.spr     || 0);
-    const reportDate  = latest.report_date || latest.date || '—';
+    // Parse values — actual column names from cushing_spr_weekly_tracking
+    const cushingVal  = parseFloat(latest.cushing_total_inventory_kbd || 0);
+    const sprVal      = parseFloat(latest.spr_total_inventory_mbd     || 0);
+    const reportDate  = latest.report_date || '—';
 
-    // Compute draws vs prior week if not stored directly
-    let cushingDraw = parseFloat(latest.cushing_draw || latest.cushing_weekly_change || 0);
-    let sprDraw     = parseFloat(latest.spr_draw     || latest.spr_weekly_change     || 0);
+    // Draws stored directly in table
+    let cushingDraw = parseFloat(latest.cushing_wow_change_kbd || 0);
+    let sprDraw     = parseFloat(latest.spr_weekly_draw_mbd   || 0);
+    // Fallback: compute from prior row if stored value is zero
     if (prev && cushingDraw === 0) {
-      const prevCushing = parseFloat(prev.cushing_inventory || prev.cushing || 0);
+      const prevCushing = parseFloat(prev.cushing_total_inventory_kbd || 0);
       if (prevCushing) cushingDraw = prevCushing - cushingVal;
     }
     if (prev && sprDraw === 0) {
-      const prevSpr = parseFloat(prev.spr_inventory || prev.spr || 0);
+      const prevSpr = parseFloat(prev.spr_total_inventory_mbd || 0);
       if (prevSpr) sprDraw = prevSpr - sprVal;
     }
 
@@ -1037,7 +1038,6 @@ function loadNextEvents() {
   var url = SUPA_URL + '/rest/v1/watch_items' +
     '?status=eq.active' +
     '&trigger_date=gte.' + iso +
-    '&or=(phase_tag.eq.Phase%201,phase_tag.eq.macro)' +
     '&select=id,item,trigger_date,trigger_condition,phase_tag' +
     '&order=trigger_date.asc' +
     '&limit=8';
