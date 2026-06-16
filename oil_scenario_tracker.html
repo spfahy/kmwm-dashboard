@@ -1041,44 +1041,51 @@ function loadNextEvents() {
     '&order=trigger_date.asc' +
     '&limit=8';
 
-  fetch(url, { headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY } })
-    .then(function(r) { return r.json(); })
-    .then(function(rows) {
-      var container = document.getElementById('ne-rows');
-      if (!container || !rows || !rows.length) return;
-
-      container.innerHTML = '';
-      rows.forEach(function(wi) {
-        var dt = new Date(wi.trigger_date + 'T00:00:00');
-        var dateLabel = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-        var raw = (wi.trigger_condition && wi.trigger_condition.trim())
-          ? wi.trigger_condition : wi.item;
-        var text = raw.length > 72 ? raw.substring(0, 70) + '\u2026' : raw;
-
-        var daysOut = Math.round((dt - today) / 86400000);
-        var dateColor = daysOut <= 0 ? 'var(--red)'
-          : daysOut <= 2 ? 'var(--amber)'
-          : (phaseColor[wi.phase_tag] || 'var(--amber)');
-
-        var row = document.createElement('div');
-        row.className = 'next-event';
-
-        var dateSpan = document.createElement('span');
-        dateSpan.className = 'ne-date';
-        dateSpan.style.color = dateColor;
-        dateSpan.textContent = dateLabel;
-
-        var textSpan = document.createElement('span');
-        textSpan.className = 'ne-text';
-        textSpan.textContent = text;
-
-        row.appendChild(dateSpan);
-        row.appendChild(textSpan);
-        container.appendChild(row);
-      });
-    })
-    .catch(function(e) { console.warn('loadNextEvents error:', e); });
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.setRequestHeader('apikey', SUPA_KEY);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + SUPA_KEY);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    var container = document.getElementById('ne-rows');
+    if (!container) return;
+    if (xhr.status !== 200) {
+      container.innerHTML = '<div class="next-event"><span class="ne-date" style="color:var(--red)">' + xhr.status + '</span><span class="ne-text" style="color:var(--red)">DB error — ' + (xhr.responseText || 'no response').substring(0,60) + '</span></div>';
+      return;
+    }
+    var rows;
+    try { rows = JSON.parse(xhr.responseText); } catch(e) {
+      container.innerHTML = '<div class="next-event"><span class="ne-text" style="color:var(--red)">Parse error: ' + xhr.responseText.substring(0,60) + '</span></div>';
+      return;
+    }
+    if (!rows || !rows.length) {
+      container.innerHTML = '<div class="next-event"><span class="ne-text" style="color:var(--muted)">No upcoming items</span></div>';
+      return;
+    }
+    container.innerHTML = '';
+    for (var i = 0; i < rows.length; i++) {
+      var wi = rows[i];
+      var dt = new Date(wi.trigger_date + 'T00:00:00');
+      var dateLabel = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      var raw = (wi.trigger_condition && wi.trigger_condition.trim()) ? wi.trigger_condition : wi.item;
+      var text = raw.length > 72 ? raw.substring(0, 70) + '\u2026' : raw;
+      var daysOut = Math.round((dt - today) / 86400000);
+      var dateColor = daysOut <= 0 ? 'var(--red)' : daysOut <= 2 ? 'var(--amber)' : (phaseColor[wi.phase_tag] || 'var(--amber)');
+      var row = document.createElement('div');
+      row.className = 'next-event';
+      var dateSpan = document.createElement('span');
+      dateSpan.className = 'ne-date';
+      dateSpan.style.color = dateColor;
+      dateSpan.textContent = dateLabel;
+      var textSpan = document.createElement('span');
+      textSpan.className = 'ne-text';
+      textSpan.textContent = text;
+      row.appendChild(dateSpan);
+      row.appendChild(textSpan);
+      container.appendChild(row);
+    }
+  };
+  xhr.send();
 }
 
 fetchEIAFromSupabase().then(function() { fetchAll(); });
