@@ -695,14 +695,25 @@ const TICKERS = [
 const FREEZE = 6406.76;
 
 async function getQ(sym) {
-  // Pull from Supabase holdings_detail (Yahoo Finance blocked by CORS)
+  // Pull from Google Sheets Stocks tab — column A = symbol, column AF = price, 15-20 min delay
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const url = SUPA_URL + '/rest/v1/holdings_detail?ticker=eq.' + encodeURIComponent(sym) + '&metric_date=lte.' + today + '&order=metric_date.desc&limit=1&select=ticker,current_price,prev_close';
-    const r = await fetch(url, { headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY } });
-    const data = await r.json();
-    if (data && data.length && data[0].current_price) {
-      return { price: parseFloat(data[0].current_price), prev: parseFloat(data[0].prev_close || data[0].current_price) };
+    const sheetId = '1CH46br0C5owHCN8W-0Zmmi8oVKgysHRoKY_FdaRJUJc';
+    const range = 'Stocks!A1:AF1000';
+    const url = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json&range=' + encodeURIComponent(range);
+    const r = await fetch(url, { cache: 'no-cache' });
+    const text = await r.text();
+    // Google wraps response in google.visualization.Query.setResponse(...)
+    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    const rows = json.table.rows;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || !row.c || !row.c[0] || !row.c[0].v) continue;
+      if (row.c[0].v.toString().toUpperCase() === sym.toUpperCase()) {
+        // Column AF = index 31 (0-based)
+        const priceCell = row.c[31];
+        const price = priceCell && priceCell.v ? parseFloat(priceCell.v) : null;
+        if (price) return { price, prev: price }; // no prev close in sheet, use price for both
+      }
     }
     return null;
   } catch(e) { return null; }
