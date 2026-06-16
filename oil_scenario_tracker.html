@@ -695,27 +695,54 @@ const TICKERS = [
 const FREEZE = 6406.76;
 
 async function getQ(sym) {
-  // Pull from Google Sheets Stocks tab — column A = symbol, column AF = price, 15-20 min delay
+  // Pull price from Stocks tab (col A=symbol, col AF=price)
+  // Pull today's change from KMWM Portfolio tab (col A=symbol, col F=today's change)
   try {
     const sheetId = '1CH46br0C5owHCN8W-0Zmmi8oVKgysHRoKY_FdaRJUJc';
-    const range = 'Stocks!A1:AF1000';
-    const url = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json&range=' + encodeURIComponent(range);
-    const r = await fetch(url, { cache: 'no-cache' });
-    const text = await r.text();
-    // Google wraps response in google.visualization.Query.setResponse(...)
-    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
-    const rows = json.table.rows;
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
+
+    // Fetch both tabs in parallel
+    const [stocksResp, portfolioResp] = await Promise.all([
+      fetch('https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json&range=' + encodeURIComponent('Stocks!A1:AF1000'), { cache: 'no-cache' }),
+      fetch('https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json&range=' + encodeURIComponent('KMWM Portfolio!A1:F1000'), { cache: 'no-cache' })
+    ]);
+
+    const parseGviz = async (resp) => {
+      const text = await resp.text();
+      const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+      return json.table.rows;
+    };
+
+    const [stocksRows, portfolioRows] = await Promise.all([parseGviz(stocksResp), parseGviz(portfolioResp)]);
+
+    // Find price in Stocks tab (col AF = index 31)
+    let price = null;
+    for (let i = 0; i < stocksRows.length; i++) {
+      const row = stocksRows[i];
       if (!row || !row.c || !row.c[0] || !row.c[0].v) continue;
       if (row.c[0].v.toString().toUpperCase() === sym.toUpperCase()) {
-        // Column AF = index 31 (0-based)
-        const priceCell = row.c[31];
-        const price = priceCell && priceCell.v ? parseFloat(priceCell.v) : null;
-        if (price) return { price, prev: price }; // no prev close in sheet, use price for both
+        const cell = row.c[31];
+        if (cell && cell.v) price = parseFloat(cell.v);
+        break;
       }
     }
-    return null;
+
+    // Find today's change in KMWM Portfolio tab (col F = index 5)
+    let change = null;
+    for (let i = 0; i < portfolioRows.length; i++) {
+      const row = portfolioRows[i];
+      if (!row || !row.c || !row.c[0] || !row.c[0].v) continue;
+      if (row.c[0].v.toString().toUpperCase() === sym.toUpperCase()) {
+        const cell = row.c[5];
+        if (cell && cell.v !== null && cell.v !== undefined) change = parseFloat(cell.v);
+        break;
+      }
+    }
+
+    if (!price) return null;
+    // Reconstruct prev from price and change (change = price - prev, so prev = price - change)
+    const prev = (change !== null) ? price - change : price;
+    return { price, prev };
+
   } catch(e) { return null; }
 }
 
