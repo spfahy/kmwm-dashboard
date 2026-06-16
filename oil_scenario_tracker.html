@@ -849,11 +849,11 @@ async function fetchAll() {
   document.getElementById('cc-time').textContent = 'Refreshing…';
 
   const syms = TICKERS.map(t=>t.sym);
-  const [sheetResults, wtiQ, spxQ] = await Promise.all([
+  const [sheetResults, spxQ] = await Promise.all([
     Promise.all(syms.map(s => getQ(s))),
-    getYahooPrice('CL%3DF'),
     getYahooPrice('%5EGSPC')
   ]);
+  const wtiQ = window._wtiPrice ? { price: window._wtiPrice, prev: window._wtiPrice } : null;
   const results = [...sheetResults, wtiQ, spxQ];
 
   // build ticker strip
@@ -935,14 +935,30 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 
 async function fetchEIAFromSupabase() {
   try {
-    const url = SUPA_URL + '/rest/v1/cushing_spr_weekly_tracking?order=report_date.desc&limit=2&select=*';
-    const resp = await fetch(url, {
-      headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + SUPA_KEY,
-        'Accept': 'application/json'
+    const [eiaResp, wtiResp] = await Promise.all([
+      fetch(SUPA_URL + '/rest/v1/cushing_spr_weekly_tracking?order=report_date.desc&limit=2&select=*', {
+        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Accept': 'application/json' }
+      }),
+      fetch(SUPA_URL + '/rest/v1/commodity_prices?commodity=eq.WTI&order=price_date.desc&limit=1&select=price,prev_close', {
+        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Accept': 'application/json' }
+      })
+    ]);
+
+    // WTI
+    try {
+      const wtiRows = await wtiResp.json();
+      if (wtiRows && wtiRows.length) {
+        const wtiEl = document.getElementById('cs-wti');
+        const wtiPrice = parseFloat(wtiRows[0].price);
+        if (wtiEl && wtiPrice) {
+          wtiEl.textContent = '$' + wtiPrice.toFixed(2);
+          wtiEl.style.color = wtiPrice>=100?'var(--red)':wtiPrice>=90?'var(--amber)':'var(--green)';
+          window._wtiPrice = wtiPrice;
+        }
       }
-    });
+    } catch(e) {}
+
+    const resp = eiaResp;
     const rows = await resp.json();
     if (!rows || !rows.length) {
       console.warn('No EIA data returned from Supabase');
@@ -952,8 +968,8 @@ async function fetchEIAFromSupabase() {
     const latest = rows[0];
     const prev   = rows[1] || null;
 
-    // Parse values — actual column names from cushing_spr_weekly_tracking
-    const cushingVal  = parseFloat(latest.cushing_total_inventory_kbd || 0);
+    // Parse values — kbd = thousands of barrels, convert to millions for display
+    const cushingVal  = parseFloat(latest.cushing_total_inventory_kbd || 0) / 1000;
     const sprVal      = parseFloat(latest.spr_total_inventory_mbd     || 0);
     const reportDate  = latest.report_date || '—';
 
