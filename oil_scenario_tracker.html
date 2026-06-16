@@ -1018,75 +1018,74 @@ async function fetchEIAFromSupabase() {
 })();
 
 // ── NEXT EVENTS — live from watch_items ───────────────
-async function loadNextEvents() {
-  try {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const iso = today.toISOString().split('T')[0]; // YYYY-MM-DD
+function loadNextEvents() {
+  var phaseColor = {
+    'Phase 1': 'var(--amber)',
+    'Phase 2': '#60A5FA',
+    'Phase 3': '#A78BFA',
+    'Phase 4': 'var(--gold)',
+    'macro': 'var(--muted)',
+    'operational': 'var(--muted)'
+  };
 
-    // Phase color map
-    const phaseColor = {
-      'Phase 1': 'var(--amber)',
-      'Phase 2': '#60A5FA',   // blue-400
-      'Phase 3': '#A78BFA',   // violet-400
-      'Phase 4': 'var(--gold)',
-      'macro':   'var(--muted)',
-      'operational': 'var(--muted)',
-    };
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  var iso = today.getFullYear() + '-' +
+    String(today.getMonth()+1).padStart(2,'0') + '-' +
+    String(today.getDate()).padStart(2,'0');
 
-    const url = SUPA_URL +
-      '/rest/v1/watch_items' +
-      '?status=eq.active' +
-      '&trigger_date=gte.' + iso +
-      '&select=id,item,trigger_date,trigger_condition,phase_tag' +
-      '&order=trigger_date.asc' +
-      '&limit=8';
+  var url = SUPA_URL + '/rest/v1/watch_items' +
+    '?status=eq.active' +
+    '&trigger_date=gte.' + iso +
+    '&select=id,item,trigger_date,trigger_condition,phase_tag' +
+    '&order=trigger_date.asc' +
+    '&limit=8';
 
-    const resp = await fetch(url, {
-      headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }
-    });
-    if (!resp.ok) return;
-    const rows = await resp.json();
-    if (!rows || !rows.length) return;
+  fetch(url, { headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY } })
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      var container = document.getElementById('ne-rows');
+      if (!container || !rows || !rows.length) return;
 
-    const container = document.getElementById('ne-rows');
-    if (!container) return;
+      container.innerHTML = '';
+      rows.forEach(function(wi) {
+        var dt = new Date(wi.trigger_date + 'T00:00:00');
+        var dateLabel = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-    container.innerHTML = rows.map(wi => {
-      // Date label: "Jun 17"
-      const dt = new Date(wi.trigger_date + 'T00:00:00');
-      const dateLabel = dt.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+        var raw = (wi.trigger_condition && wi.trigger_condition.trim())
+          ? wi.trigger_condition : wi.item;
+        var text = raw.length > 72 ? raw.substring(0, 70) + '\u2026' : raw;
 
-      // Display text: prefer trigger_condition (shorter), fall back to item
-      // Truncate to ~72 chars
-      const raw = (wi.trigger_condition && wi.trigger_condition.trim())
-        ? wi.trigger_condition
-        : wi.item;
-      const text = raw.length > 72 ? raw.substring(0, 70) + '…' : raw;
-
-      // Overdue / today highlight
-      const daysOut = Math.round((dt - today) / 86400000);
-      const dateColor = daysOut <= 0
-        ? 'var(--red)'
-        : daysOut <= 2
-          ? 'var(--amber)'
+        var daysOut = Math.round((dt - today) / 86400000);
+        var dateColor = daysOut <= 0 ? 'var(--red)'
+          : daysOut <= 2 ? 'var(--amber)'
           : (phaseColor[wi.phase_tag] || 'var(--amber)');
 
-      return `<div class="next-event" title="WI-${wi.id}: ${wi.item.replace(/"/g,'&quot;')}">
-        <span class="ne-date" style="color:${dateColor}">${dateLabel}</span>
-        <span class="ne-text">${text}</span>
-      </div>`;
-    }).join('');
+        var row = document.createElement('div');
+        row.className = 'next-event';
 
-  } catch(e) {
-    console.warn('loadNextEvents error:', e);
-  }
+        var dateSpan = document.createElement('span');
+        dateSpan.className = 'ne-date';
+        dateSpan.style.color = dateColor;
+        dateSpan.textContent = dateLabel;
+
+        var textSpan = document.createElement('span');
+        textSpan.className = 'ne-text';
+        textSpan.textContent = text;
+
+        row.appendChild(dateSpan);
+        row.appendChild(textSpan);
+        container.appendChild(row);
+      });
+    })
+    .catch(function(e) { console.warn('loadNextEvents error:', e); });
 }
 
-fetchEIAFromSupabase().then(() => { fetchAll(); loadNextEvents(); });
+fetchEIAFromSupabase().then(function() { fetchAll(); });
+loadNextEvents();
 setInterval(fetchAll, 5*60*1000);
-setInterval(fetchEIAFromSupabase, 60*60*1000); // re-fetch EIA data hourly
-setInterval(loadNextEvents, 15*60*1000);        // refresh next events every 15 min
+setInterval(fetchEIAFromSupabase, 60*60*1000);
+setInterval(loadNextEvents, 15*60*1000);
 </script>
 </body>
 </html>
