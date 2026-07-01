@@ -666,8 +666,7 @@ supaFetch('watch_items', { select: 'current_value,last_checked_at', id: 'eq.28',
 }).catch(function() {});
 
 // Load record count
-supaFetch('research_chunks', { select: 'id', limit: 1 });
-fetch(SUPA_URL + '/rest/v1/research_chunks?select=id&limit=1', {
+fetch(SUPA_URL + '/rest/v1/research_chunks?select=id', {
   headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
 }).then(function(r) {
   var cr = r.headers.get('content-range');
