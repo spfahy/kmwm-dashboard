@@ -89,25 +89,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .cash-row-pct{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .cash-total{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--amber-dim);border-radius:6px;margin-top:10px;border:1px solid rgba(122,74,8,0.12)}
 
-/* FOMC gate */
-.fomc-gate{background:var(--bg2);border:1px solid rgba(26,61,143,0.2);border-radius:10px;padding:18px 22px;margin-bottom:18px;position:relative}
-.fomc-gate::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,transparent,var(--blue),transparent)}
-.fomc-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
-.fomc-days{font-family:var(--serif);font-size:40px;color:var(--blue);line-height:1;flex-shrink:0}
-.fomc-days span{font-size:14px;color:var(--muted);font-family:var(--sans);font-style:normal}
-.fomc-title{font-size:14px;font-weight:500;color:var(--text)}
-.fomc-sub{font-size:11px;color:var(--muted);margin-top:3px}
-.fomc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.fomc-cell{background:var(--bg3);border-radius:7px;padding:9px 12px}
-.fomc-cell-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px}
-.fomc-cell-val{font-family:var(--mono);font-size:13px;color:var(--text)}
-.scenario-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.scenario-btn{padding:9px 12px;border-radius:7px;border:1px solid;font-size:12px;font-weight:500;text-align:center;cursor:pointer;transition:opacity 0.12s;font-family:var(--sans)}
-.scenario-btn:hover{opacity:0.82}
-.s-green{background:var(--green-dim);color:var(--green);border-color:var(--green-mid)}
-.s-red{background:var(--red-dim);color:var(--red);border-color:rgba(160,24,24,0.2)}
-.s-amber{background:var(--amber-dim);color:var(--amber);border-color:rgba(122,74,8,0.2)}
-
 /* Two column */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative;z-index:1}
 .panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
@@ -390,27 +371,6 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
         <div id="cash-popup-body"><div class="loading">Loading...</div></div>
       </div>
 
-      <!-- FOMC Gate -->
-      <div class="fomc-gate">
-        <div class="fomc-header">
-          <div class="fomc-days" id="fomc-days">—<span>days</span></div>
-          <div>
-            <div class="fomc-title">Warsh FOMC — June 17, 2026 · Primary Phase 2 Gate</div>
-            <div class="fomc-sub">Pre-committed rule: dovish → deploy CEG/VST · hawkish → full stop · ambiguous → hold</div>
-          </div>
-        </div>
-        <div class="fomc-grid">
-          <div class="fomc-cell"><div class="fomc-cell-label">CEG Add Zone</div><div class="fomc-cell-val">$284 – $297</div></div>
-          <div class="fomc-cell"><div class="fomc-cell-label">VST Add Zone</div><div class="fomc-cell-val">$140 – $146</div></div>
-          <div class="fomc-cell"><div class="fomc-cell-label">Core PCE (Apr)</div><div class="fomc-cell-val">3.3% YoY</div></div>
-        </div>
-        <div class="scenario-row">
-          <div class="scenario-btn s-green">Dovish → Deploy CEG / VST</div>
-          <div class="scenario-btn s-red">Hawkish → Hold Cash</div>
-          <div class="scenario-btn s-amber">Ambiguous → Default Hold</div>
-        </div>
-      </div>
-
       <!-- Two Column -->
       <div class="two-col">
 
@@ -598,16 +558,6 @@ if (dm) {
   var d = new Date(dm);
   document.getElementById('deploy-time').textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 }
-
-// FOMC countdown
-function fomcCountdown() {
-  var target = new Date('2026-06-17');
-  var today = new Date(); today.setHours(0,0,0,0);
-  var days = Math.ceil((target - today) / 86400000);
-  var el = document.getElementById('fomc-days');
-  el.innerHTML = days + '<span>days</span>';
-}
-fomcCountdown();
 
 // Format helpers
 function fmtDollar(v) {
@@ -988,7 +938,7 @@ var PHASE_CONFIG = {
     color: 'var(--blue)',
     tickers: ['CEG','VST','ETN','VRT','ABBNY'],
     thesisTag: 'Phase 2',
-    summary: 'AI compute demand driving structural power deficit. Positioned at the power infrastructure input layer — electricity generators and electrical equipment manufacturers. June 17 Warsh FOMC is the next deployment gate.'
+    summary: 'AI compute demand driving structural power deficit. Positioned at the power infrastructure input layer — electricity generators and electrical equipment manufacturers.'
   },
   'Phase 3': {
     title: 'Phase 3 — Critical Metals',
