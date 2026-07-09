@@ -1524,7 +1524,7 @@ function showImportantArticles() {
   var identity = localStorage.getItem('kmwm_identity') || 'Steve';
   var readByField = identity === 'Steve' ? 'read_by_steve' : 'read_by_michael';
 
-  document.getElementById('summary-title').textContent = 'Important Articles';
+  document.getElementById('summary-title').textContent = 'Important Articles — ' + identity + ' queue';
   document.getElementById('summary-sub').textContent = 'Loading important articles...';
   document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading...</p>';
   document.getElementById('summary-modal').classList.add('open');
@@ -1554,7 +1554,7 @@ function showRecentArticles() {
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
   var cutoff = sixtyDaysAgo.toISOString();
 
-  document.getElementById('summary-title').textContent = 'Recent Articles';
+  document.getElementById('summary-title').textContent = 'Recent Articles — ' + identity + ' view';
   document.getElementById('summary-sub').textContent = 'Loading recent analyses...';
   document.getElementById('summary-body').innerHTML = '<p style="color:var(--dim);font-style:italic">Loading...</p>';
   document.getElementById('summary-modal').classList.add('open');
