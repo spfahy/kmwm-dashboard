@@ -149,8 +149,8 @@
     <div class="ticker-strip">
       <div class="ts-item"><span class="ts-sym">CLOSURE</span><span class="ts-price" id="cc-day">—</span><span class="ts-chg">since Feb 27</span></div>
       <div class="ts-item"><span class="ts-sym">TD3C TCE</span><span class="ts-price" id="cc-tce">—</span><span class="ts-chg" id="cc-tce-chg"></span><span class="ts-trigger trig-off" id="cc-tce-trig">WI-223</span></div>
-      <div class="ts-item"><span class="ts-sym">JWC RISK</span><span class="ts-price" id="cc-jwc">8.0×</span><span class="ts-chg">Jul 2 · manual</span></div>
-      <div class="ts-item"><span class="ts-sym">TRANSITS</span><span class="ts-price" id="cc-transit">~13/d</span><span class="ts-chg">manual</span></div>
+      <div class="ts-item"><span class="ts-sym">JWC RISK</span><span class="ts-price" id="cc-jwc">8.0×</span><span class="ts-chg">loading…</span></div>
+      <div class="ts-item"><span class="ts-sym">TRANSITS</span><span class="ts-price" id="cc-transit">~13/d</span><span class="ts-chg">loading…</span></div>
       <div class="ts-item"><span class="ts-sym">INSW</span><span class="ts-price" id="cc-insw">—</span><span class="ts-chg" id="cc-insw-chg"></span></div>
       <div class="ts-item"><span class="ts-sym">WT</span><span class="ts-price" id="cc-weight">—</span><span class="ts-chg">ceil 4%</span></div>
     </div>
@@ -281,8 +281,8 @@
   </div>
 
   <div class="foot">
-    Live: TD3C (baltic_tanker_weekly) · INSW price (alert_thresholds / n8n) · weight (holdings_detail) · watch items<br>
-    Manual capture: JWC war-risk multiple &amp; transit counts — pull via <a href="https://straits.live" target="_blank">straits.live</a> (WI-107) · Phase 1 end condition: 20+ vessels/day sustained 30 days + war-risk &lt;0.5% H&amp;M<br>
+    Live: TD3C (baltic_tanker_weekly, Mondays) · INSW price (alert_thresholds / n8n, daily) · weight (holdings_detail) · watch items<br>
+    JWC war-risk multiple (WI-209) &amp; transits (WI-107): refreshed each morning by the Watch Item Verification task · cross-check <a href="https://straits.live" target="_blank">straits.live</a> · Phase 1 end condition: 20+ vessels/day sustained 30 days + war-risk &lt;0.5% H&amp;M<br>
     Execution is Tier C — this page stages decisions; Steve and Michael pull the trigger.
   </div>
 </div>
@@ -299,9 +299,12 @@ function supaFetch(table, params) {
   }).then(function(r) { return r.json(); });
 }
 
-// Manual-capture values — update here when a new reading is verified (source: straits.live / Kpler per WI-107)
-var JWC_MULT = 8.0;        // Lloyd's JWC multiple vs normal — baseline Jul 2, 2026 (WI-194/209)
-var TRANSITS = 13;         // ~daily tanker-class Hormuz crossings, Kpler post-truce reading (Jul 24 capture)
+// Hormuz physical metrics — fed daily by the Watch Item Verification task (Step 3C, added Jul 29 2026):
+// JWC war-risk multiple lives in watch_items id 209 (current_value), transits/day in id 107.
+// The values below are FALLBACKS only, used if the database read fails.
+var JWC_MULT = 8.0;        // fallback — Lloyd's JWC multiple vs normal, baseline Jul 2, 2026 (WI-194/209)
+var TRANSITS = 13;         // fallback — ~daily tanker-class Hormuz crossings, Kpler (Jul 24 capture)
+var jwcAsOf = null, transitAsOf = null;
 
 // Clock
 function tick() {
@@ -321,6 +324,34 @@ document.getElementById('q2-countdown').textContent = dq2 > 0 ? dq2 + ' days' : 
 var latestTce = null, latestWow = null;
 
 function fmtK(v) { return '$' + Math.round(v/1000) + 'K'; }
+
+// Live Hormuz physical metrics — JWC multiple (WI-209) and transits/day (WI-107),
+// refreshed each morning by the Watch Item Verification task (Step 3C).
+supaFetch('watch_items', { select: 'id,current_value,last_checked_at', id: 'in.(107,209)' }).then(function(rows) {
+  if (!rows || !rows.length) return;
+  rows.forEach(function(r) {
+    if (r.current_value == null) return;
+    var v = parseFloat(r.current_value);
+    if (isNaN(v)) return;
+    var checked = r.last_checked_at ? new Date(r.last_checked_at) : null;
+    var ageDays = checked ? (new Date() - checked) / 86400000 : null;
+    var dateTxt = checked ? checked.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    var stale = ageDays != null && ageDays > 3;
+    if (r.id === 209) {
+      JWC_MULT = v; jwcAsOf = dateTxt;
+      document.getElementById('cc-jwc').textContent = v.toFixed(1) + '×';
+      var el = document.getElementById('cc-jwc').nextElementSibling;
+      if (el) { el.textContent = dateTxt + ' · auto'; if (stale) el.classList.add('stale'); }
+    }
+    if (r.id === 107) {
+      TRANSITS = v; transitAsOf = dateTxt;
+      document.getElementById('cc-transit').textContent = '~' + Math.round(v) + '/d';
+      var el2 = document.getElementById('cc-transit').nextElementSibling;
+      if (el2) { el2.textContent = dateTxt + ' · auto'; if (stale) el2.classList.add('stale'); }
+    }
+  });
+  renderLadder();
+}).catch(function() {});
 
 // TD3C weekly feed
 supaFetch('baltic_tanker_weekly', { select: 'report_week,report_date,td3c_worldscale,td3c_tce_usd,wow_tce_change_pct', order: 'report_date.desc', limit: 12 }).then(function(rows) {
