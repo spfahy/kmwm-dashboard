@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMWM — Hormuz → INSW Transmission</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f2f1ee; --surface:#fafaf8; --surface2:#eceae6; --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
+    --text:#1a1916; --muted:#6b6860; --dim:#b0aea8;
+    --green:#1a5c30; --green-dim:rgba(26,92,48,0.08); --green-mid:rgba(26,92,48,0.15);
+    --amber:#7a4a08; --amber-dim:rgba(122,74,8,0.08);
+    --red:#a01818; --red-dim:rgba(160,24,24,0.08);
+    --blue:#1a3d8f; --blue-dim:rgba(26,61,143,0.08);
+    --purple:#5b3a8f; --purple-dim:rgba(91,58,143,0.08);
+    --serif:'Playfair Display',Georgia,serif;
+    --mono:'DM Mono',monospace; --sans:'DM Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;line-height:1.5;}
+
+  /* HEADER */
+  .command-center{background:var(--surface);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+  .cc-top{display:flex;align-items:center;border-bottom:1px solid var(--border);}
+  .cc-firm{font-family:var(--mono);font-size:13px;color:var(--green);letter-spacing:0.15em;text-transform:uppercase;padding:16px 20px;border-right:1px solid var(--border);white-space:nowrap;display:flex;align-items:center;}
+  .ticker-strip{display:flex;flex:1;flex-wrap:wrap;}
+  .ts-item{display:flex;align-items:center;gap:10px;padding:12px 18px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:-1px;white-space:nowrap;}
+  .ts-sym{font-family:var(--mono);font-size:13px;color:var(--muted);font-weight:500;letter-spacing:0.06em;}
+  .ts-price{font-family:var(--mono);font-size:26px;font-weight:500;color:var(--text);}
+  .ts-chg{font-family:var(--mono);font-size:13px;color:var(--muted);}
+  .ts-trigger{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.1em;padding:3px 10px;border-radius:10px;text-transform:uppercase;}
+  .trig-hot{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.2);}
+  .trig-near{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.2);}
+  .trig-off{background:rgba(0,0,0,0.04);color:var(--muted);border:1px solid var(--border);}
+  .cc-time{font-family:var(--mono);font-size:12px;color:var(--muted);padding:12px 16px;white-space:nowrap;display:flex;align-items:center;}
+  .cc-headline{display:flex;align-items:baseline;gap:14px;padding:12px 16px 10px;}
+  .cc-title{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--text);letter-spacing:-0.01em;}
+  .cc-sub{font-size:11px;color:var(--muted);}
+
+  .wrap{max-width:1280px;margin:0 auto;padding:16px;}
+  .section-label{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:5px;margin:18px 0 12px;}
+
+  /* SITUATION ROOM */
+  .situation-room{display:grid;grid-template-columns:1fr 300px;gap:12px;align-items:start;}
+  .sr-alerts{display:flex;flex-direction:column;gap:6px;}
+  .alert-card{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-left:3px solid;background:var(--surface);border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:0 8px 8px 0;}
+  .alert-card.urgent{border-left-color:var(--red);background:linear-gradient(to right,var(--red-dim),var(--surface));}
+  .alert-card.warning{border-left-color:var(--amber);background:linear-gradient(to right,var(--amber-dim),var(--surface));}
+  .alert-card.watch{border-left-color:var(--blue);background:linear-gradient(to right,var(--blue-dim),var(--surface));}
+  .alert-card.info{border-left-color:var(--green);background:linear-gradient(to right,var(--green-dim),var(--surface));}
+  .alert-body{flex:1;}
+  .alert-headline{font-size:12px;font-weight:500;line-height:1.35;margin-bottom:2px;color:var(--text);}
+  .alert-detail{font-size:11px;color:var(--muted);line-height:1.5;}
+  .alert-tag{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.12em;padding:2px 7px;border-radius:8px;text-transform:uppercase;flex-shrink:0;margin-top:2px;align-self:flex-start;}
+  .tag-urgent{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.15);}
+  .tag-warning{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(122,74,8,0.15);}
+  .tag-watch{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,61,143,0.15);}
+  .tag-info{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid);}
+
+  .position-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+  .pb-label{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+  .pb-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border);}
+  .pb-row:last-child{border-bottom:none;}
+  .pb-key{font-size:11px;color:var(--muted);}
+  .pb-val{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text);}
+
+  /* VECTORS */
+  .vectors{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .vector-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+  .vector-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);}
+  .vec-num{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;}
+  .vec-title{font-family:var(--serif);font-size:15px;font-weight:600;margin-bottom:6px;color:var(--text);}
+  .vec-body{font-size:11px;color:var(--muted);line-height:1.55;}
+  .vec-body b{color:var(--text);font-weight:500;}
+  .vec-sens{margin-top:10px;font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:8px;display:inline-block;letter-spacing:0.08em;text-transform:uppercase;}
+  .sens-high{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.15);}
+  .sens-low{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid);}
+
+  /* LADDER */
+  .ladder-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .ladder-table{width:100%;border-collapse:collapse;}
+  .ladder-table th{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border2);background:var(--surface2);}
+  .ladder-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:top;color:var(--text);}
+  .ladder-table tr:last-child td{border-bottom:none;}
+  .ladder-table tr:hover td{background:var(--surface2);}
+  .lt-tier{font-family:var(--mono);font-size:10px;font-weight:500;white-space:nowrap;}
+  .lt-cur{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;}
+  .lt-action{font-size:11px;color:var(--muted);line-height:1.45;}
+  .status-pill{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;padding:2px 9px;border-radius:8px;text-transform:uppercase;white-space:nowrap;}
+  .st-dormant{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid);}
+  .st-fired{background:var(--red-dim);color:var(--red);border:1px solid rgba(160,24,24,0.2);animation:blink 1.6s infinite;}
+  .st-manual{background:rgba(0,0,0,0.04);color:var(--muted);border:1px solid var(--border);}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.55}}
+
+  /* TD3C TREND */
+  .trend-grid{display:grid;grid-template-columns:1fr 300px;gap:12px;align-items:start;}
+  .trend-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .trend-table{width:100%;border-collapse:collapse;}
+  .trend-table th{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;text-align:right;padding:7px 12px;border-bottom:1px solid var(--border2);background:var(--surface2);}
+  .trend-table th:first-child{text-align:left;}
+  .trend-table td{font-family:var(--mono);font-size:11px;padding:8px 12px;border-bottom:1px solid var(--border);text-align:right;color:var(--text);}
+  .trend-table tr:last-child td{border-bottom:none;}
+  .trend-table td:first-child{text-align:left;color:var(--muted);}
+  .bar-cell{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
+  .bar{height:5px;background:var(--green);border-radius:2px;opacity:0.75;}
+  .thresh-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+  .thresh-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;}
+  .thresh-row:last-child{border-bottom:none;}
+
+  /* WATCH ITEMS */
+  .wi-grid{display:flex;flex-direction:column;gap:6px;}
+  .wi-card{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;}
+  .wi-id{font-family:var(--mono);font-size:10px;color:var(--green);font-weight:500;white-space:nowrap;padding-top:1px;}
+  .wi-body{flex:1;font-size:11px;color:var(--muted);line-height:1.5;}
+  .wi-date{font-family:var(--mono);font-size:9px;color:var(--dim);white-space:nowrap;padding-top:2px;}
+
+  .foot{font-family:var(--mono);font-size:9px;color:var(--dim);padding:16px;text-align:center;line-height:1.8;}
+  .foot a{color:var(--muted);}
+  .stale{color:var(--amber) !important;}
+  .loading-txt{font-family:var(--mono);font-size:10px;color:var(--dim);padding:10px;}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- COMMAND CENTER -->
+<div class="command-center">
+  <div class="cc-top">
+    <div class="cc-firm">Kelley &amp; Mullis — Phase 1</div>
+    <div class="ticker-strip">
+      <div class="ts-item"><span class="ts-sym">CLOSURE</span><span class="ts-price" id="cc-day">—</span><span class="ts-chg">since Feb 27</span></div>
+      <div class="ts-item"><span class="ts-sym">TD3C TCE</span><span class="ts-price" id="cc-tce">—</span><span class="ts-chg" id="cc-tce-chg"></span><span class="ts-trigger trig-off" id="cc-tce-trig">WI-223</span></div>
+      <div class="ts-item"><span class="ts-sym">JWC RISK</span><span class="ts-price" id="cc-jwc">8.0×</span><span class="ts-chg">Jul 2 · manual</span></div>
+      <div class="ts-item"><span class="ts-sym">TRANSITS</span><span class="ts-price" id="cc-transit">~13/d</span><span class="ts-chg">manual</span></div>
+      <div class="ts-item"><span class="ts-sym">INSW</span><span class="ts-price" id="cc-insw">—</span><span class="ts-chg" id="cc-insw-chg"></span></div>
+      <div class="ts-item"><span class="ts-sym">WT</span><span class="ts-price" id="cc-weight">—</span><span class="ts-chg">ceil 4%</span></div>
+    </div>
+    <div class="cc-time" id="cc-clock">—</div>
+  </div>
+  <div class="cc-headline">
+    <div class="cc-title">Strait of Hormuz → INSW Transmission</div>
+    <div class="cc-sub">Three-vector tanker thesis · reduction ladder staged · execution Tier C (Steve / Michael)</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- SITUATION ROOM -->
+  <div class="section-label">Situation Room</div>
+  <div class="situation-room">
+    <div class="sr-alerts">
+      <div class="alert-card warning">
+        <div class="alert-body">
+          <div class="alert-headline"><span id="q2-countdown">—</span> to INSW Q2 print — Aug 10, pre-open, 9:00 ET call</div>
+          <div class="alert-detail">Single combined read for WI-193 / 194 / 209. Fleet-level TCE realization vs the $300K+/day TD3C environment tests the transmission mechanism itself — a materially weak print is Tier 1 grounds regardless of the physical legs. Obtain Q2 consensus before the print (BTIG $0.32 figure removed as period-mismatched).</div>
+        </div>
+        <span class="alert-tag tag-warning">Aug 10</span>
+      </div>
+      <div class="alert-card urgent">
+        <div class="alert-body">
+          <div class="alert-headline">Largest equity in the book, above the 4% ceiling</div>
+          <div class="alert-detail">Held as a shorter-duration trade per Michael (Jul 27). Jul 20 add executed with verbal ceiling override, documented in record 2456. Only pre-existing sentinel (WI-223, $150K/day) sits ~61% below the market — functions as post-mortem, not protection. WI-257 ladder staged to fix that.</div>
+        </div>
+        <span class="alert-tag tag-urgent">Sizing</span>
+      </div>
+      <div class="alert-card watch">
+        <div class="alert-body">
+          <div class="alert-headline">Open question: is TD3C the right sentinel?</div>
+          <div class="alert-detail">TD3C is the Middle East Gulf → China VLCC route. INSW operates ~81 vessels; only ~11 are VLCCs. Resolve from the Aug 10 fleet-level TCE disclosure by vessel class before treating ladder levels as permanent.</div>
+        </div>
+        <span class="alert-tag tag-watch">WI-193</span>
+      </div>
+      <div class="alert-card info">
+        <div class="alert-body">
+          <div class="alert-headline">Diplomacy track live — Oman-mediated talks reporting "progress"</div>
+          <div class="alert-detail">Jul 26–29 cluster (JPost, Turkiye Today). A credible deal signal compresses Vector 1 (war-risk) first and fastest — months before physical reopening un-winds Vectors 2–3. Toll-mechanism verification is WI-249. Watch war-risk premium, not headlines.</div>
+        </div>
+        <span class="alert-tag tag-info">Deal Risk</span>
+      </div>
+    </div>
+    <div class="position-box">
+      <div class="pb-label">INSW Position</div>
+      <div class="pb-row"><span class="pb-key">Price</span><span class="pb-val" id="pb-price">—</span></div>
+      <div class="pb-row"><span class="pb-key">Weight</span><span class="pb-val" id="pb-weight">—</span></div>
+      <div class="pb-row"><span class="pb-key">P/L</span><span class="pb-val" id="pb-pl">—</span></div>
+      <div class="pb-row"><span class="pb-key">Model weight</span><span class="pb-val">5.50%</span></div>
+      <div class="pb-row"><span class="pb-key">Equity ceiling</span><span class="pb-val">4.00%</span></div>
+      <div class="pb-row"><span class="pb-key">Tier 1 target</span><span class="pb-val">4.38%</span></div>
+      <div class="pb-row"><span class="pb-key">Tier 2 target</span><span class="pb-val">2.00%</span></div>
+      <div class="pb-row"><span class="pb-key">Jul 20 add</span><span class="pb-val">+1% @ $88.29</span></div>
+      <div class="pb-row"><span class="pb-key">Re-entry gate</span><span class="pb-val">&lt;$82 (WI-50)</span></div>
+    </div>
+  </div>
+
+  <!-- VECTORS -->
+  <div class="section-label">Transmission — Three-Vector Thesis</div>
+  <div class="vectors">
+    <div class="vector-card">
+      <div class="vec-num">Vector 1</div>
+      <div class="vec-title">War-Risk Premium</div>
+      <div class="vec-body">Gulf Additional War Risk Premiums at <b>8× pre-war levels</b> since Jul 2; six P&amp;I clubs withdrawn from Gulf coverage. Insurers require months of demonstrated safe passage before restoring normal cover regardless of any signed agreement — but this is the leg that compresses first and fastest on a credible deal signal.</div>
+      <div class="vec-sens sens-high">Deal-sensitive — most vulnerable</div>
+    </div>
+    <div class="vector-card">
+      <div class="vec-num">Vector 2</div>
+      <div class="vec-title">Ton-Mile Expansion</div>
+      <div class="vec-body">Cape of Good Hope rerouting adds <b>10–14 days per voyage</b>, consuming fleet capacity and structurally elevating day rates with no change in oil volumes. Unwinds only as tankers physically return to Hormuz transit — demonstrated safety over time, not a political announcement.</div>
+      <div class="vec-sens sens-low">Survives a paper deal</div>
+    </div>
+    <div class="vector-card">
+      <div class="vec-num">Vector 3</div>
+      <div class="vec-title">Red Sea / Somali Corridor</div>
+      <div class="vec-body">Houthi–Somali piracy alliance keeps the alternative Cape routing leg elevated-risk. Structurally <b>independent of any Iran deal</b> — vessels avoiding Hormuz still face this exposure on the substitute route.</div>
+      <div class="vec-sens sens-low">Independent of Iran track</div>
+    </div>
+  </div>
+
+  <!-- LADDER -->
+  <div class="section-label">Reduction Ladder — Live Evaluation (WI-257 · WI-223 · WI-209 · WI-55)</div>
+  <div class="ladder-wrap">
+  <table class="ladder-table">
+    <thead><tr><th style="width:70px">Tier</th><th>Trigger Leg</th><th style="width:130px;text-align:right">Current</th><th style="width:90px;text-align:center">Status</th><th style="width:300px">On Fire</th></tr></thead>
+    <tbody id="ladder-body">
+      <tr><td colspan="5"><div class="loading-txt">Evaluating against latest TD3C print…</div></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <!-- TD3C TREND -->
+  <div class="section-label">TD3C Weekly Trend — Baltic Exchange (n8n feed → baltic_tanker_weekly)</div>
+  <div class="trend-grid">
+    <div class="trend-wrap">
+    <table class="trend-table">
+      <thead><tr><th>Week</th><th>Date</th><th>Worldscale</th><th>TCE $/day</th><th>WoW</th><th style="width:220px">TCE</th></tr></thead>
+      <tbody id="trend-body"><tr><td colspan="6"><div class="loading-txt">Loading weekly prints…</div></td></tr></tbody>
+    </table>
+    </div>
+    <div class="thresh-box">
+      <div class="pb-label">Threshold Map</div>
+      <div class="thresh-row"><span style="color:var(--muted)">Latest print</span><span id="th-latest" style="color:var(--text);font-weight:600">—</span></div>
+      <div class="thresh-row"><span style="color:var(--muted)">Tier 1 (WI-257)</span><span style="color:var(--amber)">$250K/day</span></div>
+      <div class="thresh-row"><span style="color:var(--muted)">Tier 2 (WI-223)</span><span style="color:var(--red)">$150K/day</span></div>
+      <div class="thresh-row"><span style="color:var(--muted)">WoW decline leg</span><span style="color:var(--red)">−25%</span></div>
+      <div class="thresh-row"><span style="color:var(--muted)">Buffer to Tier 1</span><span id="th-buffer" style="color:var(--green)">—</span></div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:10px;line-height:1.6">Weekly print lands Mondays via the Watch Item Verification task. WI-223 evaluated on both legs at each insert.</div>
+    </div>
+  </div>
+
+  <!-- WATCH ITEMS -->
+  <div class="section-label">Linked Watch Items (live from database)</div>
+  <div class="wi-grid" id="wi-grid"><div class="loading-txt">Loading watch items…</div></div>
+
+  <div class="foot">
+    Live: TD3C (baltic_tanker_weekly) · INSW price (alert_thresholds / n8n) · weight (holdings_detail) · watch items<br>
+    Manual capture: JWC war-risk multiple &amp; transit counts — pull via <a href="https://straits.live" target="_blank">straits.live</a> (WI-107) · Phase 1 end condition: 20+ vessels/day sustained 30 days + war-risk &lt;0.5% H&amp;M<br>
+    Execution is Tier C — this page stages decisions; Steve and Michael pull the trigger.
+  </div>
+</div>
+
+<script>
+var SUPA_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
+
+function supaFetch(table, params) {
+  var parts = [];
+  for (var k in params) { parts.push(k + '=' + params[k]); }
+  return fetch(SUPA_URL + '/rest/v1/' + table + '?' + parts.join('&'), {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); });
+}
+
+// Manual-capture values — update here when a new reading is verified (source: straits.live / Kpler per WI-107)
+var JWC_MULT = 8.0;        // Lloyd's JWC multiple vs normal — baseline Jul 2, 2026 (WI-194/209)
+var TRANSITS = 13;         // ~daily tanker-class Hormuz crossings, Kpler post-truce reading (Jul 24 capture)
+
+// Clock
+function tick() {
+  document.getElementById('cc-clock').textContent = new Date().toLocaleString('en-US', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});
+}
+tick(); setInterval(tick, 30000);
+
+// Closure day counter — day 1 = Feb 27, 2026 (Week 29 Baltic report Jul 17 = "day 141")
+var dayN = Math.floor((new Date() - new Date(2026,1,27)) / 86400000) + 1;
+document.getElementById('cc-day').textContent = 'Day ' + dayN;
+
+// Q2 print countdown
+var q2 = new Date(2026,7,10);
+var dq2 = Math.ceil((q2 - new Date()) / 86400000);
+document.getElementById('q2-countdown').textContent = dq2 > 0 ? dq2 + ' days' : (dq2 === 0 ? 'TODAY' : 'Printed');
+
+var latestTce = null, latestWow = null;
+
+function fmtK(v) { return '$' + Math.round(v/1000) + 'K'; }
+
+// TD3C weekly feed
+supaFetch('baltic_tanker_weekly', { select: 'report_week,report_date,td3c_worldscale,td3c_tce_usd,wow_tce_change_pct', order: 'report_date.desc', limit: 12 }).then(function(rows) {
+  if (!rows || !rows.length) { renderLadder(); return; }
+  var latest = rows[0];
+  latestTce = parseFloat(latest.td3c_tce_usd);
+  latestWow = latest.wow_tce_change_pct != null ? parseFloat(latest.wow_tce_change_pct) : null;
+
+  document.getElementById('cc-tce').textContent = fmtK(latestTce) + '/d';
+  var chg = document.getElementById('cc-tce-chg');
+  if (latestWow != null) {
+    chg.textContent = (latestWow >= 0 ? '+' : '') + latestWow.toFixed(1) + '% WoW';
+    chg.style.color = latestWow >= 0 ? 'var(--green)' : 'var(--red)';
+  }
+  var trig = document.getElementById('cc-tce-trig');
+  if (latestTce < 150000 || (latestWow != null && latestWow <= -25)) { trig.className = 'ts-trigger trig-hot'; trig.textContent = 'WI-223 FIRED'; }
+  else if (latestTce < 250000) { trig.className = 'ts-trigger trig-near'; trig.textContent = 'TIER 1'; }
+  // Stale marker: weekly feed, amber if > 10 days old
+  if ((new Date() - new Date(latest.report_date + 'T12:00:00')) / 86400000 > 10) {
+    document.getElementById('cc-tce-chg').classList.add('stale');
+    chg.textContent += ' · stale ' + new Date(latest.report_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }
+
+  document.getElementById('th-latest').textContent = fmtK(latestTce) + '/day';
+  var buf = ((latestTce - 250000) / 250000 * 100);
+  document.getElementById('th-buffer').textContent = buf > 0 ? '+' + buf.toFixed(0) + '% above' : 'BREACHED';
+  document.getElementById('th-buffer').style.color = buf > 0 ? 'var(--green)' : 'var(--red)';
+
+  // Trend table (chronological, oldest first)
+  var chron = rows.slice().reverse();
+  var max = Math.max.apply(null, chron.map(function(r){ return parseFloat(r.td3c_tce_usd); }));
+  document.getElementById('trend-body').innerHTML = chron.map(function(r) {
+    var tce = parseFloat(r.td3c_tce_usd);
+    var wow = r.wow_tce_change_pct != null ? parseFloat(r.wow_tce_change_pct) : null;
+    var wowTxt = wow != null ? '<span style="color:' + (wow >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (wow >= 0 ? '+' : '') + wow.toFixed(1) + '%</span>' : '—';
+    return '<tr><td>' + r.report_week.replace(' 2026','') + '</td>' +
+      '<td>' + new Date(r.report_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) + '</td>' +
+      '<td>WS' + parseFloat(r.td3c_worldscale).toFixed(0) + '</td>' +
+      '<td style="font-weight:600;color:var(--text)">$' + tce.toLocaleString() + '</td>' +
+      '<td>' + wowTxt + '</td>' +
+      '<td><div class="bar-cell"><div class="bar" style="width:' + Math.round(tce/max*180) + 'px"></div></div></td></tr>';
+  }).join('');
+  renderLadder();
+}).catch(function() { renderLadder(); });
+
+// INSW price (alert_thresholds id 18 — WI-50 n8n monitor) + weight (holdings_detail)
+supaFetch('alert_thresholds', { select: 'current_value,last_checked_at', id: 'eq.18', limit: 1 }).then(function(rows) {
+  if (rows && rows.length && rows[0].current_value) {
+    var px = parseFloat(rows[0].current_value);
+    document.getElementById('cc-insw').textContent = '$' + px.toFixed(2);
+    document.getElementById('pb-price').textContent = '$' + px.toFixed(2);
+    if (rows[0].last_checked_at) {
+      var d = new Date(rows[0].last_checked_at);
+      var el = document.getElementById('cc-insw-chg');
+      el.textContent = 'px ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      if ((new Date() - d) / 86400000 > 3) el.classList.add('stale');
+    }
+  }
+}).catch(function() {});
+
+supaFetch('holdings_detail', { select: 'alloc_pct,pl_pct,metric_date', ticker: 'eq.INSW', order: 'metric_date.desc', limit: 1 }).then(function(rows) {
+  if (!rows || !rows.length) return;
+  var r = rows[0];
+  if (r.alloc_pct) {
+    var w = (parseFloat(r.alloc_pct)*100).toFixed(2) + '%';
+    var asOf = new Date(r.metric_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    document.getElementById('cc-weight').textContent = w;
+    document.getElementById('pb-weight').textContent = w + ' (' + asOf + ')';
+    if ((new Date() - new Date(r.metric_date + 'T12:00:00')) / 86400000 > 7) {
+      document.getElementById('pb-weight').classList.add('stale');
+      document.getElementById('cc-weight').classList.add('stale');
+    }
+  }
+  if (r.pl_pct != null) {
+    var pl = parseFloat(r.pl_pct) * 100;
+    var el = document.getElementById('pb-pl');
+    el.textContent = (pl >= 0 ? '+' : '') + pl.toFixed(2) + '%';
+    el.style.color = pl >= 0 ? 'var(--green)' : 'var(--red)';
+  }
+}).catch(function() {});
+
+// Reduction ladder
+function pill(state, txt) { return '<span class="status-pill st-' + state + '">' + (txt || (state === 'fired' ? 'FIRED' : state === 'manual' ? 'Manual' : 'Dormant')) + '</span>'; }
+
+function renderLadder() {
+  var tceTxt = latestTce != null ? fmtK(latestTce) + '/d' : '—';
+  var wowTxt = latestWow != null ? ((latestWow >= 0 ? '+' : '') + latestWow.toFixed(1) + '%') : '';
+  var t1a = latestTce != null && latestTce < 250000;
+  var t2a = latestTce != null && (latestTce < 150000 || (latestWow != null && latestWow <= -25));
+  var rows = [
+    ['TIER 1', 'var(--amber)', 'TD3C weekly print below $250K/day', tceTxt, t1a ? pill('fired') : pill('dormant'), 'Reduce 5.69% → 4.38% (~$2.97M). Any ONE Tier 1 leg fires the stage. Returns position to the documented override level.'],
+    ['TIER 1', 'var(--amber)', 'Lloyd\'s JWC war-risk below 6.0× normal', JWC_MULT.toFixed(1) + '×', JWC_MULT < 6 ? pill('fired') : pill('dormant'), 'Same stage — war-risk normalization is the deal-sensitive leg (Vector 1 compressing).'],
+    ['TIER 1', 'var(--amber)', 'AIS-verified Hormuz transits above 40/day, 5 consecutive sessions', '~' + TRANSITS + '/day', pill('manual'), 'Same stage — physical reopening evidence. Verify via straits.live / Kpler (WI-107).'],
+    ['TIER 2', 'var(--red)', 'WI-223 fires: TD3C below $150K/day OR −25% WoW', tceTxt + (wowTxt ? ' · ' + wowTxt : ''), t2a ? pill('fired') : pill('dormant'), 'Reduce 4.38% → 2.00% (~$5.4M) + full INSW thesis review. Also fires on WI-209 (JWC < 5.0×) or two Tier 1 legs simultaneously.'],
+    ['TIER 2', 'var(--red)', 'WI-209 fires: JWC war-risk below 5.0× normal', JWC_MULT.toFixed(1) + '×', JWC_MULT < 5 ? pill('fired') : pill('dormant'), 'Risk-premium normalization signal. Read with freight: insurance elevated while freight normalizes = WI-194 divergence, investigate.'],
+    ['EXIT', 'var(--purple)', 'WI-55 energy-resolution: transits above ~44/day (50% of pre-war) sustained 2 weeks', '~' + TRANSITS + '/day', pill('manual'), 'Full exit of remaining position. Phase 1 end conditions (20+ vessels/day 30 days, war-risk < 0.5% H&M) are the broader gate.'],
+    ['OVERRIDE', 'var(--blue)', 'Q2 fleet TCE materially below what $300K+/day TD3C implies (Aug 10 print)', dq2 > 0 ? dq2 + ' days out' : 'printed', pill('manual', dq2 > 0 ? 'Pending' : 'Review'), 'Transmission-mechanism break — Tier 1 grounds regardless of physical legs. Company-specific, independent of the thesis.']
+  ];
+  document.getElementById('ladder-body').innerHTML = rows.map(function(r) {
+    return '<tr><td class="lt-tier" style="color:' + r[1] + '">' + r[0] + '</td><td>' + r[2] + '</td><td class="lt-cur" style="text-align:right">' + r[3] + '</td><td style="text-align:center">' + r[4] + '</td><td class="lt-action">' + r[5] + '</td></tr>';
+  }).join('');
+}
+renderLadder();
+
+// Linked watch items — live
+supaFetch('watch_items', { select: 'id,item,trigger_date,status', id: 'in.(50,107,193,194,209,223,249,257)', order: 'id.asc' }).then(function(rows) {
+  if (!rows || !rows.length) { document.getElementById('wi-grid').innerHTML = '<div class="loading-txt">No watch items returned</div>'; return; }
+  document.getElementById('wi-grid').innerHTML = rows.map(function(wi) {
+    var txt = wi.item.length > 260 ? wi.item.substring(0, 260) + '…' : wi.item;
+    var date = wi.trigger_date ? new Date(wi.trigger_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    var st = wi.status !== 'active' ? ' · ' + wi.status.toUpperCase() : '';
+    return '<div class="wi-card"><span class="wi-id">WI-' + wi.id + '</span><span class="wi-body">' + txt + '</span><span class="wi-date">' + date + st + '</span></div>';
+  }).join('');
+}).catch(function() {
+  document.getElementById('wi-grid').innerHTML = '<div class="loading-txt">Could not load watch items</div>';
+});
+</script>
+</body>
+</html>
