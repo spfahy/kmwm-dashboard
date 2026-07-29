@@ -1,23 +1,12 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    }
+    { "src": "*.html", "use": "@vercel/static" }
   ],
   "routes": [
-    {
-      "src": "/oil_scenario_tracker.html",
-      "dest": "/oil_scenario_tracker.html"
-    },
-    {
-      "src": "/read_only.html",
-      "dest": "/read_only.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "src": "/hormuz_insw.html", "dest": "/hormuz_insw.html" },
+    { "src": "/oil_scenario_tracker.html", "dest": "/oil_scenario_tracker.html" },
+    { "src": "/read_only.html", "dest": "/read_only.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
