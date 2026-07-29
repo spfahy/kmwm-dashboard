@@ -111,10 +111,26 @@
 
   /* WATCH ITEMS */
   .wi-grid{display:flex;flex-direction:column;gap:6px;}
-  .wi-card{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;}
+  .wi-card{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;cursor:pointer;transition:background 0.1s;}
+  .wi-card:hover{background:var(--surface2);border-color:var(--border2);}
   .wi-id{font-family:var(--mono);font-size:10px;color:var(--green);font-weight:500;white-space:nowrap;padding-top:1px;}
   .wi-body{flex:1;font-size:11px;color:var(--muted);line-height:1.5;}
   .wi-date{font-family:var(--mono);font-size:9px;color:var(--dim);white-space:nowrap;padding-top:2px;}
+
+  /* WATCH ITEM DETAIL MODAL */
+  .wi-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:2000;align-items:center;justify-content:center;}
+  .wi-overlay.open{display:flex;}
+  .wi-box{background:var(--surface);border-radius:12px;width:680px;max-width:94vw;max-height:84vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18);}
+  .wi-box-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .wi-box-title{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;}
+  .wi-box-close{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:var(--muted);font-family:var(--sans);}
+  .wi-box-close:hover{background:var(--surface2);}
+  .wi-box-body{padding:18px 20px;overflow-y:auto;}
+  .wi-field{margin-bottom:14px;}
+  .wi-field-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
+  .wi-field-val{font-size:13px;color:var(--text);line-height:1.65;white-space:pre-wrap;}
+  .wi-meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+  .wi-meta-cell{background:var(--surface2);border-radius:8px;padding:9px 12px;}
 
   .foot{font-family:var(--mono);font-size:9px;color:var(--dim);padding:16px;text-align:center;line-height:1.8;}
   .foot a{color:var(--muted);}
@@ -252,6 +268,17 @@
   <!-- WATCH ITEMS -->
   <div class="section-label">Linked Watch Items (live from database)</div>
   <div class="wi-grid" id="wi-grid"><div class="loading-txt">Loading watch items…</div></div>
+
+  <!-- Watch Item Detail Modal -->
+  <div class="wi-overlay" id="wi-overlay">
+    <div class="wi-box">
+      <div class="wi-box-header">
+        <div class="wi-box-title" id="wi-box-title">Watch Item Detail</div>
+        <button class="wi-box-close" id="wi-box-close">Close ✕</button>
+      </div>
+      <div class="wi-box-body" id="wi-box-body"></div>
+    </div>
+  </div>
 
   <div class="foot">
     Live: TD3C (baltic_tanker_weekly) · INSW price (alert_thresholds / n8n) · weight (holdings_detail) · watch items<br>
@@ -398,17 +425,55 @@ function renderLadder() {
 }
 renderLadder();
 
-// Linked watch items — live
-supaFetch('watch_items', { select: 'id,item,trigger_date,status', id: 'in.(50,107,193,194,209,223,249,257)', order: 'id.asc' }).then(function(rows) {
+// Linked watch items — live, click for full detail
+var WI_ROWS = {};
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+supaFetch('watch_items', { select: 'id,item,trigger_date,trigger_condition,phase_tag,owner,status,kill_date,current_value,last_checked_at,notes', id: 'in.(50,107,193,194,209,223,249,257)', order: 'id.asc' }).then(function(rows) {
   if (!rows || !rows.length) { document.getElementById('wi-grid').innerHTML = '<div class="loading-txt">No watch items returned</div>'; return; }
   document.getElementById('wi-grid').innerHTML = rows.map(function(wi) {
+    WI_ROWS[wi.id] = wi;
     var txt = wi.item.length > 260 ? wi.item.substring(0, 260) + '…' : wi.item;
     var date = wi.trigger_date ? new Date(wi.trigger_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
     var st = wi.status !== 'active' ? ' · ' + wi.status.toUpperCase() : '';
-    return '<div class="wi-card"><span class="wi-id">WI-' + wi.id + '</span><span class="wi-body">' + txt + '</span><span class="wi-date">' + date + st + '</span></div>';
+    return '<div class="wi-card" onclick="openWiDetail(' + wi.id + ')" title="Click for full detail"><span class="wi-id">WI-' + wi.id + '</span><span class="wi-body">' + esc(txt) + '</span><span class="wi-date">' + date + st + '</span></div>';
   }).join('');
 }).catch(function() {
   document.getElementById('wi-grid').innerHTML = '<div class="loading-txt">Could not load watch items</div>';
+});
+
+function openWiDetail(id) {
+  var wi = WI_ROWS[id];
+  if (!wi) return;
+  document.getElementById('wi-box-title').textContent = 'Watch Item WI-' + wi.id;
+  var fmtD = function(d) { return d ? new Date(String(d).indexOf('T') > -1 ? d : d + 'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—'; };
+  var stColor = wi.status === 'active' ? 'var(--green)' : (wi.status === 'cancelled' || wi.status === 'killed' ? 'var(--red)' : 'var(--amber)');
+  var html = '';
+  html += '<div class="wi-meta-grid">';
+  html += '<div class="wi-meta-cell"><div class="wi-field-label">Status</div><div class="wi-field-val" style="font-family:var(--mono);font-size:12px;color:' + stColor + '">' + esc(wi.status).toUpperCase() + '</div></div>';
+  html += '<div class="wi-meta-cell"><div class="wi-field-label">Trigger Date</div><div class="wi-field-val" style="font-family:var(--mono);font-size:12px">' + fmtD(wi.trigger_date) + '</div></div>';
+  html += '<div class="wi-meta-cell"><div class="wi-field-label">Phase</div><div class="wi-field-val" style="font-family:var(--mono);font-size:12px">' + esc(wi.phase_tag || '—') + '</div></div>';
+  html += '</div>';
+  html += '<div class="wi-field"><div class="wi-field-label">Full Item</div><div class="wi-field-val">' + esc(wi.item) + '</div></div>';
+  if (wi.trigger_condition) html += '<div class="wi-field"><div class="wi-field-label">Trigger Condition</div><div class="wi-field-val">' + esc(wi.trigger_condition) + '</div></div>';
+  if (wi.notes) html += '<div class="wi-field"><div class="wi-field-label">Notes</div><div class="wi-field-val" style="font-size:12px;color:var(--muted)">' + esc(wi.notes) + '</div></div>';
+  var extras = [];
+  if (wi.owner) extras.push('Owner: ' + esc(wi.owner));
+  if (wi.current_value) extras.push('Current value: ' + esc(wi.current_value) + (wi.last_checked_at ? ' (checked ' + fmtD(wi.last_checked_at) + ')' : ''));
+  if (wi.kill_date) extras.push('Kill date: ' + fmtD(wi.kill_date));
+  if (extras.length) html += '<div class="wi-field"><div class="wi-field-label">Other</div><div class="wi-field-val" style="font-size:12px;color:var(--muted)">' + extras.join(' · ') + '</div></div>';
+  document.getElementById('wi-box-body').innerHTML = html;
+  document.getElementById('wi-overlay').classList.add('open');
+}
+
+document.getElementById('wi-box-close').addEventListener('click', function() {
+  document.getElementById('wi-overlay').classList.remove('open');
+});
+document.getElementById('wi-overlay').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
 });
 </script>
 </body>
