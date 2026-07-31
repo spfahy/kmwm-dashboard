@@ -537,6 +537,19 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 var SUPA_URL = 'https://stpvrgwdlqnyatkguysk.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0cHZyZ3dkbHFueWF0a2d1eXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzc3MzMsImV4cCI6MjA4ODkxMzczM30.J_YArwDWKLUizZ7L8tgyBZ7hcJKCCY4t69ii-MfLc4M';
 
+// Portfolio Tracker project — live holdings/prices (separate Supabase project from research/ops)
+var PT_SUPA_URL = 'https://fycqnzqshafqycpcckql.supabase.co';
+var PT_SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Y3FuenFzaGFmcXljcGNja3FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjIzMzcsImV4cCI6MjA5Nzk5ODMzN30.v9RwqeN6yIdxq63CEDT6QRhwhyfPzcPYzPko8-eQvO0';
+
+function ptFetch(table, params) {
+  var parts = [];
+  for (var k in params) { parts.push(k + '=' + params[k]); }
+  var url = PT_SUPA_URL + '/rest/v1/' + table + '?' + parts.join('&');
+  return fetch(url, {
+    headers: { 'apikey': PT_SUPA_KEY, 'Authorization': 'Bearer ' + PT_SUPA_KEY }
+  }).then(function(r) { return r.json(); });
+}
+
 function supaFetch(table, params) {
   var parts = [];
   for (var k in params) { parts.push(k + '=' + params[k]); }
@@ -630,16 +643,16 @@ fetch(SUPA_URL + '/rest/v1/research_chunks?select=id', {
   }
 }).catch(function() {});
 
-// Load cash sleeve
+// Load cash sleeve — live from Portfolio Tracker project (v_cash_sleeve view: holdings x price_history, computed on read)
 var cashData = {};
-supaFetch('portfolio_metrics', { select: 'cash_sleeve_pct,sgov_pct,fduxx_pct,ftsm_pct,ptshx_pct,gld_total_pct,gld_excess_pct,sgov_value,fduxx_value,ftsm_value,ptshx_value,gld_excess_value,last_synced_at', order: 'metric_date.desc', limit: 1 }).then(function(data) {
+ptFetch('v_cash_sleeve', { select: '*' }).then(function(data) {
   if (!data || !data.length) return;
   cashData = data[0];
   var pct = (parseFloat(cashData.cash_sleeve_pct) * 100).toFixed(2);
   document.getElementById('cash-val').textContent = pct + '%';
   var synced = new Date(cashData.last_synced_at);
   var syncStr = synced.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + synced.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('cash-sub').textContent = 'SGOV · FDUXX · GLD dry powder · ' + syncStr;
+  document.getElementById('cash-sub').textContent = 'SGOV · FDUXX · FTSM · ' + syncStr;
   document.getElementById('sync-time').textContent = syncStr;
   document.getElementById('sync-time').style.color = 'var(--green)';
 }).catch(function() {});
@@ -653,14 +666,17 @@ document.getElementById('cash-card').addEventListener('click', function(e) {
   popup.style.top = (rect.bottom + 6) + 'px';
   popup.style.left = rect.left + 'px';
   popup.style.display = 'block';
+  var totalAum = parseFloat(cashData.total_aum) || 0;
   var rows = [
-    ['SGOV', 'iShares 0-3M Treasury', cashData.sgov_pct, cashData.sgov_value],
-    ['FDUXX', 'Fidelity Money Market', cashData.fduxx_pct, cashData.fduxx_value],
-    ['FTSM', 'First Trust Short Maturity', cashData.ftsm_pct, cashData.ftsm_value],
-    ['GLD', 'SPDR Gold (above 9% core)', cashData.gld_excess_pct, cashData.gld_excess_value]
+    ['SGOV', 'iShares 0-3M Treasury', cashData.sgov_value, totalAum],
+    ['FDUXX', 'Fidelity Money Market', cashData.fduxx_value, totalAum],
+    ['FTSM', 'First Trust Short Maturity', cashData.ftsm_value, totalAum],
+    ['PTSHX', 'PIMCO Short Asset (if held)', cashData.ptshx_value, totalAum]
   ];
   var html = rows.map(function(r) {
-    return '<div class="cash-row"><div><div class="cash-row-ticker">' + r[0] + '</div><div class="cash-row-name">' + r[1] + '</div></div><div class="cash-row-right"><div class="cash-row-val">' + fmtDollar(r[3]) + '</div><div class="cash-row-pct">' + fmtPct(r[2]) + '</div></div></div>';
+    var val = parseFloat(r[2]) || 0;
+    var pct = r[3] ? (val / r[3]) : 0;
+    return '<div class="cash-row"><div><div class="cash-row-ticker">' + r[0] + '</div><div class="cash-row-name">' + r[1] + '</div></div><div class="cash-row-right"><div class="cash-row-val">' + fmtDollar(val) + '</div><div class="cash-row-pct">' + fmtPct(pct) + '</div></div></div>';
   }).join('');
   var total = cashData.cash_sleeve_pct ? (parseFloat(cashData.cash_sleeve_pct)*100).toFixed(2) + '%' : '—';
   html += '<div class="cash-total"><span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--amber)">Total Cash Sleeve</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--amber)">' + total + '</span></div>';
