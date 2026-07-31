@@ -652,7 +652,7 @@ ptFetch('v_cash_sleeve', { select: '*' }).then(function(data) {
   document.getElementById('cash-val').textContent = pct + '%';
   var synced = new Date(cashData.last_synced_at);
   var syncStr = synced.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + synced.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('cash-sub').textContent = 'SGOV · FDUXX · FTSM · ' + syncStr;
+  document.getElementById('cash-sub').textContent = 'SGOV · FDUXX · PHYS dry powder · ' + syncStr;
   document.getElementById('sync-time').textContent = syncStr;
   document.getElementById('sync-time').style.color = 'var(--green)';
 }).catch(function() {});
@@ -671,7 +671,8 @@ document.getElementById('cash-card').addEventListener('click', function(e) {
     ['SGOV', 'iShares 0-3M Treasury', cashData.sgov_value, totalAum],
     ['FDUXX', 'Fidelity Money Market', cashData.fduxx_value, totalAum],
     ['FTSM', 'First Trust Short Maturity', cashData.ftsm_value, totalAum],
-    ['PTSHX', 'PIMCO Short Asset (if held)', cashData.ptshx_value, totalAum]
+    ['PTSHX', 'PIMCO Short Asset (if held)', cashData.ptshx_value, totalAum],
+    ['PHYS', 'Sprott Physical Gold (above 9%)', cashData.phys_dry_powder_value, totalAum]
   ];
   var html = rows.map(function(r) {
     var val = parseFloat(r[2]) || 0;
