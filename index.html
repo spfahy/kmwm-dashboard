@@ -150,9 +150,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .modal-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .modal-output{flex:1;overflow-y:auto;padding:18px;font-size:13px;line-height:1.7;color:var(--text)}
 .modal-output.large-text{font-size:15px;line-height:1.8}
-.modal-output.large-text h3{font-size:16px}
+.modal-output.large-text h3{font-size:22px}
 .modal-output p{margin-bottom:8px}
-.modal-output h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px;color:var(--text)}
+.modal-output h3{font-family:var(--serif);font-size:19px;font-weight:700;margin:18px 0 7px;color:var(--text)}
 .modal-output strong{font-weight:500;color:var(--text)}
 .modal-output .placeholder{color:var(--dim);font-style:italic}
 .btn-font-toggle{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:0.03em}
@@ -205,7 +205,8 @@ textarea:focus,input[type=text]:focus,select:focus{border-color:var(--green);bac
 .summary-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .summary-body{flex:1;overflow-y:auto;padding:20px;font-size:13px;line-height:1.7;color:var(--text)}
 .summary-body.large-text{font-size:15px;line-height:1.8}
-.summary-body h3{font-family:var(--serif);font-size:14px;font-weight:600;margin:14px 0 5px}
+.summary-body h3{font-family:var(--serif);font-size:19px;font-weight:700;margin:18px 0 7px;color:var(--text)}
+.summary-body.large-text h3{font-size:22px}
 .summary-body p{margin-bottom:8px}
 .summary-body strong{font-weight:500}
 .btn-copy{padding:4px 10px;background:none;border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--mono)}
@@ -1248,11 +1249,7 @@ function openSummary(tag, view) {
     }).then(function(r) { return r.json(); }).then(function(data) {
       var reply = data.analysis || data.reply || 'No summary generated.';
       document.getElementById('summary-sub').textContent = records.length + ' most recent records synthesized';
-      document.getElementById('summary-body').innerHTML = '<p>' + reply
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
-        .replace(/\n\n/g,'</p><p>')
-        .replace(/\n/g,'<br>') + '</p>';
+      document.getElementById('summary-body').innerHTML = renderSummaryMarkdown(reply);
     });
   }).catch(function(e) {
     document.getElementById('summary-body').innerHTML = '<p style="color:var(--red)">Error: ' + e.message + '</p>';
@@ -1328,6 +1325,28 @@ document.getElementById('intake-analyze-btn').addEventListener('click', function
     prog.classList.remove('visible');
   });
 });
+
+function renderSummaryMarkdown(text) {
+  var lines = text.split('\n');
+  var html = '';
+  lines.forEach(function(line) {
+    var trimmed = line.trim();
+    if (trimmed.startsWith('### ') || trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
+      var heading = trimmed.replace(/^#+\s*/, '');
+      html += '<h3>' + heading
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>') + '</h3>';
+    } else if (trimmed === '') {
+      html += '';
+    } else {
+      var processed = trimmed
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+      html += '<p>' + processed + '</p>';
+    }
+  });
+  return html;
+}
 
 function renderMarkdown(text) {
   var lines = text.split('\n');
